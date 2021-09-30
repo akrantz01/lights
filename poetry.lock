@@ -1,4 +1,56 @@
 [[package]]
+name = "adafruit-blinka"
+version = "6.13.1"
+description = "CircuitPython APIs for non-CircuitPython versions of Python such as CPython on Linux and MicroPython."
+category = "main"
+optional = false
+python-versions = ">=3.6.0"
+
+[package.dependencies]
+Adafruit-PlatformDetect = ">=3.13.0"
+Adafruit-PureIO = ">=1.1.7"
+pyftdi = ">=0.40.0"
+
+[[package]]
+name = "adafruit-circuitpython-neopixel"
+version = "6.2.1"
+description = "CircuitPython library for NeoPixel LEDs."
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+Adafruit-Blinka = "*"
+adafruit-circuitpython-pixelbuf = "*"
+
+[[package]]
+name = "adafruit-circuitpython-pixelbuf"
+version = "1.1.0"
+description = "A pure Python implementation of adafruit_pixelbuf for smaller boards."
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+Adafruit-Blinka = "*"
+
+[[package]]
+name = "adafruit-platformdetect"
+version = "3.15.3"
+description = "Platform detection for use by libraries like Adafruit-Blinka."
+category = "main"
+optional = false
+python-versions = ">=3.6.0"
+
+[[package]]
+name = "adafruit-pureio"
+version = "1.1.9"
+description = "Pure python (i.e. no native extensions) access to Linux IO    including I2C and SPI. Drop in replacement for smbus and spidev modules."
+category = "main"
+optional = false
+python-versions = ">=3.5.0"
+
+[[package]]
 name = "black"
 version = "21.9b0"
 description = "The uncompromising code formatter."
@@ -100,10 +152,57 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "pyftdi"
+version = "0.53.3"
+description = "FTDI device driver (pure Python)"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+pyserial = ">=3.0"
+pyusb = ">=1.0.0,<1.2.0 || >1.2.0"
+
+[[package]]
+name = "pyserial"
+version = "3.5"
+description = "Python Serial Port Extension"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.extras]
+cp2110 = ["hidapi"]
+
+[[package]]
+name = "pyusb"
+version = "1.2.1"
+description = "Python USB access module"
+category = "main"
+optional = false
+python-versions = ">=3.6.0"
+
+[[package]]
 name = "regex"
 version = "2021.9.24"
 description = "Alternative regular expression module, to replace re."
 category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
+name = "rpi-ws281x"
+version = "4.3.0"
+description = "Userspace Raspberry Pi PWM/PCM/SPI library for SK6812 and WS281X LEDs."
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
+name = "rpi.gpio"
+version = "0.7.0"
+description = "A module to control Raspberry Pi GPIO channels"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -146,9 +245,24 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "ca32990e4b55b2d9f5f7e24a04324969bce1185a1eac728330ab3964714fbec9"
+content-hash = "c5f386a8dbf75ae6c98c76d8d5e1beaf882f72a2bc633f9fcd183b28d898460d"
 
 [metadata.files]
+adafruit-blinka = [
+    {file = "Adafruit-Blinka-6.13.1.tar.gz", hash = "sha256:70d27a4b366e6076a2e6f8a41dd37fef770b07bb5dac1a77c973725fd2b4c510"},
+]
+adafruit-circuitpython-neopixel = [
+    {file = "adafruit-circuitpython-neopixel-6.2.1.tar.gz", hash = "sha256:cb060b4d5e9d3903350aaa1844dd6edf4f874db2069b1a4298602d5ae01674b7"},
+]
+adafruit-circuitpython-pixelbuf = [
+    {file = "adafruit-circuitpython-pixelbuf-1.1.0.tar.gz", hash = "sha256:eae554f1353d167454c9484f70deb2ecb196b0516592c3db36588e9bd6c2edd8"},
+]
+adafruit-platformdetect = [
+    {file = "Adafruit-PlatformDetect-3.15.3.tar.gz", hash = "sha256:726782879e1dc18c1b2f50301ab3f04c3a7817a54e35c955ee2bb64a6d60df74"},
+]
+adafruit-pureio = [
+    {file = "Adafruit_PureIO-1.1.9.tar.gz", hash = "sha256:2caf22fb07c7f771d83267f331a76cde314723f884a9570ea6f768730c87a879"},
+]
 black = [
     {file = "black-21.9b0-py3-none-any.whl", hash = "sha256:380f1b5da05e5a1429225676655dddb96f5ae8c75bdf91e53d798871b902a115"},
     {file = "black-21.9b0.tar.gz", hash = "sha256:7de4cfc7eb6b710de325712d40125689101d21d25283eed7e9998722cf10eb91"},
@@ -192,6 +306,18 @@ pycapnp = [
     {file = "pycapnp-1.1.0-cp39-cp39-win_amd64.whl", hash = "sha256:13badfb644e2eb7f1219aab259d18b262d1512021e4112fa1ad5e74d17bc30cf"},
     {file = "pycapnp-1.1.0.tar.gz", hash = "sha256:786a2e39b79e592a41e8a1eaeea6e41e2015ecb9f5b7f7c20dfc5768ba1ae077"},
 ]
+pyftdi = [
+    {file = "pyftdi-0.53.3-py3-none-any.whl", hash = "sha256:6e86880ec6d66389de643ca83de5d59fffea3bd334f492e12fab71a832f878a2"},
+    {file = "pyftdi-0.53.3.tar.gz", hash = "sha256:4ef20c246bdb0f278d283337d7a6e69cf9bdb0ead525e7ad867d9e46ad26e613"},
+]
+pyserial = [
+    {file = "pyserial-3.5-py2.py3-none-any.whl", hash = "sha256:c4451db6ba391ca6ca299fb3ec7bae67a5c55dde170964c7a14ceefec02f2cf0"},
+    {file = "pyserial-3.5.tar.gz", hash = "sha256:3c77e014170dfffbd816e6ffc205e9842efb10be9f58ec16d3e8675b4925cddb"},
+]
+pyusb = [
+    {file = "pyusb-1.2.1-py3-none-any.whl", hash = "sha256:2b4c7cb86dbadf044dfb9d3a4ff69fd217013dbe78a792177a3feb172449ea36"},
+    {file = "pyusb-1.2.1.tar.gz", hash = "sha256:a4cc7404a203144754164b8b40994e2849fde1cfff06b08492f12fff9d9de7b9"},
+]
 regex = [
     {file = "regex-2021.9.24-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:0628ed7d6334e8f896f882a5c1240de8c4d9b0dd7c7fb8e9f4692f5684b7d656"},
     {file = "regex-2021.9.24-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:3baf3eaa41044d4ced2463fd5d23bf7bd4b03d68739c6c99a59ce1f95599a673"},
@@ -234,6 +360,14 @@ regex = [
     {file = "regex-2021.9.24-cp39-cp39-win32.whl", hash = "sha256:95e89a8558c8c48626dcffdf9c8abac26b7c251d352688e7ab9baf351e1c7da6"},
     {file = "regex-2021.9.24-cp39-cp39-win_amd64.whl", hash = "sha256:835962f432bce92dc9bf22903d46c50003c8d11b1dc64084c8fae63bca98564a"},
     {file = "regex-2021.9.24.tar.gz", hash = "sha256:6266fde576e12357b25096351aac2b4b880b0066263e7bc7a9a1b4307991bb0e"},
+]
+rpi-ws281x = [
+    {file = "rpi_ws281x-4.3.0-cp27-cp27mu-linux_armv7l.whl", hash = "sha256:656f86d9cda8ff2e2b0368c17b6afdf898234d414133bcc10f214864a6843453"},
+    {file = "rpi_ws281x-4.3.0-cp37-cp37m-linux_armv7l.whl", hash = "sha256:e62576713938f81a4448711c41646caded0684b1df2ee4ff43ccd32d1dddd81f"},
+    {file = "rpi_ws281x-4.3.0.tar.gz", hash = "sha256:0b9549687ab7117acbc4bac0e92742fd2c8290fd204514d72fed91c06ba2e805"},
+]
+"rpi.gpio" = [
+    {file = "RPi.GPIO-0.7.0.tar.gz", hash = "sha256:7424bc6c205466764f30f666c18187a0824077daf20b295c42f08aea2cb87d3f"},
 ]
 tomli = [
     {file = "tomli-1.2.1-py3-none-any.whl", hash = "sha256:8dd0e9524d6f386271a36b41dbf6c57d8e32fd96fd22b6584679dc569d20899f"},
