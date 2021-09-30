@@ -92,6 +92,14 @@ docs = ["Sphinx (>=4)", "furo (>=2021.7.5b38)", "proselint (>=0.10.2)", "sphinx-
 test = ["appdirs (==1.4.4)", "pytest (>=6)", "pytest-cov (>=2.7)", "pytest-mock (>=3.6)"]
 
 [[package]]
+name = "pycapnp"
+version = "1.1.0"
+description = "A cython wrapping of the C++ Cap'n Proto library"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "regex"
 version = "2021.9.24"
 description = "Alternative regular expression module, to replace re."
@@ -138,7 +146,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "b66b1ba372da9cfb485653d75385938f00bced489d30aa2ba78a320474673032"
+content-hash = "4b6b19c14b52285a78f221269f478663b1380484b1ad2108bf42529bb6b7241e"
 
 [metadata.files]
 black = [
@@ -168,6 +176,21 @@ pathspec = [
 platformdirs = [
     {file = "platformdirs-2.4.0-py3-none-any.whl", hash = "sha256:8868bbe3c3c80d42f20156f22e7131d2fb321f5bc86a2a345375c6481a67021d"},
     {file = "platformdirs-2.4.0.tar.gz", hash = "sha256:367a5e80b3d04d2428ffa76d33f124cf11e8fff2acdaa9b43d545f5c7d661ef2"},
+]
+pycapnp = [
+    {file = "pycapnp-1.1.0-cp37-cp37m-macosx_10_14_x86_64.whl", hash = "sha256:bdd013eae51d190a2426d00cc72d0aaed148a5be778ca86ee1adae3ab7a0613f"},
+    {file = "pycapnp-1.1.0-cp37-cp37m-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:b9a1d6306a0e3e0090574aeb08d432bd67f9eb04ab564e89ef34cd1fe320b20f"},
+    {file = "pycapnp-1.1.0-cp37-cp37m-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:47c8bc28521312660c95cfc8a552654949407f8b17bc7ed6955ad7dae34d21a4"},
+    {file = "pycapnp-1.1.0-cp37-cp37m-win_amd64.whl", hash = "sha256:60adf2674f89f629551171116b8f400b17e9a41a2ef15736767acec405d4ca50"},
+    {file = "pycapnp-1.1.0-cp38-cp38-macosx_10_14_x86_64.whl", hash = "sha256:a788a374ccb93354943c89f5b1caf785faf7bb90191cd6265e042aa004f8b206"},
+    {file = "pycapnp-1.1.0-cp38-cp38-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:2a1746017079107232faf26af8ef4284ab0b20ce5cbe688d44e7553a67e5e5cb"},
+    {file = "pycapnp-1.1.0-cp38-cp38-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:0c770145a4eccfe97f53ab500283aa9bf969d4a37bffc75737a964db4f2af833"},
+    {file = "pycapnp-1.1.0-cp38-cp38-win_amd64.whl", hash = "sha256:1774a4fe9db5f094ba40cf00898fa4b437773e7f9c538b779275b9f422a92ebc"},
+    {file = "pycapnp-1.1.0-cp39-cp39-macosx_10_14_x86_64.whl", hash = "sha256:2b28d5d951602c0b832bbe63f85ebdd7685b33118b1c11c2c65a243ec9f35a66"},
+    {file = "pycapnp-1.1.0-cp39-cp39-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:61b009faba34855c9d29db107e188898c83099347e22ebcbc1d955774403247b"},
+    {file = "pycapnp-1.1.0-cp39-cp39-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:2a7aa9af0185e5977a59228db5042dffb048b2d4bf4f665d2105b4781cf2fcbc"},
+    {file = "pycapnp-1.1.0-cp39-cp39-win_amd64.whl", hash = "sha256:13badfb644e2eb7f1219aab259d18b262d1512021e4112fa1ad5e74d17bc30cf"},
+    {file = "pycapnp-1.1.0.tar.gz", hash = "sha256:786a2e39b79e592a41e8a1eaeea6e41e2015ecb9f5b7f7c20dfc5768ba1ae077"},
 ]
 regex = [
     {file = "regex-2021.9.24-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:0628ed7d6334e8f896f882a5c1240de8c4d9b0dd7c7fb8e9f4692f5684b7d656"},
