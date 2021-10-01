@@ -1,24 +1,11 @@
 import logging
-import sys
 
-LOG_FORMAT = logging.Formatter("%(asctime)s - %(levelname)s - %(name)s - %(message)s")
+from lights_common import SETTINGS
 
-
-def initialize():
-    """
-    Initialize the logging facilities
-    """
-    # Default to DEBUG
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
-
-    # Log to stdout at INFO
-    stdout_handler = logging.StreamHandler(sys.stdout)
-    stdout_handler.setLevel(logging.INFO)
-    stdout_handler.setFormatter(LOG_FORMAT)
-    logger.addHandler(stdout_handler)
-
-    # TODO: add debug handler
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+    level=SETTINGS.log_level,
+)
 
 
 def get(name=""):

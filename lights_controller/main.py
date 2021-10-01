@@ -49,8 +49,6 @@ async def start_listener():
 
 def main():
     loop = asyncio.get_event_loop()
-
-    logger.initialize()
     log = logger.get()
 
     log.info("starting controller")
