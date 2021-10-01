@@ -3,6 +3,9 @@ import functools
 import neopixel
 
 from lights_common import lights
+from .logger import get as get_logger
+
+logger = get_logger("server")
 
 pixels = neopixel.NeoPixel(board.D18, 30)
 
@@ -30,21 +33,30 @@ class LightControllerImpl(lights.LightController.Server):
         position_type = position.which()
         if position_type == "single":
             pixels[position.single] = color
+            logger.info(f"set pixel {position.single} to {color}")
         elif position_type == "range":
             r = position.range
             pixels[r.start : r.end + 1] = color
+            logger.info(f"set pixels in range [{r.start}, {r.end}] to {color}")
         elif position_type == "list":
             for p in position.list:
                 pixels[p] = color
+            logger.info(f"set pixels {position.list} to {color}")
 
     def fill(self, color: lights.Color, **_):
-        pixels.fill(color_to_tuple(color))
+        color = color_to_tuple(color)
+        pixels.fill(color)
+        logger.info(f"set all pixels to {color}")
 
     def brightness(self, level: int, **_):
         pixels.brightness = clamp(level, 0, 100) / 100
+        logger.info(f"set pixel brightness to {pixels.brightness}")
 
     def mode(self, mode: lights.Mode, **_):
         pixels.auto_write = mode == lights.Mode.queue
+        logger.info(f"changed write mode to '{mode}'")
 
     def show(self, **_):
-        pixels.show()
+        if pixels.auto_write:
+            pixels.show()
+            logger.info("wrote any queued changes to pixels")

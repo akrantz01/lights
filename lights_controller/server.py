@@ -1,12 +1,11 @@
 import asyncio
 from asyncio.streams import StreamReader, StreamWriter
 import capnp
-import logging
 
 from .impl import LightControllerImpl
+from .logger import get as get_logger
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger = get_logger("socket")
 
 
 async def on_connection(reader: StreamReader, writer: StreamWriter):
