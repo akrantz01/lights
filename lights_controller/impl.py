@@ -2,12 +2,13 @@ import board
 import functools
 import neopixel
 
-from lights_common import lights
+from lights_common import lights, SETTINGS
 from .logger import get as get_logger
 
 logger = get_logger("server")
 
-pixels = neopixel.NeoPixel(board.D18, 30)
+pixels = neopixel.NeoPixel(board.D18, SETTINGS.led_count)
+logger.info(f"using strip with {SETTINGS.led_count} NeoPixels")
 
 
 def clamp(value: int, lower: int, upper: int):

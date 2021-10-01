@@ -2,6 +2,8 @@ import capnp
 import os.path
 import sys
 
+from . import settings
+
 capnp.remove_import_hook()
 
 
@@ -17,3 +19,6 @@ try:
     lights
 except NameError as e:
     raise e
+
+
+SETTINGS = settings.load()

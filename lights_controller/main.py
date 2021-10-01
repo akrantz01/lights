@@ -1,8 +1,8 @@
 import asyncio
 import signal
 import socket
-import sys
 
+from lights_common import SETTINGS
 from lights_controller import logger
 from lights_controller.server import on_connection
 
@@ -37,7 +37,10 @@ def cancel_tasks(loop: asyncio.AbstractEventLoop):
 
 async def start_listener():
     listener = await asyncio.start_server(
-        on_connection, "127.0.0.1", "8080", family=socket.AF_INET
+        on_connection,
+        SETTINGS.controller_host,
+        str(SETTINGS.controller_port),
+        family=socket.AF_INET,
     )
 
     async with listener:
@@ -69,7 +72,9 @@ def main():
 
     # Run until complete
     try:
-        log.info("server started")
+        log.info(
+            f"server started on {SETTINGS.controller_host}:{SETTINGS.controller_port}"
+        )
         loop.run_forever()
     except KeyboardInterrupt:
         log.info("received termination signal")
@@ -85,8 +90,7 @@ def main():
         cancel_tasks(loop)
 
         # Stop async generators
-        if sys.version_info >= (3, 6):
-            loop.run_until_complete(loop.shutdown_asyncgens())
+        loop.run_until_complete(loop.shutdown_asyncgens())
     finally:
         loop.close()
 
