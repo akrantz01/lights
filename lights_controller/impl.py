@@ -1,10 +1,8 @@
 import board
-import capnp
 import functools
 import neopixel
 
-capnp.remove_import_hook()
-lights = capnp.load("lights.capnp")
+from lights_common import lights
 
 pixels = neopixel.NeoPixel(board.D18, 30)
 

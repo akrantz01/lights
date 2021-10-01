@@ -4,6 +4,10 @@ version = "0.1.0"
 description = "Control an Adafruit NeoPixel light strip from a Raspberry Pi"
 authors = ["Alex Krantz <alex@krantz.dev>"]
 license = "MIT"
+packages = [
+    { include = "lights_common" },
+    { include = "lights_controller" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.7"
@@ -16,6 +20,9 @@ adafruit-circuitpython-neopixel = "^6.2.1"
 
 [tool.poetry.dev-dependencies]
 black = "^21.9b0"
+
+[tool.poetry.scripts]
+lights-controller = "lights_controller.main:main"
 
 [tool.black]
 line-length = 88

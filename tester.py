@@ -3,7 +3,7 @@ import click
 import typing as t
 
 capnp.remove_import_hook()
-lights = capnp.load("lights.capnp")
+lights = capnp.load("lights_common/lights.capnp")
 
 
 class MutuallyExclusiveOption(click.Option):
