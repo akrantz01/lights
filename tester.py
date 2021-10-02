@@ -88,7 +88,7 @@ def validate_color(_ctx, _param, value):
     "port",
     type=int,
     help="The port of the server to connect to",
-    default=8080,
+    default=30000,
 )
 @click.pass_context
 def main(ctx: click.Context, address: str, port: int):
