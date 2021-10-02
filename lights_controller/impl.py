@@ -56,10 +56,10 @@ class LightControllerImpl(lights.LightController.Server):
         logger.info(f"set pixel brightness to {pixels.brightness}")
 
     def mode(self, mode: lights.Mode, **_):
-        pixels.auto_write = mode == lights.Mode.queue
+        pixels.auto_write = mode == lights.Mode.instant
         logger.info(f"changed write mode to '{mode}'")
 
     def show(self, **_):
-        if pixels.auto_write:
+        if not pixels.auto_write:
             pixels.show()
             logger.info("wrote any queued changes to pixels")
