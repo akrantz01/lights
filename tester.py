@@ -1,9 +1,11 @@
 import capnp
 import click
+from dotenv import load_dotenv
 import typing as t
 
-capnp.remove_import_hook()
-lights = capnp.load("lights_common/lights.capnp")
+from lights_common import lights, SETTINGS
+
+load_dotenv()
 
 
 class MutuallyExclusiveOption(click.Option):
@@ -80,7 +82,7 @@ def validate_color(_ctx, _param, value):
     "address",
     type=str,
     help="The address of the server to connect to",
-    default="127.0.0.1",
+    default=SETTINGS.controller_host,
 )
 @click.option(
     "-p",
@@ -88,7 +90,7 @@ def validate_color(_ctx, _param, value):
     "port",
     type=int,
     help="The port of the server to connect to",
-    default=30000,
+    default=SETTINGS.controller_port,
 )
 @click.pass_context
 def main(ctx: click.Context, address: str, port: int):
