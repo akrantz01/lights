@@ -29,6 +29,7 @@ SQLAlchemy = {version = "^1.4.25", extras = ["asyncio"]}
 [tool.poetry.dev-dependencies]
 black = "^21.9b0"
 sqlalchemy2-stubs = "^0.0.2-alpha.17"
+ipython = "^7.28.0"
 
 [tool.poetry.scripts]
 lights-controller = "lights_controller.main:main"
