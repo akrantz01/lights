@@ -25,6 +25,7 @@ gunicorn = "^20.1.0"
 alembic = "^1.7.3"
 asyncpg = "^0.24.0"
 SQLAlchemy = {version = "^1.4.25", extras = ["asyncio"]}
+python-dateutil = "^2.8.2"
 
 [tool.poetry.dev-dependencies]
 black = "^21.9b0"
