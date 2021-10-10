@@ -11,6 +11,8 @@ from lights_common import lights, SETTINGS
 class Client(object):
     def __init__(self):
         self.client: lights.LightController = capnp.TwoPartyClient()
+        self.running = True
+        self.tasks = []
 
     async def connect(self):
         """
@@ -23,21 +25,33 @@ class Client(object):
         )
 
         # Spawn the reader and writer tasks
-        coroutines = [self.read(reader, self.client), self.write(writer, self.client)]
-        asyncio.gather(*coroutines, return_exceptions=True)
+        self.tasks = [
+            asyncio.ensure_future(self.read(reader)),
+            asyncio.ensure_future(self.write(writer)),
+        ]
 
+        # Bootstrap the client
         self.client = self.client.bootstrap().cast_as(lights.LightController)
 
-    @staticmethod
-    async def read(reader: StreamReader, client):
-        while True:
-            data = await reader.read(4096)
-            client.write(data)
+    async def shutdown(self):
+        """
+        Shutdown the connection to the serve
+        """
+        self.running = False
+        for task in self.tasks:
+            if not task.cancelled():
+                task.cancel()
 
-    @staticmethod
-    async def write(writer: StreamWriter, client):
-        while True:
-            data = await client.read(4096)
+        await asyncio.gather(*self.tasks, return_exceptions=True)
+
+    async def read(self, reader: StreamReader):
+        while self.running:
+            data = await reader.read(4096)
+            self.client.write(data)
+
+    async def write(self, writer: StreamWriter):
+        while self.running:
+            data = await self.client.read(4096)
             writer.write(data.tobytes())
             await writer.drain()
 

@@ -16,6 +16,11 @@ async def on_startup():
     await CLIENT.connect()
 
 
+@app.on_event("shutdown")
+async def on_shutdown():
+    await CLIENT.shutdown()
+
+
 @app.exception_handler(StarletteHTTPException)
 async def http_exception(_request: Request, exception: StarletteHTTPException):
     return UJSONResponse(
