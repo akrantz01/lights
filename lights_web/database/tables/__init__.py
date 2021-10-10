@@ -1,2 +1,2 @@
-from .pixel import Pixel
-from .strip import Strip
+from .preset import Preset
+from .range import Range
