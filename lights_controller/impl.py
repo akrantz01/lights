@@ -36,7 +36,15 @@ class LightControllerImpl(lights.LightController.Server):
             pixels[position.single] = color
             logger.info(f"set pixel {position.single} to {color}")
         elif position_type == "range":
-            for p in range(position.range.start, position.range.end + 1):
+            start = position.range.start
+            end = position.range.end
+
+            if start > end:
+                r = range(start, end - 1, -1)
+            else:
+                r = range(start, end + 1)
+
+            for p in r:
                 pixels[p] = color
             logger.info(
                 f"set pixels in range [{position.range.start}, {position.range.end}] to {color}"
