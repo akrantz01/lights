@@ -720,7 +720,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "ec126455b739ee8144079902de0d9fe851d40733f3b475223d9184093e034ec3"
+content-hash = "54f21cec880b8d1f521b74501b3ae7b4031c89f1f993de456d04f1db083922a5"
 
 [metadata.files]
 adafruit-blinka = [

@@ -1,6 +1,6 @@
 import logging
 
-from lights_common import SETTINGS
+from . import SETTINGS
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",

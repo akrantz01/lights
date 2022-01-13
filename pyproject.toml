@@ -5,7 +5,7 @@ description = "Control an Adafruit NeoPixel light strip from a Raspberry Pi"
 authors = ["Alex Krantz <alex@krantz.dev>"]
 license = "MIT"
 packages = [
-    { include = "lights_common" },
+    { include = "lights_capnp" },
     { include = "lights_controller" },
 ]
 
@@ -18,23 +18,13 @@ Adafruit-Blinka = "^6.13.1"
 rpi-ws281x = "^4.3.0"
 adafruit-circuitpython-neopixel = "^6.2.1"
 python-dotenv = "^0.19.0"
-uvicorn = {version = "^0.15.0", extras = ["standard"]}
-fastapi = "^0.68.1"
-ujson = "^4.2.0"
-gunicorn = "^20.1.0"
-alembic = "^1.7.3"
-asyncpg = "^0.24.0"
-SQLAlchemy = {version = "^1.4.25", extras = ["asyncio"]}
-python-dateutil = "^2.8.2"
 
 [tool.poetry.dev-dependencies]
 black = "^21.9b0"
-sqlalchemy2-stubs = "^0.0.2-alpha.17"
 ipython = "^7.28.0"
 
 [tool.poetry.scripts]
 lights-controller = "lights_controller.main:main"
-lights-web = "lights_web.main:main"
 
 [tool.black]
 line-length = 88

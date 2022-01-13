@@ -3,7 +3,8 @@ import click
 from dotenv import load_dotenv
 import typing as t
 
-from lights_common import lights, SETTINGS
+from lights_capnp import lights
+from lights_controller import SETTINGS
 
 load_dotenv()
 

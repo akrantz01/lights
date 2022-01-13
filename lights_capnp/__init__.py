@@ -2,10 +2,7 @@ import capnp
 import os.path
 import sys
 
-from . import settings
-
 capnp.remove_import_hook()
-
 
 # Find the Cap'n Proto definition
 for path in sys.path:
@@ -19,6 +16,3 @@ try:
     lights
 except NameError as e:
     raise e
-
-
-SETTINGS = settings.load()

@@ -2,7 +2,8 @@ import board
 import functools
 import neopixel
 
-from lights_common import lights, SETTINGS
+from lights_capnp import lights
+from . import SETTINGS
 from .logger import get as get_logger
 
 logger = get_logger("server")

@@ -2,8 +2,7 @@ import asyncio
 import signal
 import socket
 
-from lights_common import SETTINGS
-from lights_controller import logger
+from lights_controller import logger, SETTINGS
 from lights_controller.server import on_connection
 
 
