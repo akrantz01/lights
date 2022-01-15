@@ -37,5 +37,7 @@ func Handler(hub *Hub, stripLength int) func(w http.ResponseWriter, r *http.Requ
 
 		// Send configuration information
 		client.send <- NewConfiguration(stripLength)
+
+		// TODO: send current strip state and color
 	}
 }

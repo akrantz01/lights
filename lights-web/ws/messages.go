@@ -11,6 +11,12 @@ const (
 	MessageCurrentColor
 	// MessageSetColor changes the current color of the lights
 	MessageSetColor
+	// MessageStripState notifies clients of the current color and state of the strip
+	MessageStripState
+	// MessageStateOn turns on the entire strip to the last color
+	MessageStateOn
+	// MessageStateOff turns off the entire strip (equivalent to setting to 0,0,0)
+	MessageStateOff
 )
 
 // Message is used to determine the type of message to decode as
@@ -47,4 +53,17 @@ func NewCurrentColor(color database.Color) CurrentColor {
 // SetColor is received when a client wishes to change the color of the entire strip
 type SetColor struct {
 	Color database.Color `json:"color"`
+}
+
+// StripState is broadcast when the state of the strip changes
+type StripState struct {
+	Type MessageType `json:"type"`
+	On   bool        `json:"on"`
+}
+
+func NewStripStatus(on bool) StripState {
+	return StripState{
+		Type: MessageStripState,
+		On:   on,
+	}
 }

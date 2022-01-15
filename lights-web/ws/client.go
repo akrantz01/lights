@@ -89,6 +89,16 @@ func (c *Client) reader() {
 
 			c.hub.broadcast <- NewCurrentColor(setColor.Color)
 
+		case MessageStateOn:
+			// TODO: actually set the strip to the last color
+
+			c.hub.broadcast <- NewStripStatus(true)
+
+		case MessageStateOff:
+			// TODO: actually set the strip to off
+
+			c.hub.broadcast <- NewStripStatus(false)
+
 		// Handle any unknown messages
 		default:
 			c.logger.Warn("unknown message type", zap.Uint8("type", uint8(msg.Type)))
