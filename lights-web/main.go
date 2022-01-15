@@ -15,6 +15,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"go.uber.org/zap"
 
+	"github.com/akrantz01/lights/lights-web/database"
 	"github.com/akrantz01/lights/lights-web/lights"
 	"github.com/akrantz01/lights/lights-web/logging"
 )
@@ -26,6 +27,12 @@ func main() {
 	}
 	defer logger.Sync()
 
+	// Connect to the database
+	db, err := database.Open("")
+	if err != nil {
+		logger.Fatal("failed to open database", zap.String("path", ""))
+	}
+
 	r := chi.NewRouter()
 
 	// Register middleware
@@ -34,6 +41,7 @@ func main() {
 	r.Use(logging.Request(logger))
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Heartbeat("/ping"))
+	r.Use(database.WithDatabase(db))
 
 	serverCtx, serverStopCtx := context.WithCancel(context.Background())
 	server := &http.Server{
@@ -73,6 +81,10 @@ func main() {
 
 	// Wait for server context to be stopped
 	<-serverCtx.Done()
+
+	if err := db.Close(); err != nil {
+		logger.Fatal("failed to close the database")
+	}
 
 	logger.Info("shutdown complete. goodbye!")
 }
