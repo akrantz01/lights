@@ -3,14 +3,12 @@ package main
 import (
 	"context"
 	"log"
-	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"capnproto.org/go/capnp/v3/rpc"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"go.uber.org/zap"
@@ -18,6 +16,7 @@ import (
 	"github.com/akrantz01/lights/lights-web/database"
 	"github.com/akrantz01/lights/lights-web/lights"
 	"github.com/akrantz01/lights/lights-web/logging"
+	"github.com/akrantz01/lights/lights-web/rpc"
 )
 
 func main() {
@@ -28,10 +27,19 @@ func main() {
 	defer logger.Sync()
 
 	// Connect to the database
-	db, err := database.Open("")
+	db, err := database.Open("./badger")
 	if err != nil {
-		logger.Fatal("failed to open database", zap.String("path", ""))
+		logger.Fatal("failed to open database", zap.String("path", "./badger"))
 	}
+
+	// Connect to the controller
+	lc, err := lights.Connect("192.168.1.6:30000")
+	if err != nil {
+		logger.Fatal("failed to connect to the controller", zap.String("address", "192.168.1.6:30000"))
+	}
+
+	// Start the action processor
+	_, processorCancel := rpc.NewProcessor(db, lc)
 
 	r := chi.NewRouter()
 
@@ -82,45 +90,11 @@ func main() {
 	// Wait for server context to be stopped
 	<-serverCtx.Done()
 
+	processorCancel()
+
 	if err := db.Close(); err != nil {
 		logger.Fatal("failed to close the database")
 	}
 
 	logger.Info("shutdown complete. goodbye!")
-}
-
-func client() error {
-	ctx := context.Background()
-	conn, err := net.Dial("tcp", "192.168.1.6:30000")
-	if err != nil {
-		log.Fatalf("failed to dial: %v\n", err)
-	}
-
-	rpcConn := rpc.NewConn(rpc.NewStreamTransport(conn), nil)
-	defer rpcConn.Close()
-
-	lc := lights.LightController{Client: rpcConn.Bootstrap(ctx)}
-
-	lc.Brightness(ctx, func(params lights.LightController_brightness_Params) error {
-		params.SetLevel(60)
-		return nil
-	})
-
-	result, free := lc.Fill(ctx, func(params lights.LightController_fill_Params) error {
-		c, err := params.NewColor()
-		if err != nil {
-			return err
-		}
-
-		c.SetR(196)
-		c.SetG(128)
-		c.SetB(64)
-
-		return nil
-	})
-	defer free()
-
-	<-result.Done()
-
-	return nil
 }
