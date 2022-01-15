@@ -17,7 +17,7 @@ var upgrader = websocket.Upgrader{
 }
 
 // Handler initiates the websocket connection and starts the client
-func Handler(hub *Hub) func(w http.ResponseWriter, r *http.Request) {
+func Handler(hub *Hub, stripLength int) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
@@ -34,5 +34,8 @@ func Handler(hub *Hub) func(w http.ResponseWriter, r *http.Request) {
 		// Start reader and writer routines
 		go client.reader()
 		go client.writer()
+
+		// Send configuration information
+		client.send <- NewConfiguration(stripLength)
 	}
 }

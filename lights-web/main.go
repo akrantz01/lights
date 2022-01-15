@@ -61,7 +61,7 @@ func main() {
 	r.Use(database.WithDatabase(db))
 
 	// Register routes
-	r.Get("/ws", ws.Handler(hub))
+	r.Get("/ws", ws.Handler(hub, config.StripLength))
 
 	serverCtx, serverStopCtx := context.WithCancel(context.Background())
 	server := &http.Server{

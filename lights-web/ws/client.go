@@ -76,6 +76,20 @@ func (c *Client) reader() {
 
 		// Re-parse the message and do stuff
 		switch msg.Type {
+
+		// Set the color of the entire light strip
+		case MessageSetColor:
+			var setColor SetColor
+			if err := json.Unmarshal(message, &setColor); err != nil {
+				c.logger.Error("failed to parse set color message")
+				continue
+			}
+
+			// TODO: actually set the light strip color
+
+			c.hub.broadcast <- NewCurrentColor(setColor.Color)
+
+		// Handle any unknown messages
 		default:
 			c.logger.Warn("unknown message type", zap.Uint8("type", uint8(msg.Type)))
 			break

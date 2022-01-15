@@ -3,6 +3,7 @@ package main
 import (
 	"net"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/joho/godotenv"
@@ -17,6 +18,8 @@ type Config struct {
 
 	LogLevel    string
 	Development bool
+
+	StripLength int
 }
 
 // ReadConfig extracts all the configuration options from the environment variables
@@ -36,12 +39,22 @@ func ReadConfig() (*Config, error) {
 	rawDevelopment := strings.ToLower(getEnvOrDefault("LIGHTS_DEVELOPMENT", "no"))
 	development := rawDevelopment == "y" || rawDevelopment == "yes" || rawDevelopment == "true"
 
+	stripDensity, err := strconv.Atoi(getEnvOrDefault("LIGHTS_STRIP_DENSITY", "30"))
+	if err != nil {
+		return nil, err
+	}
+	stripLength, err := strconv.Atoi(getEnvOrDefault("LIGHTS_STRIP_LENGTH", "5"))
+	if err != nil {
+		return nil, err
+	}
+
 	return &Config{
 		ListenAddr:     listenAddress,
 		ControllerAddr: controllerAddress,
 		DatabasePath:   getEnvOrDefault("LIGHTS_WEB_DATABASE_PATH", "./badger"),
 		LogLevel:       getEnvOrDefault("LIGHTS_LOG_LEVEL", "info"),
 		Development:    development,
+		StripLength:    stripDensity * stripLength,
 	}, nil
 }
 
