@@ -20,22 +20,27 @@ import (
 )
 
 func main() {
-	logger, err := logging.New("debug", true)
+	config, err := ReadConfig()
+	if err != nil {
+		log.Fatalf("failed to read configuration: %v\n", err)
+	}
+
+	logger, err := logging.New(config.LogLevel, config.Development)
 	if err != nil {
 		log.Fatalf("failed to initialize logging: %v\n", err)
 	}
 	defer logger.Sync()
 
 	// Connect to the database
-	db, err := database.Open("./badger")
+	db, err := database.Open(config.DatabasePath)
 	if err != nil {
-		logger.Fatal("failed to open database", zap.String("path", "./badger"))
+		logger.Fatal("failed to open database", zap.String("path", config.DatabasePath))
 	}
 
 	// Connect to the controller
-	lc, err := lights.Connect("192.168.1.6:30000")
+	lc, err := lights.Connect(config.ControllerAddr)
 	if err != nil {
-		logger.Fatal("failed to connect to the controller", zap.String("address", "192.168.1.6:30000"))
+		logger.Fatal("failed to connect to the controller", zap.String("address", config.ControllerAddr))
 	}
 
 	// Start the action processor
@@ -53,7 +58,7 @@ func main() {
 
 	serverCtx, serverStopCtx := context.WithCancel(context.Background())
 	server := &http.Server{
-		Addr:    "127.0.0.1:3000",
+		Addr:    config.ListenAddr,
 		Handler: r,
 	}
 
@@ -82,7 +87,7 @@ func main() {
 	}()
 
 	// Start the server
-	logger.Info("listening and ready to handle requests", zap.String("address", "127.0.0.1:3000"))
+	logger.Info("listening and ready to handle requests", zap.String("address", config.ListenAddr))
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		logger.Fatal("an error occurred while running", zap.Error(err))
 	}

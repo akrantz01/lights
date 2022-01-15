@@ -6,6 +6,7 @@ require (
 	capnproto.org/go/capnp/v3 v3.0.0-alpha.1
 	github.com/dgraph-io/badger/v3 v3.2103.2
 	github.com/go-chi/chi/v5 v5.0.7
+	github.com/joho/godotenv v1.4.0
 	go.uber.org/zap v1.20.0
 )
 
