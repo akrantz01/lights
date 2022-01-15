@@ -265,3 +265,6 @@ go.work
 ### Go Patch ###
 /vendor/
 /Godeps/
+
+### Project files ###
+badger/

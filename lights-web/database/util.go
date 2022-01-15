@@ -1,21 +1,29 @@
 package database
 
-import "go.uber.org/zap"
+import (
+	"fmt"
+
+	"go.uber.org/zap"
+)
 
 type loggerShim struct{}
 
 func (l loggerShim) Errorf(template string, args ...interface{}) {
-	zap.S().Errorf(template, args)
+	msg := fmt.Sprintf(template, args...)
+	zap.L().WithOptions(zap.AddCallerSkip(1)).Error(msg)
 }
 
 func (l loggerShim) Warningf(template string, args ...interface{}) {
-	zap.S().Warnf(template, args)
+	msg := fmt.Sprintf(template, args...)
+	zap.L().WithOptions(zap.AddCallerSkip(1)).Warn(msg)
 }
 
 func (l loggerShim) Infof(template string, args ...interface{}) {
-	zap.S().Infof(template, args)
+	msg := fmt.Sprintf(template, args...)
+	zap.L().WithOptions(zap.AddCallerSkip(1)).Info(msg)
 }
 
 func (l loggerShim) Debugf(template string, args ...interface{}) {
-	zap.S().Debugf(template, args)
+	msg := fmt.Sprintf(template, args...)
+	zap.L().WithOptions(zap.AddCallerSkip(1)).Debug(msg)
 }
