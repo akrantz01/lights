@@ -17,6 +17,7 @@ import (
 	"github.com/akrantz01/lights/lights-web/lights"
 	"github.com/akrantz01/lights/lights-web/logging"
 	"github.com/akrantz01/lights/lights-web/rpc"
+	"github.com/akrantz01/lights/lights-web/ws"
 )
 
 func main() {
@@ -46,6 +47,9 @@ func main() {
 	// Start the action processor
 	_, processorCancel := rpc.NewProcessor(db, lc)
 
+	// Start the websocket hub
+	hub := ws.NewHub()
+
 	r := chi.NewRouter()
 
 	// Register middleware
@@ -55,6 +59,9 @@ func main() {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Heartbeat("/ping"))
 	r.Use(database.WithDatabase(db))
+
+	// Register routes
+	r.Get("/ws", ws.Handler(hub))
 
 	serverCtx, serverStopCtx := context.WithCancel(context.Background())
 	server := &http.Server{
@@ -96,6 +103,8 @@ func main() {
 	<-serverCtx.Done()
 
 	processorCancel()
+
+	hub.Stop()
 
 	if err := db.Close(); err != nil {
 		logger.Fatal("failed to close the database")

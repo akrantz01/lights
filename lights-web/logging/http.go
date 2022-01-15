@@ -63,15 +63,23 @@ type RequestLoggerEntry struct {
 	Logger *zap.Logger
 }
 
-func (l *RequestLoggerEntry) Write(status, bytes int, _ http.Header, elapsed time.Duration, _ interface{}) {
-	logFunc := logLevelForStatus(l.Logger, status)
+func (l *RequestLoggerEntry) Write(status, bytes int, headers http.Header, elapsed time.Duration, _ interface{}) {
 	latency := float64(elapsed.Nanoseconds()) / 1000000.0
-	logFunc(
-		"finished processing request",
-		zap.Int("status", status),
-		zap.Int("bytes", bytes),
-		zap.Float64("latency", latency),
-	)
+	logger := l.Logger.With(zap.Int("status", status), zap.Int("bytes", bytes), zap.Float64("latency", latency))
+
+	// Check if hijacked for websocket upgrade
+	if status == 0 && bytes == 0 && len(headers) == 0 {
+		logger.Info("upgraded to websocket connection")
+	} else {
+		logFunc := logLevelForStatus(logger, status)
+		logFunc(
+			"finished processing request",
+			zap.Int("status", status),
+			zap.Int("bytes", bytes),
+			zap.Float64("latency", latency),
+		)
+	}
+
 }
 
 func (l *RequestLoggerEntry) Panic(v interface{}, stack []byte) {
