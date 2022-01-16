@@ -99,6 +99,23 @@ func (c *Client) reader() {
 
 			c.hub.broadcast <- NewStripStatus(false)
 
+		// Set the brightness of the entire strip
+		case MessageSetBrightness:
+			var setBrightness SetBrightness
+			if err := json.Unmarshal(message, &setBrightness); err != nil {
+				c.logger.Error("failed to parse set brightness message", zap.Error(err))
+				continue
+			}
+
+			if setBrightness.Brightness > 100 {
+				c.logger.Warn("invalid brightness level", zap.Uint8("brightness", setBrightness.Brightness))
+				continue
+			}
+
+			// TODO: actually set the strip brightness
+
+			c.hub.broadcast <- NewCurrentBrightness(setBrightness.Brightness)
+
 		// Handle any unknown messages
 		default:
 			c.logger.Warn("unknown message type", zap.Uint8("type", uint8(msg.Type)))

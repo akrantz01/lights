@@ -7,7 +7,7 @@ type MessageType uint8
 const (
 	// MessageConfiguration tells the client basic information about the current setup
 	MessageConfiguration MessageType = iota + 1
-	// MessageCurrentColor notifies clients of the current color after a call to SetColor
+	// MessageCurrentColor notifies clients of the current color after a call to MessageSetColor
 	MessageCurrentColor
 	// MessageSetColor changes the current color of the lights
 	MessageSetColor
@@ -17,6 +17,10 @@ const (
 	MessageStateOn
 	// MessageStateOff turns off the entire strip (equivalent to setting to 0,0,0)
 	MessageStateOff
+	// MessageCurrentBrightness notifies clients of the current brightness after a call to MessageSetBrightness
+	MessageCurrentBrightness
+	// MessageSetBrightness changes the current brightness of the lights
+	MessageSetBrightness
 )
 
 // Message is used to determine the type of message to decode as
@@ -66,4 +70,22 @@ func NewStripStatus(on bool) StripState {
 		Type: MessageStripState,
 		On:   on,
 	}
+}
+
+// CurrentBrightness is broadcast when the brightness changes
+type CurrentBrightness struct {
+	Type       MessageType `json:"type"`
+	Brightness uint8       `json:"brightness"`
+}
+
+func NewCurrentBrightness(brightness uint8) CurrentBrightness {
+	return CurrentBrightness{
+		Type:       MessageCurrentBrightness,
+		Brightness: brightness,
+	}
+}
+
+// SetBrightness is received when a client wishes to change the brightness of the strip
+type SetBrightness struct {
+	Brightness uint8 `json:"brightness"`
 }
