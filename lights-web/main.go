@@ -45,7 +45,7 @@ func main() {
 	}
 
 	// Start the action processor
-	_, processorCancel := rpc.NewProcessor(db, lc)
+	actions, processorCancel := rpc.NewProcessor(db, lc)
 
 	// Start the websocket hub
 	hub := ws.NewHub()
@@ -59,6 +59,7 @@ func main() {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Heartbeat("/ping"))
 	r.Use(database.WithDatabase(db))
+	r.Use(rpc.WithActions(actions))
 
 	// Register routes
 	r.Get("/ws", ws.Handler(hub, config.StripLength))

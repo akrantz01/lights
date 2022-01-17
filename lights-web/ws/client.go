@@ -6,6 +6,8 @@ import (
 
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
+
+	"github.com/akrantz01/lights/lights-web/rpc"
 )
 
 const (
@@ -38,7 +40,7 @@ func (c *Client) register() {
 }
 
 // reader processes all incoming messages from the client
-func (c *Client) reader() {
+func (c *Client) reader(actions chan rpc.Callable) {
 	defer func() {
 		c.hub.unregister <- c
 		c.conn.Close()
@@ -89,14 +91,14 @@ func (c *Client) reader() {
 
 			c.hub.broadcast <- NewCurrentColor(setColor.Color)
 
+		// Turn the entire strip on
 		case MessageStateOn:
-			// TODO: actually set the strip to the last color
-
+			actions <- rpc.NewStateChange(true)
 			c.hub.broadcast <- NewStripStatus(true)
 
+		// Turn the entire strip off
 		case MessageStateOff:
-			// TODO: actually set the strip to off
-
+			actions <- rpc.NewStateChange(false)
 			c.hub.broadcast <- NewStripStatus(false)
 
 		// Set the brightness of the entire strip

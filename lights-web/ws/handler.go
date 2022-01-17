@@ -6,6 +6,8 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
+
+	"github.com/akrantz01/lights/lights-web/rpc"
 )
 
 // Handler initiates the websocket connection and starts the client
@@ -28,12 +30,14 @@ func Handler(hub *Hub, stripLength int) func(w http.ResponseWriter, r *http.Requ
 		id := middleware.GetReqID(r.Context())
 		logger := zap.L().With(zap.String("id", id), zap.String("remote", r.RemoteAddr))
 
+		actions := rpc.GetActions(r.Context())
+
 		// Create the client
 		client := newClient(conn, hub, logger)
 		client.register()
 
 		// Start reader and writer routines
-		go client.reader()
+		go client.reader(actions)
 		go client.writer()
 
 		// Send configuration information
