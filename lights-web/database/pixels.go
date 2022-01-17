@@ -62,9 +62,12 @@ func (d *Database) SetPixel(pixel Pixel) error {
 
 // SetPixelRange sets a range of pixels to a given color
 func (d *Database) SetPixelRange(start uint16, end uint16, color Color) error {
-	// Get all the changed indexes
 	indexes := util.RangeToIndexes(start, end)
+	return d.SetArbitraryPixels(indexes, color)
+}
 
+// SetArbitraryPixels sets a list of pixel indexes to the given color
+func (d *Database) SetArbitraryPixels(indexes []uint16, color Color) error {
 	// Convert the color to its binary encoding
 	encodedColor := []byte{color.Red, color.Green, color.Blue}
 

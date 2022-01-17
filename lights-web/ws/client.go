@@ -142,6 +142,16 @@ func (c *Client) reader(actions chan rpc.Callable) {
 			actions <- rpc.NewPixelRange(setRange.Start, setRange.End, setRange.Color)
 			c.hub.broadcast <- NewCurrentPixels(modified, setRange.Color)
 
+		case MessageSetArbitrary:
+			var setArbitrary SetArbitraryPixels
+			if err := json.Unmarshal(message, &setArbitrary); err != nil {
+				c.logger.Error("failed to parse set arbitrary pixels message", zap.Error(err))
+				continue
+			}
+
+			actions <- rpc.NewArbitraryPixels(setArbitrary.Indexes, setArbitrary.Color)
+			c.hub.broadcast <- NewCurrentPixels(setArbitrary.Indexes, setArbitrary.Color)
+
 		// Handle any unknown messages
 		default:
 			c.logger.Warn("unknown message type", zap.Uint8("type", uint8(msg.Type)))

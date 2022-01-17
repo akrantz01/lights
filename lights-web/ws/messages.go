@@ -29,6 +29,8 @@ const (
 	MessageSetPixel
 	// MessageSetRange is used to set a range of pixels to a given color
 	MessageSetRange
+	// MessageSetArbitrary is used to set arbitrary pixels to a given color
+	MessageSetArbitrary
 )
 
 // Message is used to determine the type of message to decode as
@@ -132,4 +134,10 @@ type SetPixelRange struct {
 	Start uint16         `json:"start"`
 	End   uint16         `json:"end"`
 	Color database.Color `json:"color"`
+}
+
+// SetArbitraryPixels is received when a client wishes to change the color of individual, non-linear pixels
+type SetArbitraryPixels struct {
+	Indexes []uint16       `json:"indexes"`
+	Color   database.Color `json:"color"`
 }

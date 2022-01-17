@@ -111,3 +111,57 @@ func (sp SetPixelRange) Execute(ctx context.Context, db *database.Database, cont
 
 	return nil
 }
+
+// SetArbitraryPixels changes the color of multiple pixels at the same time
+type SetArbitraryPixels struct {
+	Indexes []uint16
+	Color   database.Color
+}
+
+func NewArbitraryPixels(indexes []uint16, color database.Color) SetArbitraryPixels {
+	return SetArbitraryPixels{
+		Indexes: indexes,
+		Color:   color,
+	}
+}
+
+func (sa SetArbitraryPixels) Type() string {
+	return "set-arbitrary-pixels"
+}
+
+func (sa SetArbitraryPixels) Execute(ctx context.Context, db *database.Database, controller lights.LightController) error {
+	result, free := controller.Set(ctx, func(params lights.LightController_set_Params) error {
+		// Set desired color
+		color, err := params.NewColor()
+		if err != nil {
+			return err
+		}
+		color.SetR(sa.Color.Red)
+		color.SetG(sa.Color.Green)
+		color.SetB(sa.Color.Blue)
+
+		// Set the indexes
+		position, err := params.NewPosition()
+		if err != nil {
+			return err
+		}
+		list, err := position.NewList(int32(len(sa.Indexes)))
+		if err != nil {
+			return err
+		}
+		for i, v := range sa.Indexes {
+			list.Set(i, v)
+		}
+
+		return nil
+	})
+	defer free()
+
+	if err := db.SetArbitraryPixels(sa.Indexes, sa.Color); err != nil {
+		return err
+	}
+
+	<-result.Done()
+
+	return nil
+}
