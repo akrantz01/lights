@@ -8,41 +8,39 @@ import (
 	"github.com/akrantz01/lights/lights-web/util"
 )
 
-// GetPixel retrieves a pixel by index in the database
-func (d *Database) GetPixel(index uint16) (Color, error) {
-	color := Color{
-		Red:   0,
-		Green: 0,
-		Blue:  0,
-	}
-
-	// Encode the index for retrieval
-	encodedIndex := make([]byte, 2)
-	binary.LittleEndian.PutUint16(encodedIndex, index)
+// GetPixels retrieves all the colors of the pixels in the database
+func (d *Database) GetPixels() ([]Color, error) {
+	colors := make([]Color, d.length)
 
 	err := d.db.View(func(txn *badger.Txn) error {
-		item, err := txn.Get([]byte{'p', encodedIndex[0], encodedIndex[1]})
-		if err == badger.ErrKeyNotFound {
-			return nil
-		} else if err != nil {
-			return err
-		}
+		for i := range colors {
+			// Encode the index for retrieval
+			encoded := make([]byte, 2)
+			binary.LittleEndian.PutUint16(encoded, uint16(i))
 
-		// Retrieve the value
-		rawColor := make([]byte, 3)
-		if _, err := item.ValueCopy(rawColor); err != nil {
-			return err
-		}
+			// Fetch the item
+			item, err := txn.Get([]byte{'p', encoded[0], encoded[1]})
+			if err == badger.ErrKeyNotFound {
+				continue
+			} else if err != nil {
+				return err
+			}
 
-		// Extract the color byte values
-		color.Red = rawColor[0]
-		color.Green = rawColor[1]
-		color.Blue = rawColor[2]
+			// Retrieve the value
+			rawColor := make([]byte, 3)
+			if _, err := item.ValueCopy(rawColor); err != nil {
+				return err
+			}
+
+			// Extract the color byte values
+			colors[i].Red = rawColor[0]
+			colors[i].Green = rawColor[1]
+			colors[i].Blue = rawColor[2]
+		}
 
 		return nil
 	})
-
-	return color, err
+	return colors, err
 }
 
 // SetPixel sets a pixel in the database

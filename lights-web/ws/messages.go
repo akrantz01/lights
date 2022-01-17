@@ -41,10 +41,10 @@ type Message struct {
 // Configuration describes basic information about the server
 type Configuration struct {
 	Type        MessageType `json:"type"`
-	StripLength int         `json:"strip_length"`
+	StripLength uint16      `json:"strip_length"`
 }
 
-func NewConfiguration(length int) Configuration {
+func NewConfiguration(length uint16) Configuration {
 	return Configuration{
 		Type:        MessageConfiguration,
 		StripLength: length,

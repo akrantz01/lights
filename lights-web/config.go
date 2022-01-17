@@ -19,7 +19,7 @@ type Config struct {
 	LogLevel    string
 	Development bool
 
-	StripLength int
+	StripLength uint16
 }
 
 // ReadConfig extracts all the configuration options from the environment variables
@@ -54,7 +54,7 @@ func ReadConfig() (*Config, error) {
 		DatabasePath:   getEnvOrDefault("LIGHTS_WEB_DATABASE_PATH", "./badger"),
 		LogLevel:       getEnvOrDefault("LIGHTS_LOG_LEVEL", "info"),
 		Development:    development,
-		StripLength:    stripDensity * stripLength,
+		StripLength:    uint16(stripDensity * stripLength),
 	}, nil
 }
 

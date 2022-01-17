@@ -33,7 +33,7 @@ func main() {
 	defer logger.Sync()
 
 	// Connect to the database
-	db, err := database.Open(config.DatabasePath)
+	db, err := database.Open(config.DatabasePath, config.StripLength)
 	if err != nil {
 		logger.Fatal("failed to open database", zap.String("path", config.DatabasePath))
 	}

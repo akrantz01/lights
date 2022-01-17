@@ -11,11 +11,12 @@ import (
 const databaseContextKey = "badger-database-key"
 
 type Database struct {
-	db *badger.DB
+	db     *badger.DB
+	length uint16
 }
 
 // Open opens a "connection" to the database
-func Open(path string) (*Database, error) {
+func Open(path string, length uint16) (*Database, error) {
 	opts := badger.DefaultOptions(path).WithCompression(options.Snappy).WithLogger(loggerShim{})
 	db, err := badger.Open(opts)
 	if err != nil {
@@ -27,7 +28,8 @@ func Open(path string) (*Database, error) {
 	}
 
 	return &Database{
-		db: db,
+		db:     db,
+		length: length,
 	}, nil
 }
 

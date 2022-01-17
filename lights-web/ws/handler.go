@@ -12,7 +12,7 @@ import (
 )
 
 // Handler initiates the websocket connection and starts the client
-func Handler(hub *Hub, stripLength int) func(w http.ResponseWriter, r *http.Request) {
+func Handler(hub *Hub, stripLength uint16) func(w http.ResponseWriter, r *http.Request) {
 	upgrader := websocket.Upgrader{
 		ReadBufferSize:    1024,
 		WriteBufferSize:   1024,
