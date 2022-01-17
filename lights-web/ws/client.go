@@ -114,8 +114,7 @@ func (c *Client) reader(actions chan rpc.Callable) {
 				continue
 			}
 
-			// TODO: actually set the strip brightness
-
+			actions <- rpc.NewBrightnessChange(setBrightness.Brightness)
 			c.hub.broadcast <- NewCurrentBrightness(setBrightness.Brightness)
 
 		// Handle any unknown messages
