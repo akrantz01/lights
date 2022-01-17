@@ -87,8 +87,7 @@ func (c *Client) reader(actions chan rpc.Callable) {
 				continue
 			}
 
-			// TODO: actually set the light strip color
-
+			actions <- rpc.NewColorChange(setColor.Color)
 			c.hub.broadcast <- NewCurrentColor(setColor.Color)
 
 		// Turn the entire strip on
