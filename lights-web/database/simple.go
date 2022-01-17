@@ -29,8 +29,8 @@ func (d *Database) GetColor() (Color, error) {
 
 		// Extract the color byte values
 		color.Red = rawColor[0]
-		color.Blue = rawColor[1]
-		color.Green = rawColor[2]
+		color.Green = rawColor[1]
+		color.Blue = rawColor[2]
 
 		return nil
 	})
@@ -40,7 +40,7 @@ func (d *Database) GetColor() (Color, error) {
 // SetColor stores the filled color set to the strip
 func (d *Database) SetColor(c Color) error {
 	return d.db.Update(func(txn *badger.Txn) error {
-		return txn.Set([]byte("color"), []byte{c.Red, c.Blue, c.Green})
+		return txn.Set([]byte("color"), []byte{c.Red, c.Green, c.Blue})
 	})
 }
 
