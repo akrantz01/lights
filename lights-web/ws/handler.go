@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
 
+	"github.com/akrantz01/lights/lights-web/database"
 	"github.com/akrantz01/lights/lights-web/rpc"
 )
 
@@ -31,6 +32,7 @@ func Handler(hub *Hub, stripLength int) func(w http.ResponseWriter, r *http.Requ
 		logger := zap.L().With(zap.String("id", id), zap.String("remote", r.RemoteAddr))
 
 		actions := rpc.GetActions(r.Context())
+		db := database.GetDatabase(r.Context())
 
 		// Create the client
 		client := newClient(conn, hub, logger)
@@ -43,6 +45,22 @@ func Handler(hub *Hub, stripLength int) func(w http.ResponseWriter, r *http.Requ
 		// Send configuration information
 		client.send <- NewConfiguration(stripLength)
 
-		// TODO: send current strip state and color
+		// Get the current status
+		brightness, err := db.GetBrightness()
+		if err != nil {
+			logger.Error("failed to get brightness", zap.Error(err))
+		}
+		color, err := db.GetColor()
+		if err != nil {
+			logger.Error("failed to get color", zap.Error(err))
+		}
+		state, err := db.GetState()
+		if err != nil {
+			logger.Error("failed to get state", zap.Error(err))
+		}
+
+		client.send <- NewCurrentBrightness(brightness)
+		client.send <- NewCurrentColor(color)
+		client.send <- NewStripStatus(state)
 	}
 }
