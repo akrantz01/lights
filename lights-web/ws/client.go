@@ -126,7 +126,7 @@ func (c *Client) reader(actions chan rpc.Callable) {
 			}
 
 			actions <- rpc.NewSetPixel(setPixel.Index, setPixel.Color)
-			c.hub.broadcast <- NewSingleCurrentPixels(setPixel.Index, setPixel.Color)
+			c.hub.broadcast <- NewSingleModifiedPixel(setPixel.Index, setPixel.Color)
 
 		// Sets the color of a range of pixels
 		case MessageSetRange:
@@ -140,7 +140,7 @@ func (c *Client) reader(actions chan rpc.Callable) {
 			modified := util.RangeToIndexes(setRange.Start, setRange.End)
 
 			actions <- rpc.NewPixelRange(setRange.Start, setRange.End, setRange.Color)
-			c.hub.broadcast <- NewCurrentPixels(modified, setRange.Color)
+			c.hub.broadcast <- NewModifiedPixels(modified, setRange.Color)
 
 		case MessageSetArbitrary:
 			var setArbitrary SetArbitraryPixels
@@ -150,7 +150,7 @@ func (c *Client) reader(actions chan rpc.Callable) {
 			}
 
 			actions <- rpc.NewArbitraryPixels(setArbitrary.Indexes, setArbitrary.Color)
-			c.hub.broadcast <- NewCurrentPixels(setArbitrary.Indexes, setArbitrary.Color)
+			c.hub.broadcast <- NewModifiedPixels(setArbitrary.Indexes, setArbitrary.Color)
 
 		// Handle any unknown messages
 		default:

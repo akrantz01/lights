@@ -4,6 +4,13 @@ import (
 	"github.com/dgraph-io/badger/v3"
 )
 
+type PixelMode uint8
+
+const (
+	PixelModeFill PixelMode = iota + 1
+	PixelModeIndividual
+)
+
 // GetColor retrieves the filled color set to the strip
 func (d *Database) GetColor() (Color, error) {
 	color := Color{
@@ -111,5 +118,36 @@ func (d *Database) SetState(state bool) error {
 
 	return d.db.Update(func(txn *badger.Txn) error {
 		return txn.Set([]byte("state"), []byte{value})
+	})
+}
+
+// GetPixelMode retrieves the current display mode
+func (d *Database) GetPixelMode() (PixelMode, error) {
+	mode := PixelModeFill
+
+	err := d.db.View(func(txn *badger.Txn) error {
+		item, err := txn.Get([]byte("pixel-mode"))
+		if err == badger.ErrKeyNotFound {
+			return nil
+		} else if err != nil {
+			return err
+		}
+
+		// Retrieve the value
+		v := make([]byte, 1)
+		if _, err := item.ValueCopy(v); err != nil {
+			return err
+		}
+		mode = PixelMode(v[0])
+
+		return nil
+	})
+	return mode, err
+}
+
+// SetPixelMode sets the current display mode
+func (d *Database) SetPixelMode(mode PixelMode) error {
+	return d.db.Update(func(txn *badger.Txn) error {
+		return txn.Set([]byte("pixel-mode"), []byte{byte(mode)})
 	})
 }

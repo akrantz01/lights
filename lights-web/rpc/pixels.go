@@ -52,6 +52,11 @@ func (sp SetSinglePixel) Execute(ctx context.Context, db *database.Database, con
 		return err
 	}
 
+	// Change the display mode to individual pixels
+	if err := db.SetPixelMode(database.PixelModeIndividual); err != nil {
+		return err
+	}
+
 	<-result.Done()
 
 	return nil
@@ -100,7 +105,13 @@ func (sp SetPixelRange) Execute(ctx context.Context, db *database.Database, cont
 	})
 	defer free()
 
+	// Save the changed range
 	if err := db.SetPixelRange(sp.Start, sp.End, sp.Color); err != nil {
+		return err
+	}
+
+	// Change the display mode to individual pixels
+	if err := db.SetPixelMode(database.PixelModeIndividual); err != nil {
 		return err
 	}
 
@@ -154,7 +165,13 @@ func (sa SetArbitraryPixels) Execute(ctx context.Context, db *database.Database,
 	})
 	defer free()
 
+	// Save the changed pixels
 	if err := db.SetArbitraryPixels(sa.Indexes, sa.Color); err != nil {
+		return err
+	}
+
+	// Change the display mode to individual pixels
+	if err := db.SetPixelMode(database.PixelModeIndividual); err != nil {
 		return err
 	}
 

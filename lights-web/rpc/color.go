@@ -43,6 +43,11 @@ func (cb ChangeColor) Execute(ctx context.Context, db *database.Database, contro
 		return err
 	}
 
+	// Change the display mode to fill
+	if err := db.SetPixelMode(database.PixelModeFill); err != nil {
+		return err
+	}
+
 	<-result.Done()
 
 	return nil

@@ -22,15 +22,18 @@ const (
 	MessageCurrentBrightness
 	// MessageSetBrightness changes the current brightness of the lights
 	MessageSetBrightness
-	// MessageCurrentPixels notifies clients of changes to individual pixels on the strip. Once received by the client, the
+	// MessageModifiedPixels notifies clients of changes to individual pixels on the strip. Once received by the client, the
 	// client shall automatically switch to pixel modification mode.
-	MessageCurrentPixels
+	MessageModifiedPixels
 	// MessageSetPixel is used to set an individual light to a given color
 	MessageSetPixel
 	// MessageSetRange is used to set a range of pixels to a given color
 	MessageSetRange
 	// MessageSetArbitrary is used to set arbitrary pixels to a given color
 	MessageSetArbitrary
+	// MessageCurrentPixels notifies clients of the current individual pixel colors when the strip is in pixel
+	// modification mode.
+	MessageCurrentPixels
 )
 
 // Message is used to determine the type of message to decode as
@@ -100,24 +103,24 @@ type SetBrightness struct {
 	Brightness uint8 `json:"brightness"`
 }
 
-// CurrentPixels is broadcast whenever any single pixels change
-type CurrentPixels struct {
+// ModifiedPixels is broadcast whenever any single pixels change
+type ModifiedPixels struct {
 	Type    MessageType    `json:"type"`
 	Indexes []uint16       `json:"indexes"`
 	Color   database.Color `json:"color"`
 }
 
-func NewSingleCurrentPixels(index uint16, color database.Color) CurrentPixels {
-	return CurrentPixels{
-		Type:    MessageCurrentPixels,
+func NewSingleModifiedPixel(index uint16, color database.Color) ModifiedPixels {
+	return ModifiedPixels{
+		Type:    MessageModifiedPixels,
 		Indexes: []uint16{index},
 		Color:   color,
 	}
 }
 
-func NewCurrentPixels(indexes []uint16, color database.Color) CurrentPixels {
-	return CurrentPixels{
-		Type:    MessageCurrentPixels,
+func NewModifiedPixels(indexes []uint16, color database.Color) ModifiedPixels {
+	return ModifiedPixels{
+		Type:    MessageModifiedPixels,
 		Indexes: indexes,
 		Color:   color,
 	}
@@ -140,4 +143,17 @@ type SetPixelRange struct {
 type SetArbitraryPixels struct {
 	Indexes []uint16       `json:"indexes"`
 	Color   database.Color `json:"color"`
+}
+
+// CurrentPixels is used to broadcast the status of all pixels
+type CurrentPixels struct {
+	Type   MessageType      `json:"type"`
+	Pixels []database.Color `json:"pixels"`
+}
+
+func NewCurrentPixels(pixels []database.Color) CurrentPixels {
+	return CurrentPixels{
+		Type:   MessageCurrentPixels,
+		Pixels: pixels,
+	}
 }

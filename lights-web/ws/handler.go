@@ -45,22 +45,35 @@ func Handler(hub *Hub, stripLength uint16) func(w http.ResponseWriter, r *http.R
 		// Send configuration information
 		client.send <- NewConfiguration(stripLength)
 
-		// Get the current status
+		// Get the current status for state and brightness
 		brightness, err := db.GetBrightness()
 		if err != nil {
 			logger.Error("failed to get brightness", zap.Error(err))
 		}
-		color, err := db.GetColor()
-		if err != nil {
-			logger.Error("failed to get color", zap.Error(err))
-		}
+		client.send <- NewCurrentBrightness(brightness)
 		state, err := db.GetState()
 		if err != nil {
 			logger.Error("failed to get state", zap.Error(err))
 		}
-
-		client.send <- NewCurrentBrightness(brightness)
-		client.send <- NewCurrentColor(color)
 		client.send <- NewStripStatus(state)
+
+		// Get the current display mode
+		if mode, err := db.GetPixelMode(); err != nil {
+			logger.Error("failed to get pixel state")
+		} else if mode == database.PixelModeFill {
+			color, err := db.GetColor()
+			if err != nil {
+				logger.Error("failed to get color", zap.Error(err))
+			}
+
+			client.send <- NewCurrentColor(color)
+		} else if mode == database.PixelModeIndividual {
+			pixels, err := db.GetPixels()
+			if err != nil {
+				logger.Error("failed to get pixel colors", zap.Error(err))
+			}
+
+			client.send <- NewCurrentPixels(pixels)
+		}
 	}
 }
