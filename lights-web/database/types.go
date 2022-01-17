@@ -5,3 +5,8 @@ type Color struct {
 	Green uint8 `json:"g"`
 	Blue  uint8 `json:"b"`
 }
+
+type Pixel struct {
+	Index uint16
+	Color Color
+}

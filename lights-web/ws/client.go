@@ -116,6 +116,17 @@ func (c *Client) reader(actions chan rpc.Callable) {
 			actions <- rpc.NewBrightnessChange(setBrightness.Brightness)
 			c.hub.broadcast <- NewCurrentBrightness(setBrightness.Brightness)
 
+		// Sets the color of an individual pixel
+		case MessageSetPixel:
+			var setPixel SetPixel
+			if err := json.Unmarshal(message, &setPixel); err != nil {
+				c.logger.Error("failed to parse set pixel message", zap.Error(err))
+				continue
+			}
+
+			actions <- rpc.NewSetPixel(setPixel.Index, setPixel.Color)
+			c.hub.broadcast <- NewSingleCurrentPixels(setPixel.Index, setPixel.Color)
+
 		// Handle any unknown messages
 		default:
 			c.logger.Warn("unknown message type", zap.Uint8("type", uint8(msg.Type)))
