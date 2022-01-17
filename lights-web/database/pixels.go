@@ -9,14 +9,11 @@ import (
 )
 
 // GetPixel retrieves a pixel by index in the database
-func (d *Database) GetPixel(index uint16) (Pixel, error) {
-	pixel := Pixel{
-		Index: 0,
-		Color: Color{
-			Red:   0,
-			Blue:  0,
-			Green: 0,
-		},
+func (d *Database) GetPixel(index uint16) (Color, error) {
+	color := Color{
+		Red:   0,
+		Green: 0,
+		Blue:  0,
 	}
 
 	// Encode the index for retrieval
@@ -38,25 +35,24 @@ func (d *Database) GetPixel(index uint16) (Pixel, error) {
 		}
 
 		// Extract the color byte values
-		pixel.Index = index
-		pixel.Color.Red = rawColor[0]
-		pixel.Color.Green = rawColor[1]
-		pixel.Color.Blue = rawColor[2]
+		color.Red = rawColor[0]
+		color.Green = rawColor[1]
+		color.Blue = rawColor[2]
 
 		return nil
 	})
 
-	return pixel, err
+	return color, err
 }
 
 // SetPixel sets a pixel in the database
-func (d *Database) SetPixel(pixel Pixel) error {
+func (d *Database) SetPixel(index uint16, color Color) error {
 	// Encode the index into the key
-	index := make([]byte, 2)
-	binary.LittleEndian.PutUint16(index, pixel.Index)
+	encoded := make([]byte, 2)
+	binary.LittleEndian.PutUint16(encoded, index)
 
 	return d.db.Update(func(txn *badger.Txn) error {
-		return txn.Set([]byte{'p', index[0], index[1]}, []byte{pixel.Color.Red, pixel.Color.Green, pixel.Color.Blue})
+		return txn.Set([]byte{'p', encoded[0], encoded[1]}, []byte{color.Red, color.Green, color.Blue})
 	})
 }
 

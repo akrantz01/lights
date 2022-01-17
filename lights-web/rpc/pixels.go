@@ -48,10 +48,7 @@ func (sp SetSinglePixel) Execute(ctx context.Context, db *database.Database, con
 	defer free()
 
 	// Save the color to the database
-	if err := db.SetPixel(database.Pixel{
-		Color: sp.Color,
-		Index: sp.Index,
-	}); err != nil {
+	if err := db.SetPixel(sp.Index, sp.Color); err != nil {
 		return err
 	}
 
