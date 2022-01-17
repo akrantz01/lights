@@ -4,6 +4,8 @@ import (
 	"encoding/binary"
 
 	"github.com/dgraph-io/badger/v3"
+
+	"github.com/akrantz01/lights/lights-web/util"
 )
 
 // GetPixel retrieves a pixel by index in the database
@@ -55,5 +57,29 @@ func (d *Database) SetPixel(pixel Pixel) error {
 
 	return d.db.Update(func(txn *badger.Txn) error {
 		return txn.Set([]byte{'p', index[0], index[1]}, []byte{pixel.Color.Red, pixel.Color.Green, pixel.Color.Blue})
+	})
+}
+
+// SetPixelRange sets a range of pixels to a given color
+func (d *Database) SetPixelRange(start uint16, end uint16, color Color) error {
+	// Get all the changed indexes
+	indexes := util.RangeToIndexes(start, end)
+
+	// Convert the color to its binary encoding
+	encodedColor := []byte{color.Red, color.Green, color.Blue}
+
+	return d.db.Update(func(txn *badger.Txn) error {
+		for _, i := range indexes {
+			// Encode the index for insertion
+			encoded := make([]byte, 2)
+			binary.LittleEndian.PutUint16(encoded, i)
+
+			// Set the value
+			if err := txn.Set([]byte{'p', encoded[0], encoded[1]}, encodedColor); err != nil {
+				return err
+			}
+		}
+
+		return nil
 	})
 }

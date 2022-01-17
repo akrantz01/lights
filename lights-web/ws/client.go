@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/akrantz01/lights/lights-web/rpc"
+	"github.com/akrantz01/lights/lights-web/util"
 )
 
 const (
@@ -126,6 +127,20 @@ func (c *Client) reader(actions chan rpc.Callable) {
 
 			actions <- rpc.NewSetPixel(setPixel.Index, setPixel.Color)
 			c.hub.broadcast <- NewSingleCurrentPixels(setPixel.Index, setPixel.Color)
+
+		// Sets the color of a range of pixels
+		case MessageSetRange:
+			var setRange SetPixelRange
+			if err := json.Unmarshal(message, &setRange); err != nil {
+				c.logger.Error("failed to parse set pixel range message", zap.Error(err))
+				continue
+			}
+
+			// Determine the range of all pixels modified
+			modified := util.RangeToIndexes(setRange.Start, setRange.End)
+
+			actions <- rpc.NewPixelRange(setRange.Start, setRange.End, setRange.Color)
+			c.hub.broadcast <- NewCurrentPixels(modified, setRange.Color)
 
 		// Handle any unknown messages
 		default:

@@ -27,6 +27,8 @@ const (
 	MessageCurrentPixels
 	// MessageSetPixel is used to set an individual light to a given color
 	MessageSetPixel
+	// MessageSetRange is used to set a range of pixels to a given color
+	MessageSetRange
 )
 
 // Message is used to determine the type of message to decode as
@@ -122,5 +124,12 @@ func NewCurrentPixels(indexes []uint16, color database.Color) CurrentPixels {
 // SetPixel is received when a client wishes to change the color of an individual pixel
 type SetPixel struct {
 	Index uint16         `json:"index"`
+	Color database.Color `json:"color"`
+}
+
+// SetPixelRange is received when a client wishes to change the color of a range of pixels
+type SetPixelRange struct {
+	Start uint16         `json:"start"`
+	End   uint16         `json:"end"`
 	Color database.Color `json:"color"`
 }
