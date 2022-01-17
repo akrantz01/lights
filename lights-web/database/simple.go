@@ -1,6 +1,8 @@
 package database
 
 import (
+	"encoding/binary"
+
 	"github.com/dgraph-io/badger/v3"
 )
 
@@ -46,8 +48,19 @@ func (d *Database) GetColor() (Color, error) {
 
 // SetColor stores the filled color set to the strip
 func (d *Database) SetColor(c Color) error {
+	encodedColor := []byte{c.Red, c.Green, c.Blue}
+
 	return d.db.Update(func(txn *badger.Txn) error {
-		return txn.Set([]byte("color"), []byte{c.Red, c.Green, c.Blue})
+		for i := uint16(0); i < d.length; i++ {
+			encoded := make([]byte, 2)
+			binary.LittleEndian.PutUint16(encoded, i)
+
+			if err := txn.Set([]byte{'p', encoded[0], encoded[1]}, encodedColor); err != nil {
+				return err
+			}
+		}
+
+		return txn.Set([]byte("color"), encodedColor)
 	})
 }
 
