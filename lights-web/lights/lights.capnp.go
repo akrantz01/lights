@@ -3,12 +3,13 @@
 package lights
 
 import (
+	context "context"
+	strconv "strconv"
+
 	capnp "capnproto.org/go/capnp/v3"
 	text "capnproto.org/go/capnp/v3/encoding/text"
 	schemas "capnproto.org/go/capnp/v3/schemas"
 	server "capnproto.org/go/capnp/v3/server"
-	context "context"
-	strconv "strconv"
 )
 
 type Color struct{ capnp.Struct }
@@ -378,6 +379,22 @@ func (c LightController) Show(ctx context.Context, params func(LightController_s
 	ans, release := c.Client.SendCall(ctx, s)
 	return LightController_show_Results_Future{Future: ans.Future()}, release
 }
+func (c LightController) SetAll(ctx context.Context, params func(LightController_setAll_Params) error) (LightController_setAll_Results_Future, capnp.ReleaseFunc) {
+	s := capnp.Send{
+		Method: capnp.Method{
+			InterfaceID:   0xb169ce07794d2b2f,
+			MethodID:      5,
+			InterfaceName: "lights_capnp/lights.capnp:LightController",
+			MethodName:    "setAll",
+		},
+	}
+	if params != nil {
+		s.ArgsSize = capnp.ObjectSize{DataSize: 0, PointerCount: 1}
+		s.PlaceArgs = func(s capnp.Struct) error { return params(LightController_setAll_Params{Struct: s}) }
+	}
+	ans, release := c.Client.SendCall(ctx, s)
+	return LightController_setAll_Results_Future{Future: ans.Future()}, release
+}
 
 func (c LightController) AddRef() LightController {
 	return LightController{
@@ -400,6 +417,8 @@ type LightController_Server interface {
 	Mode(context.Context, LightController_mode) error
 
 	Show(context.Context, LightController_show) error
+
+	SetAll(context.Context, LightController_setAll) error
 }
 
 // LightController_NewServer creates a new Server from an implementation of LightController_Server.
@@ -418,7 +437,7 @@ func LightController_ServerToClient(s LightController_Server, policy *server.Pol
 // This can be used to create a more complicated Server.
 func LightController_Methods(methods []server.Method, s LightController_Server) []server.Method {
 	if cap(methods) == 0 {
-		methods = make([]server.Method, 0, 5)
+		methods = make([]server.Method, 0, 6)
 	}
 
 	methods = append(methods, server.Method{
@@ -478,6 +497,18 @@ func LightController_Methods(methods []server.Method, s LightController_Server) 
 		},
 		Impl: func(ctx context.Context, call *server.Call) error {
 			return s.Show(ctx, LightController_show{call})
+		},
+	})
+
+	methods = append(methods, server.Method{
+		Method: capnp.Method{
+			InterfaceID:   0xb169ce07794d2b2f,
+			MethodID:      5,
+			InterfaceName: "lights_capnp/lights.capnp:LightController",
+			MethodName:    "setAll",
+		},
+		Impl: func(ctx context.Context, call *server.Call) error {
+			return s.SetAll(ctx, LightController_setAll{call})
 		},
 	})
 
@@ -567,6 +598,23 @@ func (c LightController_show) Args() LightController_show_Params {
 func (c LightController_show) AllocResults() (LightController_show_Results, error) {
 	r, err := c.Call.AllocResults(capnp.ObjectSize{DataSize: 0, PointerCount: 0})
 	return LightController_show_Results{Struct: r}, err
+}
+
+// LightController_setAll holds the state for a server call to LightController.setAll.
+// See server.Call for documentation.
+type LightController_setAll struct {
+	*server.Call
+}
+
+// Args returns the call's arguments.
+func (c LightController_setAll) Args() LightController_setAll_Params {
+	return LightController_setAll_Params{Struct: c.Call.Args()}
+}
+
+// AllocResults allocates the results struct.
+func (c LightController_setAll) AllocResults() (LightController_setAll_Results, error) {
+	r, err := c.Call.AllocResults(capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return LightController_setAll_Results{Struct: r}, err
 }
 
 type LightController_set_Params struct{ capnp.Struct }
@@ -1219,66 +1267,206 @@ func (p LightController_show_Results_Future) Struct() (LightController_show_Resu
 	return LightController_show_Results{s}, err
 }
 
-const schema_d91d0c9586c33e4f = "x\xda\x9cU]h\x1cU\x14>\xdf\xbd3;\x89$" +
-	"\xdd\\g\x8b\x18\x91\xa55\x85&\x9a\xb4\xd9X\x94D" +
-	"\xcc\xc64\xf4\x87,\xee\x04\xa5\xf8\x87L\x92q\xbbu" +
-	"v&\xceL\x8c\xf1A\xabb\x1f\x95\x0aA|,\xb6" +
-	"B}P\xe3\x0f\xc5`}\xf1E\xd1\xa8 \x06|\xa9" +
-	"\"yQ\xfc)\x82(\x9a:rgwv\xa6\x8d\xb5" +
-	"l\xdf\xee\xdcs\xcf=\xdf\xf9\xcew\xbf\xd9]dE" +
-	"6\xa8\xbe\x98!2&\xd5Lx\xef\xea\x1d\x9fN\x1f" +
-	";r\x94D\x1f\x88\x14\x8dh\xa8\x9f\xff\x08R\xc2?" +
-	"\xaf[.\xbf1r&\x1d\xd9\xc6\xdf\x96\x91\xef\xec\x0f" +
-	"\x1f8wh\xe8\x192\xfa\x10\x87\x04\xff\x1e\x04}\x07" +
-	"\x1f%\x84G~[\xdbX\xfa{\xe0\xb9T\xea\x04_" +
-	"\x91\xa9#\xd7T\x1f|\x8b\xbfp\x9c\x8cn \xbc\xfb" +
-	"\xce\x8f\x8e-u\xdc\xf8\x0dM@\xe3\xc0\xd0\x1e\xde\x0d" +
-	"}\x82kD\xfa\x18\x7f\x93\x10>iV~\xbd\xe1\xe5" +
-	"gO\xa6.Z\xadc\xd8w\xee\xf7C;G\xbe~" +
-	"-\x8d\xe1\xac\x0cA_\x8d0\xec\xba\xb9\xb4\xa8}^" +
-	"]&\xd1\xcd\x93B\x84\xa1\x9f\xf9\x14tD\x09\x17\xf8" +
-	">\xe8\x9f\xc8e\x98[\xffx`\xe1\x89\xf3\xef\\\x02" +
-	",:\xb6\xac0\xe8g\xe5R\x7f_\x91\xb0\x8e\xae\\" +
-	"\xaf\xfeqZ|\x96\x82e\xa8Q\x7fO-~\xb0\xd1" +
-	"\xfe\xe5\xc6*\x197\x01I\xb7[\xa1\x81hhL=" +
-	"(\x01\x96\xd4\x05BX\x18\xff\xe5\xa5w\xe7\xb7\xad\xa5" +
-	".9]\xbf\xe4\xd5\x93k\xeb\x0f\xb5\xf3oIt\xb3" +
-	"4t\xfd\x15\xf5/\xfd\x94*q\x9cPo#\x84\xf6" +
-	"\x89\x9fj\x99\xa5G\xd7\xebW\xa8L\xdeqJ}]" +
-	"\xd6x/\xaa\xb1\xf2\xd5\xf93_\xec-\xfc\xd08\x00" +
-	"y`k&biGf\x94\xfaC\xbbZ9\x1c\xf8" +
-	"\x0f\xcfd\xcc9gnW\xfdk`F~\x0cO\xca" +
-	"\x8fq\xd7\x09<\xd7\xb6-o`\xda\x93\x1b\x8e\xe5\xfb" +
-	"=S\x96\x9f\x9d\xb7\x03\xbf\x99\xae^9\xdd\xb7\x82\x9e" +
-	")+\xef_\x94\xd7Z\xd9\xb2\xe9if\xcd7\x14\xae" +
-	"\x10) \x12\x9d\x05\"\xa3\x8d\xc3\xc81\xe4m\xebq" +
-	"\xcbF\x86\x182\x92\x9b\x16\xa0\x1dv\x17z\xa6F\xad" +
-	"\x8b\xb1\xf1\xcd\x89e\xd7\xaf\x06U\xee:e\xc0\xe8\xe0" +
-	"JG\x18F0&\x86\x89\x8c\"\x871\xc9\xd0\x89\x7f" +
-	"B \x11\x828P \xd6\xc9.\x849p\"1\xd8" +
-	"Gd\xdc\xc2a\xecg\x18\xf5\xabN\xc5\xb6\xa0\x11\x83" +
-	"F\xc8{\xa6S\xb1\xb2v\xd5\x0f\xb0\x85P\xe6\x88\"" +
-	"[\xae\xa2\x99r\xde\xf4\xccZK\xf3\xa9\xb9\xb3V\x9c" +
-	"\x97f\xb8/a8+\xcf \x9b\xe8\x93\x80l\x0a\x9d" +
-	"r\xa5*\xf0$q9\xae\x125\xb5\x8b\xd8g\xc4\xf1" +
-	"\xed\xc4\xc4\xf3\x1a\x12\xd9\"~#b\xb1\x8f\x98\xa8i" +
-	"`M\xf3A\xec\\\xc2\xbc\x9f\x98\xb8O\x03o\x9a\x02" +
-	"\xe2\x07*J2oL\x83\xd2\xb4\x12\xc4\xe6$\xf6\xc8" +
-	"X\xaf\xa6\xf9VPD\xf6\x91\xaam\x17\x11\xc6r#" +
-	"\xee\xfb\xc5z\xc7Ed%\xa9E\x94\x81\xffS\xc7\xb8" +
-	"k\xbb\x1e5\xa4\xd1\xa0o\xe2\xdaD\x19\x02\xc8I\xaf" +
-	"\x12\x07\xe4\xe6^\x0e\xa3\xcc \x18\xcb\x81\x11\x89\x92\xdc" +
-	"\xdc\xcfa\xdc\xc3\x00/\x961*\xcd\xd5\xf4\xd5H;" +
-	"\x9a\xea&i+\x97\x93\xb6\xeb\x0cD\"\x8cf\xae\x10" +
-	"\xd5\xf1\xf6\xcaW\xd6\xc3a\xec\x96M4\xf0\xf6o'" +
-	"2vr\x18\xb72\xe4\xfd\xc0\xf4\x82X\xc7\x9a\xe5\xcc" +
-	"\xc6\xebV\xb0\xca\x09l\xc6\xca.M\x1c\x9d\x1b.\xb9" +
-	"\xb3\x96\xe4\xb9-B\"\x0aR\x88\xa2\xfd.\xa2\xfcc" +
-	"\xf3\xd6\xbc\xf5t\xd5\xf1\x03\xd3\x09Z\xb5\xa7\xb2\x99\x8d" +
-	"\xd4\xdf\xd6\x1c_\xef\xc1\xa4\xc9\xe6\xf8\x06\x0b\x8d'|" +
-	";C8\xd7\xe0\x8d\x88\xd0\x95\x18>\x01]\x84\xfc\x8c" +
-	"\x94\x04\xba\x92\xbfK}\xbfeV\xfe\xe3]\xa6\x9d\xef" +
-	"2e\xfe\x0d\x00\x00\xff\xffU^S\xe7"
+type LightController_setAll_Params struct{ capnp.Struct }
+
+// LightController_setAll_Params_TypeID is the unique identifier for the type LightController_setAll_Params.
+const LightController_setAll_Params_TypeID = 0xfe9f6757811fca23
+
+func NewLightController_setAll_Params(s *capnp.Segment) (LightController_setAll_Params, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return LightController_setAll_Params{st}, err
+}
+
+func NewRootLightController_setAll_Params(s *capnp.Segment) (LightController_setAll_Params, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return LightController_setAll_Params{st}, err
+}
+
+func ReadRootLightController_setAll_Params(msg *capnp.Message) (LightController_setAll_Params, error) {
+	root, err := msg.Root()
+	return LightController_setAll_Params{root.Struct()}, err
+}
+
+func (s LightController_setAll_Params) String() string {
+	str, _ := text.Marshal(0xfe9f6757811fca23, s.Struct)
+	return str
+}
+
+func (s LightController_setAll_Params) Colors() (Color_List, error) {
+	p, err := s.Struct.Ptr(0)
+	return Color_List{List: p.List()}, err
+}
+
+func (s LightController_setAll_Params) HasColors() bool {
+	return s.Struct.HasPtr(0)
+}
+
+func (s LightController_setAll_Params) SetColors(v Color_List) error {
+	return s.Struct.SetPtr(0, v.List.ToPtr())
+}
+
+// NewColors sets the colors field to a newly
+// allocated Color_List, preferring placement in s's segment.
+func (s LightController_setAll_Params) NewColors(n int32) (Color_List, error) {
+	l, err := NewColor_List(s.Struct.Segment(), n)
+	if err != nil {
+		return Color_List{}, err
+	}
+	err = s.Struct.SetPtr(0, l.List.ToPtr())
+	return l, err
+}
+
+// LightController_setAll_Params_List is a list of LightController_setAll_Params.
+type LightController_setAll_Params_List struct{ capnp.List }
+
+// NewLightController_setAll_Params creates a new list of LightController_setAll_Params.
+func NewLightController_setAll_Params_List(s *capnp.Segment, sz int32) (LightController_setAll_Params_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1}, sz)
+	return LightController_setAll_Params_List{l}, err
+}
+
+func (s LightController_setAll_Params_List) At(i int) LightController_setAll_Params {
+	return LightController_setAll_Params{s.List.Struct(i)}
+}
+
+func (s LightController_setAll_Params_List) Set(i int, v LightController_setAll_Params) error {
+	return s.List.SetStruct(i, v.Struct)
+}
+
+func (s LightController_setAll_Params_List) String() string {
+	str, _ := text.MarshalList(0xfe9f6757811fca23, s.List)
+	return str
+}
+
+// LightController_setAll_Params_Future is a wrapper for a LightController_setAll_Params promised by a client call.
+type LightController_setAll_Params_Future struct{ *capnp.Future }
+
+func (p LightController_setAll_Params_Future) Struct() (LightController_setAll_Params, error) {
+	s, err := p.Future.Struct()
+	return LightController_setAll_Params{s}, err
+}
+
+type LightController_setAll_Results struct{ capnp.Struct }
+
+// LightController_setAll_Results_TypeID is the unique identifier for the type LightController_setAll_Results.
+const LightController_setAll_Results_TypeID = 0x8d8b9bdeab971ab3
+
+func NewLightController_setAll_Results(s *capnp.Segment) (LightController_setAll_Results, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return LightController_setAll_Results{st}, err
+}
+
+func NewRootLightController_setAll_Results(s *capnp.Segment) (LightController_setAll_Results, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return LightController_setAll_Results{st}, err
+}
+
+func ReadRootLightController_setAll_Results(msg *capnp.Message) (LightController_setAll_Results, error) {
+	root, err := msg.Root()
+	return LightController_setAll_Results{root.Struct()}, err
+}
+
+func (s LightController_setAll_Results) String() string {
+	str, _ := text.Marshal(0x8d8b9bdeab971ab3, s.Struct)
+	return str
+}
+
+// LightController_setAll_Results_List is a list of LightController_setAll_Results.
+type LightController_setAll_Results_List struct{ capnp.List }
+
+// NewLightController_setAll_Results creates a new list of LightController_setAll_Results.
+func NewLightController_setAll_Results_List(s *capnp.Segment, sz int32) (LightController_setAll_Results_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0}, sz)
+	return LightController_setAll_Results_List{l}, err
+}
+
+func (s LightController_setAll_Results_List) At(i int) LightController_setAll_Results {
+	return LightController_setAll_Results{s.List.Struct(i)}
+}
+
+func (s LightController_setAll_Results_List) Set(i int, v LightController_setAll_Results) error {
+	return s.List.SetStruct(i, v.Struct)
+}
+
+func (s LightController_setAll_Results_List) String() string {
+	str, _ := text.MarshalList(0x8d8b9bdeab971ab3, s.List)
+	return str
+}
+
+// LightController_setAll_Results_Future is a wrapper for a LightController_setAll_Results promised by a client call.
+type LightController_setAll_Results_Future struct{ *capnp.Future }
+
+func (p LightController_setAll_Results_Future) Struct() (LightController_setAll_Results, error) {
+	s, err := p.Future.Struct()
+	return LightController_setAll_Results{s}, err
+}
+
+const schema_d91d0c9586c33e4f = "x\xda\x9cUoh\x1c\xd5\x17\xbd\xe7\xbd\xf9\x93\xfcH" +
+	"\xb2y\xbfM\xd1D\xcab\x1b\xa1\x89&m6\x82\x9a" +
+	"Xw5\x0d6\xa5\xc1\x9d\xd0\x12\xf0\x0f2I\xc6\xed" +
+	"\xd6\xc9n\x9c\x99\x18#\xa8\x8d\xc5\x8aH\x84\x0a\xa1\x14" +
+	"\x11\x11\xab\xa0\x82\x1a\xab\x14\x83\x08*\x82V\xab\x82\x18" +
+	"\xf0K\x14\xc9\x17E\xb4\x08\xa2h\xec\xc8\x9b\xdd\xd9\x99" +
+	"6j\xdc~\xdby\xf7\xdew\xcf;\xf7\xdc\xb3;\x0e" +
+	"\xb3,\xebQ3:\x91\xb1O\xd5\xfc\xfdg\xae\xffx" +
+	"\xec\xc8\xc1C$:A\xa4\xe8D\xbd\x8f\xf0\xefA\x8a" +
+	"\xff\xdb%\x8b\xb9W\xfaO\xc5#\xb3\xfcu\x19\xf9\xc6" +
+	"~\xe7\xb6\x95\xd1\xde92:\x11\x86\x0a\xfc[\x10\x92" +
+	"\x0f\xf0\x0c\xc1?\xf8\xf3\xf2\xda\xc2\x1f\xdd\x87c\xa5O" +
+	"\xf3%Yz\xb2\xed\xd8\xcb+O=>\x1f\x8b\xcc\xf3" +
+	"\xd32\xd2\xff\xbf\xc2\xed\xaf\xf1'\x8e\x92\xd1\x06\xf8\xb7" +
+	"\xdc\xf0\xfe\x91\x85\x86\xcd_\xd1 t\x0e\xf4\xce\xf16" +
+	"$\x8fr\x9d(9\xcf_%\xf8\xf7\x9b\xf9\x9f.;" +
+	"\xf6\xf0\x89\xd8E\xadJ\x80\xee\xe6\x95_F\xb7\xf5\x7f" +
+	"\xf9B\x1c]\xbd\x0c!\xd9\xaaHt\xdb\xaf\x1c\x9e\xd5" +
+	"?-,\x92h\xe3Q#B\xefu\xca\x08\x92\xc3A" +
+	"\xc1\x90\xf2(\x92;U\x9d\xc8oY\xfd\xb0{\xe6\xbe" +
+	"\xb3'/\x00\x16\xa4]\xa12${dZ\xb2K\x95" +
+	"\xb0\x0e-\xb5\xaa\xbf\xbe(>\x89\xc1\xfa@\x0d^\xfe" +
+	"\xe0\xec\xdbk\xf5\x9f\xaf\x9d!c+\x10\xbdv\x13t" +
+	"\x10\xf5\xbe\xa9\xee\x91\x00\xdfUg\x08~z\xe0\xc7'" +
+	"\xdf\x98\xbe|9v\xc9f-\xb8\xe4\xb9\x13\xcb\xabw" +
+	"\xd4\xf3\xafI\xb4\xb18\xf4d\xa3\xf6{\xb2U\x938" +
+	"6i\xd7\x10|\xfb\xd9\x1f&\xb5\x85\xbbW\xcbW\xa8" +
+	",\xe0G{I\xf6\xe8\xd0d\x8f\xa5/\xce\x9e\xfal" +
+	"W\xfa\xbbJ\x02d\xc2cZ\xc0\xd2qM\xb2\xb4\xf5" +
+	"tjn4\xff\xcc\xb9x\xc2[\xda{2\xe1#-" +
+	"C]\xbe]\xc8\x1f\xf0\xdc;\xc75s\xaa8\xb5\xbd" +
+	"\xfc\xd5=.?\xfa\xf6\xca\x8f\x81R\xd1sJ\xb6m" +
+	"9\xddc\x8e<(Z\xae\xdb>b\xb9\x89i\xdbs" +
+	"\xab\xe5\xea\xc6\xe5\xae\xe5\xb5\x8fX)\xf7\xbc\xba\xda\xda" +
+	"\xe6LG7']C\xe1\x0a\x91\x02\"\xd1\x98&2" +
+	"\xea8\x8c\x16\x86\x94m\xddk\xd9\xd0\x88A\x93\xe4\xd5" +
+	"\x00\xed@i\xa6}$c\xd5\x8c\xcd\xb5\xbc\x1bm[" +
+	"\xd2!+\x89\xaa\xb5|}m\xae\xe4\x16\xbc\x02/\x15" +
+	"s\x80\xd1\xc0\x95\x06\xdf\x0f\x9e0\xd8Gdd9\x8c" +
+	"\xbd\x0c\x8d8\xe7\x03\x91\xca\xc4P\x9aX#\xfb\xd3o" +
+	"\x01'\x12=\x9dD\xc6U\x1c\xc6n\x86\x8c[(\xe6" +
+	"m\x0b:1\xe8\x84\x94c\x16\xf3V\xc2.\xb8\x1e\x9a" +
+	"\x089\x8e \xd2t\x11D\xe4R\xa6cN\xd64\xdb" +
+	"\xc9\xd2\x84\x15\xd6\xc5\xa7\xd3\x19M'!s\x90\x88\xc4" +
+	"O@\"\x86N\xd9\xa8\x0b\x1cI\xdc\xa5\\\x954W" +
+	"\x16\x03\xa1\xbd\x89\xc5-\xc4\xc4\xf3:\xa2\x9d@\xb8\x80" +
+	"\xe2x'11\xaf\x83U=\x0f\xa1a\x8a\xb9[\x89" +
+	"\x89Y\x1d\xbc\xea8\x08\xb7_L\xca:S\x87R\xf5" +
+	")\x84\x9e(\xf6\xcb\xd8\x90\x0e\xb5\xbab\x08]Q\xec" +
+	"\xec#&zt\xdd\xb5\xbc,\x12w\x15l;\x0b?" +
+	"\x941q\xd7\xcd\x96\xd9\xc8\"!\x09\xcf\"S\xd6Q" +
+	"\x169\xe0\xdf$4P\xb2K\x0eU\xf4S\xe1x\xf0" +
+	"\xff\x91|\x04\xd0\"\xddR\x0c\xc9\xc3]\x1cF\x8eA" +
+	"0\xd6\x02F$\x86\xe5\xe1n\x0ec\x1f\x03\x9cpO" +
+	"\x90\xaf\xfe\x1a\xbb\x98\xdd\x09F\xbfnw\x94\x7f\xd2\x7f" +
+	"\xa9\xd8\x1d(5\x10\x86BT\xc6\xdb!\xd7\xb8\x9d\xc3" +
+	"\xd8!\x1fQ\xc1\xdb\xb5\x85\xc8\xd8\xc6a\\\xcd\x90r" +
+	"=\xd3\xf1B\xb1\xebVq\"\xfc]\x0bV9\x8a\xf5" +
+	"X\xd9\x85\x85\x99\xa9\xbe\xe1\xd2\x84%y\xae\x0b\x90\x88" +
+	"\xb4T\xab\xa8\xbf\x89(u\xcf\xb45m=T(\xba" +
+	"\x9eY\xf4j\xf5\xbf\x9c\x99\x08V\xa4\xae:\xbe\x8e=" +
+	"\xd1#\xab\xe3\xebIW\xf6\xfcZ\x06\x7f\xaa\xc2\x1b\x11" +
+	"\xa19\xfa\xcb!\xa0\x99\x90\x1a\x97\x92@s\xf4\xffV" +
+	">\xaf\x99\x95\xbfY\xde\xb8\xb5n\xd4\xe6\xbf{e." +
+	"\xe8C\xf1F}\x95F\xed\x0c\x99\xa0\x91\x1bZ\xd8\xf9" +
+	"\x0d\x9b\x08\x7f\x05\x00\x00\xff\xff\xb1}\xa66"
 
 func init() {
 	schemas.Register(schema_d91d0c9586c33e4f,
@@ -1286,6 +1474,7 @@ func init() {
 		0x80b73bae50b117f8,
 		0x813357de5bbe6ce0,
 		0x832efb95fcd6f26a,
+		0x8d8b9bdeab971ab3,
 		0x918e03b05c690a3b,
 		0xa482971bef67617a,
 		0xa6d53b2857f5de47,
@@ -1296,5 +1485,6 @@ func init() {
 		0xd62175b492ee4332,
 		0xdf03095de4d6a4a3,
 		0xe46b95066deca16c,
-		0xe93244cfb7f0d3ba)
+		0xe93244cfb7f0d3ba,
+		0xfe9f6757811fca23)
 }

@@ -62,12 +62,14 @@ def validate_range(_ctx, _param, value):
         raise click.BadParameter("format must be 'start,end'")
 
 
-def validate_color(_ctx, _param, value):
+def validate_color(ctx, param, value):
     if value is None:
         return value
     elif isinstance(value, dict):
         if "r" in value and "g" in value and "b" in value:
             return value
+    elif isinstance(value, tuple):
+        return [validate_color(ctx, param, c) for c in value]
 
     try:
         [r, g, b] = value.split(",")
@@ -162,6 +164,21 @@ def set(
         position["list"] = position_list
 
     obj.set(position, color).wait()
+
+
+@main.command(
+    name="set-all",
+    help="Set the colors of all the pixels. The color must be in the format 'r,g,b'.",
+)
+@click.argument(
+    "color",
+    required=True,
+    callback=validate_color,
+    nargs=-1,
+)
+@click.pass_obj
+def set_all(obj: lights.LightController, color: t.List[t.Dict[str, int]]):
+    obj.setAll(color).wait()
 
 
 @main.command(

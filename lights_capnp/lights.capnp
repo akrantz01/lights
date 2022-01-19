@@ -52,4 +52,7 @@ interface LightController @0xb169ce07794d2b2f {
 
   show @4 ();
   # Write any queued changes to the strip. This is a no-op if the mode is set to instant.
+
+  setAll @5 (colors: List(Color));
+  # Set the color of all pixels at the same time. The length of `colors` must be the same as the number of pixels.
 }

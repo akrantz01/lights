@@ -32,12 +32,6 @@ func (ap ApplyPreset) Execute(ctx context.Context, db *database.Database, contro
 		return err
 	}
 
-	// Group the colors into arbitrary sets
-	colors := make(map[database.Color][]uint16)
-	for i, color := range preset.Pixels {
-		colors[color] = append(colors[color], uint16(i))
-	}
-
 	// Switch to queued mode
 	queuedResult, free := controller.Mode(ctx, func(params lights.LightController_mode_Params) error {
 		params.SetMode(lights.Mode_queue)
@@ -46,10 +40,17 @@ func (ap ApplyPreset) Execute(ctx context.Context, db *database.Database, contro
 	<-queuedResult.Done()
 	free()
 
-	// Change all the colors
-	for color, indexes := range colors {
-		result, free := controller.Set(ctx, func(params lights.LightController_set_Params) error {
-			c, err := params.NewColor()
+	// Set all the pixels
+	setAllResult, free := controller.SetAll(ctx, func(params lights.LightController_setAll_Params) error {
+		// Create the new list
+		list, err := params.NewColors(int32(len(preset.Pixels)))
+		if err != nil {
+			return err
+		}
+
+		// Fill the list
+		for i, color := range preset.Pixels {
+			c, err := lights.NewColor(list.Segment())
 			if err != nil {
 				return err
 			}
@@ -57,29 +58,22 @@ func (ap ApplyPreset) Execute(ctx context.Context, db *database.Database, contro
 			c.SetG(color.Green)
 			c.SetB(color.Blue)
 
-			// Set the indexes
-			position, err := params.NewPosition()
-			if err != nil {
+			if err := list.Set(i, c); err != nil {
 				return err
 			}
-			list, err := position.NewList(int32(len(indexes)))
-			if err != nil {
-				return err
-			}
-			for i, v := range indexes {
-				list.Set(i, v)
-			}
-
-			return nil
-		})
-
-		// Save changed pixels
-		if err := db.SetArbitraryPixels(indexes, color); err != nil {
-			return err
 		}
 
-		<-result.Done()
-		free()
+		return nil
+	})
+	<-setAllResult.Done()
+	free()
+
+	// Save the pixel changes
+	if err := db.SetAllPixels(preset.Pixels); err != nil {
+		return err
+	}
+	if err := db.SetPixelMode(database.PixelModeIndividual); err != nil {
+		return err
 	}
 
 	// Change the brightness

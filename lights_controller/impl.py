@@ -1,6 +1,7 @@
 import board
 import functools
 import neopixel
+from typing import List
 
 from lights_capnp import lights
 from . import SETTINGS
@@ -54,6 +55,11 @@ class LightControllerImpl(lights.LightController.Server):
             for p in position.list:
                 pixels[p] = color
             logger.info(f"set pixels {position.list} to {color}")
+
+    def setAll(self, colors: List[lights.Color], **_):
+        for i, color in enumerate(colors):
+            pixels[i] = color_to_tuple(color)
+        logger.info("set all pixels to specified colors")
 
     def fill(self, color: lights.Color, **_):
         color = color_to_tuple(color)

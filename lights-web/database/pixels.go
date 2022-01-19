@@ -80,3 +80,21 @@ func (d *Database) SetArbitraryPixels(indexes []uint16, color Color) error {
 		return nil
 	})
 }
+
+// SetAllPixels sets the color of every pixel in the database from the given array
+func (d *Database) SetAllPixels(colors []Color) error {
+	return d.db.Update(func(txn *badger.Txn) error {
+		for i, color := range colors {
+			// Encode the index for insertion
+			encoded := make([]byte, 2)
+			binary.LittleEndian.PutUint16(encoded, uint16(i))
+
+			// Set the value
+			if err := txn.Set([]byte{'p', encoded[0], encoded[1]}, []byte{color.Red, color.Green, color.Blue}); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+}
