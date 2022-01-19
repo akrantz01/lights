@@ -34,6 +34,10 @@ const (
 	// MessageCurrentPixels notifies clients of the current individual pixel colors when the strip is in pixel
 	// modification mode.
 	MessageCurrentPixels
+	// MessagePresetUsed notifies clients that a preset was applied to the strip
+	MessagePresetUsed
+	// MessageApplyPreset displays a preset onto the strip
+	MessageApplyPreset
 )
 
 // Message is used to determine the type of message to decode as
@@ -156,4 +160,22 @@ func NewCurrentPixels(pixels []database.Color) CurrentPixels {
 		Type:   MessageCurrentPixels,
 		Pixels: pixels,
 	}
+}
+
+// PresetUsed is used to broadcast the name of the preset that was applied
+type PresetUsed struct {
+	Type MessageType `json:"type"`
+	Name string      `json:"name"`
+}
+
+func NewPresetUsed(name string) PresetUsed {
+	return PresetUsed{
+		Type: MessagePresetUsed,
+		Name: name,
+	}
+}
+
+// ApplyPreset is received when a client wishes to apply a preset to the strip
+type ApplyPreset struct {
+	Name string `json:"name"`
 }

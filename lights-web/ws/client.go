@@ -142,6 +142,7 @@ func (c *Client) reader(actions chan rpc.Callable) {
 			actions <- rpc.NewPixelRange(setRange.Start, setRange.End, setRange.Color)
 			c.hub.broadcast <- NewModifiedPixels(modified, setRange.Color)
 
+		// Sets an arbitrary set of pixels to the same color
 		case MessageSetArbitrary:
 			var setArbitrary SetArbitraryPixels
 			if err := json.Unmarshal(message, &setArbitrary); err != nil {
@@ -151,6 +152,17 @@ func (c *Client) reader(actions chan rpc.Callable) {
 
 			actions <- rpc.NewArbitraryPixels(setArbitrary.Indexes, setArbitrary.Color)
 			c.hub.broadcast <- NewModifiedPixels(setArbitrary.Indexes, setArbitrary.Color)
+
+		// Apply a preset to the strip
+		case MessageApplyPreset:
+			var applyPreset ApplyPreset
+			if err := json.Unmarshal(message, &applyPreset); err != nil {
+				c.logger.Error("failed to parse apply preset message", zap.Error(err))
+				continue
+			}
+
+			actions <- rpc.NewApplyPreset(applyPreset.Name)
+			c.hub.broadcast <- NewPresetUsed(applyPreset.Name)
 
 		// Handle any unknown messages
 		default:
