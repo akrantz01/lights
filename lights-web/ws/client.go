@@ -150,6 +150,11 @@ func (c *Client) reader(actions chan rpc.Callable) {
 				continue
 			}
 
+			if len(setArbitrary.Indexes) == 0 || setArbitrary.Indexes == nil {
+				c.logger.Warn("no indexes to set")
+				continue
+			}
+
 			actions <- rpc.NewArbitraryPixels(setArbitrary.Indexes, setArbitrary.Color)
 			c.hub.broadcast <- NewModifiedPixels(setArbitrary.Indexes, setArbitrary.Color)
 
