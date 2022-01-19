@@ -72,12 +72,7 @@ func (l *RequestLoggerEntry) Write(status, bytes int, headers http.Header, elaps
 		logger.Info("upgraded to websocket connection")
 	} else {
 		logFunc := logLevelForStatus(logger, status)
-		logFunc(
-			"finished processing request",
-			zap.Int("status", status),
-			zap.Int("bytes", bytes),
-			zap.Float64("latency", latency),
-		)
+		logFunc("finished processing request")
 	}
 
 }

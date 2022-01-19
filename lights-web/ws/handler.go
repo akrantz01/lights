@@ -8,11 +8,12 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/akrantz01/lights/lights-web/database"
+	"github.com/akrantz01/lights/lights-web/handlers"
 	"github.com/akrantz01/lights/lights-web/rpc"
 )
 
 // Handler initiates the websocket connection and starts the client
-func Handler(hub *Hub, stripLength uint16) func(w http.ResponseWriter, r *http.Request) {
+func Handler(hub *Hub) func(w http.ResponseWriter, r *http.Request) {
 	upgrader := websocket.Upgrader{
 		ReadBufferSize:    1024,
 		WriteBufferSize:   1024,
@@ -43,7 +44,8 @@ func Handler(hub *Hub, stripLength uint16) func(w http.ResponseWriter, r *http.R
 		go client.writer()
 
 		// Send configuration information
-		client.send <- NewConfiguration(stripLength)
+		length := handlers.GetStripLength(r.Context())
+		client.send <- NewConfiguration(length)
 
 		// Get the current status for state and brightness
 		brightness, err := db.GetBrightness()

@@ -10,6 +10,8 @@ import (
 
 const databaseContextKey = "badger-database-key"
 
+var ErrNotFound = badger.ErrKeyNotFound
+
 type Database struct {
 	db     *badger.DB
 	length uint16

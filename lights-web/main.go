@@ -14,6 +14,8 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/akrantz01/lights/lights-web/database"
+	"github.com/akrantz01/lights/lights-web/handlers"
+	"github.com/akrantz01/lights/lights-web/handlers/presets"
 	"github.com/akrantz01/lights/lights-web/lights"
 	"github.com/akrantz01/lights/lights-web/logging"
 	"github.com/akrantz01/lights/lights-web/rpc"
@@ -60,9 +62,11 @@ func main() {
 	r.Use(middleware.Heartbeat("/ping"))
 	r.Use(database.WithDatabase(db))
 	r.Use(rpc.WithActions(actions))
+	r.Use(handlers.WithRequestContext(config.StripLength))
 
 	// Register routes
-	r.Get("/ws", ws.Handler(hub, config.StripLength))
+	r.Get("/ws", ws.Handler(hub))
+	r.Route("/presets", presets.Router)
 
 	serverCtx, serverStopCtx := context.WithCancel(context.Background())
 	server := &http.Server{
