@@ -1,16 +1,10 @@
-import board
-import functools
-import neopixel
 from typing import List
 
 from lights_capnp import lights
-from . import SETTINGS
+from . import pixels
 from .logger import get as get_logger
 
 logger = get_logger("server")
-
-pixels = neopixel.NeoPixel(board.D18, SETTINGS.led_count)
-logger.info(f"using strip with {SETTINGS.led_count} NeoPixels")
 
 
 def clamp(value: int, lower: int, upper: int):
@@ -21,60 +15,40 @@ def clamp(value: int, lower: int, upper: int):
     return value
 
 
-def color_to_tuple(color: lights.Color):
-    color_clamp = functools.partial(clamp, lower=0, upper=255)
-    r = color_clamp(color.r)
-    g = color_clamp(color.g)
-    b = color_clamp(color.b)
-    return r, g, b
-
-
 class LightControllerImpl(lights.LightController.Server):
     def set(self, position: lights.Position, color: lights.Color, **_):
-        color = color_to_tuple(color)
-
         position_type = position.which()
         if position_type == "single":
-            pixels[position.single] = color
-            logger.info(f"set pixel {position.single} to {color}")
+            pixels.change(position.single, color.r, color.g, color.b)
         elif position_type == "range":
-            start = position.range.start
-            end = position.range.end
+            offset = -1 if position.range.start > position.range.end else 1
+            seq = range(position.range.start, position.range.end + offset, offset)
 
-            if start > end:
-                r = range(start, end - 1, -1)
-            else:
-                r = range(start, end + 1)
-
-            for p in r:
-                pixels[p] = color
-            logger.info(
-                f"set pixels in range [{position.range.start}, {position.range.end}] to {color}"
-            )
+            for p in seq:
+                pixels.change(p, color.r, color.g, color.b)
         elif position_type == "list":
             for p in position.list:
-                pixels[p] = color
-            logger.info(f"set pixels {position.list} to {color}")
+                pixels.change(p, color.r, color.g, color.b)
+
+        logger.info(f"set pixels to {(color.r, color.g, color.b)}")
 
     def setAll(self, colors: List[lights.Color], **_):
         for i, color in enumerate(colors):
-            pixels[i] = color_to_tuple(color)
+            pixels.change(i, color.r, color.g, color.b)
         logger.info("set all pixels to specified colors")
 
     def fill(self, color: lights.Color, **_):
-        color = color_to_tuple(color)
-        pixels.fill(color)
+        pixels.fill(color.r, color.b, color.g)
         logger.info(f"set all pixels to {color}")
 
     def brightness(self, level: int, **_):
-        pixels.brightness = clamp(level, 0, 100) / 100
-        logger.info(f"set pixel brightness to {pixels.brightness}")
+        pixels.brightness(level)
+        logger.info(f"set pixel brightness to {level}")
 
     def mode(self, mode: lights.Mode, **_):
-        pixels.auto_write = mode == lights.Mode.instant
+        pixels.mode(mode == lights.Mode.instant)
         logger.info(f"changed write mode to '{mode}'")
 
     def show(self, **_):
-        if not pixels.auto_write:
-            pixels.show()
-            logger.info("wrote any queued changes to pixels")
+        pixels.show()
+        logger.info("wrote queued changes")
