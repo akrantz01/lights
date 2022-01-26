@@ -1,9 +1,8 @@
 from queue import Empty, SimpleQueue
 from threading import Thread
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
-if TYPE_CHECKING:
-    from .animation import Animation
+from .animation import Animation
 
 _queue = SimpleQueue()
 
@@ -15,14 +14,15 @@ class Animator(Thread):
 
         self.running = True
         self.animating = False
-        self.item: Optional["Animator"] = None
+        self.item: Optional[Animation] = None
 
     def run(self) -> None:
         while self.running:
             if self.item is None:
                 # If we don't have an animation, block until we have one
                 try:
-                    self.item = _queue.get(block=False, timeout=10)
+                    name = _queue.get(block=False, timeout=10)
+                    self.load(name)
                 except Empty:
                     pass
             else:
@@ -31,17 +31,31 @@ class Animator(Thread):
                     self.item.entrypoint()
 
                     # Attempt to fetch a newer animation w/o blocking
-                    self.item = _queue.get(block=False)
+                    name = _queue.get(block=False)
+                    self.load(name)
                 except (AttributeError, Empty):
                     pass
 
     @staticmethod
-    def queue(animation: "Animation"):
+    def queue(name: str):
         """
         Attempt to load and queue an animation
-        :param animation: the animation to load
+        :param name: the animation to load
+        :return: whether it could be loaded
         """
-        _queue.put(animation)
+        if not Animation.exists(name):
+            return False
+
+        _queue.put(name)
+        return True
+
+    def load(self, name: str):
+        """
+        Load the animation from disk
+        :param name: name of the module
+        :return: the loaded animation
+        """
+        self.item = Animation.load(name)
 
     def pause(self):
         """

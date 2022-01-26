@@ -56,11 +56,9 @@ class LightControllerImpl(lights.LightController.Server):
         logger.info("wrote queued changes")
 
     def animate(self, name: str, **_):
-        try:
-            animation = Animation.load(name)
-            ANIMATOR.queue(animation)
+        if ANIMATOR.queue(name):
             logger.info(f"started animation '{name}'")
-        except FileNotFoundError:
+        else:
             logger.warn(f"attempted to load nonexistent animation '{name}'")
 
     def stopAnimation(self, **_):

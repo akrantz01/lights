@@ -53,6 +53,15 @@ class Animation(object):
         return Animation(store, module)
 
     @staticmethod
+    def exists(name: str) -> bool:
+        """
+        Determines if the pre-compiled module exists on disk
+        :param name: name of the module
+        :return: a runnable module
+        """
+        return SETTINGS.animations_path.joinpath(name).exists()
+
+    @staticmethod
     def remove(name: str):
         """
         Remove a compiled module from disk
