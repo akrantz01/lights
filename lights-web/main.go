@@ -15,6 +15,7 @@ import (
 
 	"github.com/akrantz01/lights/lights-web/database"
 	"github.com/akrantz01/lights/lights-web/handlers"
+	"github.com/akrantz01/lights/lights-web/handlers/animations"
 	"github.com/akrantz01/lights/lights-web/handlers/presets"
 	"github.com/akrantz01/lights/lights-web/lights"
 	"github.com/akrantz01/lights/lights-web/logging"
@@ -67,6 +68,7 @@ func main() {
 	// Register routes
 	r.Get("/ws", ws.Handler(hub))
 	r.Route("/presets", presets.Router)
+	r.Route("/animations", animations.Router)
 
 	serverCtx, serverStopCtx := context.WithCancel(context.Background())
 	server := &http.Server{

@@ -69,3 +69,80 @@ func (sa StopAnimation) Execute(ctx context.Context, db *database.Database, cont
 
 	return nil
 }
+
+// AddAnimation registers an animation with the controller
+type AddAnimation struct {
+	Name     string
+	Wasm     []byte
+	Response chan bool
+}
+
+func NewAddAnimation(name string, wasm []byte) (AddAnimation, chan bool) {
+	success := make(chan bool)
+	return AddAnimation{
+		Name:     name,
+		Wasm:     wasm,
+		Response: success,
+	}, success
+}
+
+func (aa AddAnimation) Type() string {
+	return "add-animation"
+}
+
+func (aa AddAnimation) Execute(ctx context.Context, db *database.Database, controller lights.LightController) error {
+	// Add the animation
+	result, free := controller.RegisterAnimation(ctx, func(params lights.LightController_registerAnimation_Params) error {
+		if err := params.SetName(aa.Name); err != nil {
+			return err
+		}
+		return params.SetAnimation(aa.Wasm)
+	})
+	defer free()
+
+	// Send back success status
+	<-result.Done()
+	data, err := result.Struct()
+	if err != nil {
+		return err
+	}
+	aa.Response <- data.Success()
+
+	// Add the animation to the database when successful
+	if data.Success() {
+		return db.AddAnimation(aa.Name)
+	}
+	return nil
+}
+
+// RemoveAnimation deletes an animation from the controller
+type RemoveAnimation struct {
+	Name string
+}
+
+func NewRemoveAnimation(name string) RemoveAnimation {
+	return RemoveAnimation{
+		Name: name,
+	}
+}
+
+func (ra RemoveAnimation) Type() string {
+	return "remove-animation"
+}
+
+func (ra RemoveAnimation) Execute(ctx context.Context, db *database.Database, controller lights.LightController) error {
+	// Remove the animation
+	result, free := controller.UnregisterAnimation(ctx, func(params lights.LightController_unregisterAnimation_Params) error {
+		return params.SetName(ra.Name)
+	})
+	defer free()
+
+	// Remove animation from database
+	if err := db.RemoveAnimation(ra.Name); err != nil {
+		return err
+	}
+
+	<-result.Done()
+
+	return nil
+}
