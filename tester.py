@@ -219,24 +219,24 @@ def show(obj: lights.LightController):
 
 
 @main.group(help="Manage strip animations")
-def animation():
+def animations():
     pass
 
 
-@animation.command(help="Start an animation")
+@animations.command(help="Start an animation")
 @click.argument("name", required=True)
 @click.pass_obj
 def start(obj: lights.LightController, name: str):
     obj.animate(name).wait()
 
 
-@animation.command(help="Stop the currently running animation")
+@animations.command(help="Stop the currently running animation")
 @click.pass_obj
 def stop(obj: lights.LightController):
     obj.stopAnimation().wait()
 
 
-@animation.command(help="Register a new animation")
+@animations.command(help="Register a new animation")
 @click.argument("name", required=True)
 @click.argument("wasm", required=True, type=click.File("rb"))
 @click.pass_obj
@@ -244,11 +244,19 @@ def register(obj: lights.LightController, name: str, wasm: t.BinaryIO):
     obj.registerAnimation(name, wasm.read()).wait()
 
 
-@animation.command(help="Unregister an animation")
+@animations.command(help="Unregister an animation")
 @click.argument("name", required=True)
 @click.pass_obj
 def unregister(obj: lights.LightController, name: str):
     obj.unregisterAnimation(name).wait()
+
+
+@animations.command(name="list", help="List get a list of all animations")
+@click.pass_obj
+def list_animations(obj: lights.LightController):
+    result = obj.listAnimations().wait()
+    for name in result.names:
+        click.echo(name)
 
 
 if __name__ == "__main__":

@@ -1,7 +1,8 @@
+import os
 from typing import List
 
 from lights_capnp import lights
-from . import pixels
+from . import SETTINGS, pixels
 from .animation import Animation, ValidationException
 from .animator import ANIMATOR
 from .logger import get as get_logger
@@ -76,3 +77,6 @@ class LightControllerImpl(lights.LightController.Server):
     def unregisterAnimation(self, name: str, **_):
         Animation.remove(name)
         logger.info(f"unloaded animation: '{name}'")
+
+    def listAnimations(self, **_) -> List[str]:
+        return os.listdir(str(SETTINGS.animations_path))

@@ -67,4 +67,7 @@ interface LightController @0xb169ce07794d2b2f {
 
   unregisterAnimation @9 (name :Text);
   # Remove an animation from the registry by name.
+
+  listAnimations @10 () -> (names :List(Text));
+  # Get a list of all known animations
 }
