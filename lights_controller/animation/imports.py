@@ -1,4 +1,4 @@
-from wasmer import Function, ImportObject, Store
+from wasmer import Function, FunctionType, ImportObject, Store, Type
 
 from .. import pixels
 
@@ -13,11 +13,28 @@ def register(store: Store) -> ImportObject:
     imports.register(
         "env",
         {
-            "brightness": Function(store, pixels.brightness),
-            "fill": Function(store, pixels.fill),
-            "mode": Function(store, pixels.mode),
-            "set": Function(store, pixels.change),
-            "show": Function(store, pixels.show),
+            "brightness": Function(
+                store, pixels.brightness, FunctionType(params=[Type.I32], results=[])
+            ),
+            "fill": Function(
+                store,
+                pixels.fill,
+                FunctionType(params=[Type.I32, Type.I32, Type.I32], results=[]),
+            ),
+            "instant_mode": Function(
+                store, lambda: pixels.mode(True), FunctionType(params=[], results=[])
+            ),
+            "queue_mode": Function(
+                store, lambda: pixels.mode(False), FunctionType(params=[], results=[])
+            ),
+            "set": Function(
+                store,
+                pixels.change,
+                FunctionType(
+                    params=[Type.I32, Type.I32, Type.I32, Type.I32], results=[]
+                ),
+            ),
+            "show": Function(store, pixels.show, FunctionType(params=[], results=[])),
         },
     )
     return imports

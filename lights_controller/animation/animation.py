@@ -1,5 +1,6 @@
 import os
 from wasmer import engine, Function, Instance, Module, Store
+from typing import Optional
 
 from .. import SETTINGS
 from . import imports
@@ -20,6 +21,7 @@ class Animation(object):
         self.store = store
         self.module = module
         self.environment = imports.register(self.store)
+        self.instance: Optional[Instance] = None
 
     @staticmethod
     def build(wasm: bytes) -> "Animation":
@@ -77,8 +79,9 @@ class Animation(object):
         Get the animation entrypoint to be called on loop
         :return: a callable method
         """
-        instance = Instance(self.module, self.environment)
-        return instance.exports.animate
+        if self.instance is None:
+            self.instance = Instance(self.module, self.environment)
+        return self.instance.exports.animate
 
     def save(self, name: str):
         """
