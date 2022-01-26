@@ -2,7 +2,7 @@ import asyncio
 import signal
 import socket
 
-from lights_controller import logger, SETTINGS
+from lights_controller import logger, ANIMATOR, SETTINGS
 from lights_controller.server import on_connection
 
 
@@ -88,6 +88,9 @@ def main():
 
         # Stop async generators
         loop.run_until_complete(loop.shutdown_asyncgens())
+
+        # Stop running animations
+        ANIMATOR.stop()
     finally:
         loop.close()
 

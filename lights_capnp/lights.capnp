@@ -55,4 +55,16 @@ interface LightController @0xb169ce07794d2b2f {
 
   setAll @5 (colors: List(Color));
   # Set the color of all pixels at the same time. The length of `colors` must be the same as the number of pixels.
+
+  animate @6 (name: Text);
+  # Run the specified animation by name. Once started, no other actions can be performed until stopped.
+
+  stopAnimation @7 ();
+  # Stop the currently running animation. This method is idempotent.
+
+  registerAnimation @8 (name: Text, animation: Data);
+  # Register an animation and assign a name to it.
+
+  unregisterAnimation @9 (name: Text);
+  # Remove an animation from the registry by name.
 }

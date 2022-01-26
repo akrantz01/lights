@@ -1,7 +1,8 @@
 from typing import List
 
 from lights_capnp import lights
-from . import pixels
+from . import ANIMATOR, pixels
+from .animation import Animation, ValidationException
 from .logger import get as get_logger
 
 logger = get_logger("server")
@@ -52,3 +53,27 @@ class LightControllerImpl(lights.LightController.Server):
     def show(self, **_):
         pixels.show()
         logger.info("wrote queued changes")
+
+    def animate(self, name: str, **_):
+        try:
+            animation = Animation.load(name)
+            ANIMATOR.queue(animation)
+            logger.info(f"started animation '{name}'")
+        except FileNotFoundError:
+            logger.warn(f"attempted to load nonexistent animation '{name}'")
+
+    def stopAnimation(self, **_):
+        ANIMATOR.pause()
+        logger.info("stopped the current animation")
+
+    def registerAnimation(self, name: str, animation: bytes, **_):
+        try:
+            compiled = Animation.build(animation)
+            compiled.save(name)
+            logger.info(f"loaded new animation '{name}'")
+        except ValidationException as e:
+            logger.warn(f"failed to load animation: {e}")
+
+    def unregisterAnimation(self, name: str):
+        Animation.remove(name)
+        logger.info(f"unloaded animation: '{name}'")

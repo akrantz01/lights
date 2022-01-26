@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from dotenv import load_dotenv
 import logging
 from os import environ
+from pathlib import Path
 
 
 @dataclass
@@ -9,6 +10,9 @@ class Settings:
     # The host and port for the controller
     controller_host: str
     controller_port: int
+
+    # Where to store/load registered animations
+    animations_path: Path
 
     # The log level to report at
     log_level: int
@@ -45,6 +49,9 @@ def load() -> Settings:
     return Settings(
         controller_host=environ.get("LIGHTS_CONTROLLER_HOST", "127.0.0.1"),
         controller_port=int(environ.get("LIGHTS_CONTROLLER_PORT", 30000)),
+        animations_path=Path(
+            environ.get("LIGHTS_CONTROLLER_ANIMATIONS_PATH", "./animations")
+        ).absolute(),
         strip_density=int(environ.get("LIGHTS_STRIP_DENSITY", 30)),
         strip_length=int(environ.get("LIGHTS_STRIP_LENGTH", 5)),
         database_url=database_url,
