@@ -21,9 +21,6 @@ class Settings:
     strip_density: int
     strip_length: int
 
-    # The URL of the database to connect to
-    database_url: str
-
     @property
     def led_count(self):
         return self.strip_density * self.strip_length
@@ -38,14 +35,6 @@ def load() -> Settings:
     except ValueError:
         level = logging.getLevelName(raw_level)
 
-    raw_database_url = environ.get(
-        "LIGHTS_DATABASE_URL",
-        "postgresql+asyncpg://postgres:postgres@127.0.0.1:5432/postgres",
-    )
-    database_url = raw_database_url.replace(
-        "postgresql://", "postgresql+asyncpg://"
-    ).replace("postgres://", "postgresql+asyncpg://")
-
     return Settings(
         controller_host=environ.get("LIGHTS_CONTROLLER_HOST", "127.0.0.1"),
         controller_port=int(environ.get("LIGHTS_CONTROLLER_PORT", 30000)),
@@ -54,6 +43,5 @@ def load() -> Settings:
         ).absolute(),
         strip_density=int(environ.get("LIGHTS_STRIP_DENSITY", 30)),
         strip_length=int(environ.get("LIGHTS_STRIP_LENGTH", 5)),
-        database_url=database_url,
         log_level=level,
     )
