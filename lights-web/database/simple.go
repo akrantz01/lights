@@ -11,6 +11,7 @@ type PixelMode uint8
 const (
 	PixelModeFill PixelMode = iota + 1
 	PixelModeIndividual
+	PixelModeAnimation
 )
 
 // GetColor retrieves the filled color set to the strip
