@@ -40,7 +40,7 @@ class LightControllerImpl(lights.LightController.Server):
         logger.info("set all pixels to specified colors")
 
     def fill(self, color: lights.Color, **_):
-        pixels.fill(color.r, color.b, color.g)
+        pixels.fill(color.r, color.g, color.b)
         logger.info(f"set all pixels to {color}")
 
     def brightness(self, level: int, **_):
