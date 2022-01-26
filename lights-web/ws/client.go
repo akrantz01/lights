@@ -169,6 +169,22 @@ func (c *Client) reader(actions chan rpc.Callable) {
 			actions <- rpc.NewApplyPreset(applyPreset.Name)
 			c.hub.broadcast <- NewPresetUsed(applyPreset.Name)
 
+		// Start an animation by name on the strip
+		case MessageStartAnimation:
+			var startAnimation StartAnimation
+			if err := json.Unmarshal(message, &startAnimation); err != nil {
+				c.logger.Error("failed to parse start animation message", zap.Error(err))
+				continue
+			}
+
+			actions <- rpc.NewStartAnimation(startAnimation.Name)
+			c.hub.broadcast <- NewAnimationStatus(startAnimation.Name, true)
+
+		// Stop the currently running animation
+		case MessageStopAnimation:
+			actions <- rpc.NewStopAnimation()
+			c.hub.broadcast <- NewAnimationStatus("", false)
+
 		// Handle any unknown messages
 		default:
 			c.logger.Warn("unknown message type", zap.Uint8("type", uint8(msg.Type)))

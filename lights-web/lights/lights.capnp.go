@@ -395,6 +395,86 @@ func (c LightController) SetAll(ctx context.Context, params func(LightController
 	ans, release := c.Client.SendCall(ctx, s)
 	return LightController_setAll_Results_Future{Future: ans.Future()}, release
 }
+func (c LightController) Animate(ctx context.Context, params func(LightController_animate_Params) error) (LightController_animate_Results_Future, capnp.ReleaseFunc) {
+	s := capnp.Send{
+		Method: capnp.Method{
+			InterfaceID:   0xb169ce07794d2b2f,
+			MethodID:      6,
+			InterfaceName: "lights_capnp/lights.capnp:LightController",
+			MethodName:    "animate",
+		},
+	}
+	if params != nil {
+		s.ArgsSize = capnp.ObjectSize{DataSize: 0, PointerCount: 1}
+		s.PlaceArgs = func(s capnp.Struct) error { return params(LightController_animate_Params{Struct: s}) }
+	}
+	ans, release := c.Client.SendCall(ctx, s)
+	return LightController_animate_Results_Future{Future: ans.Future()}, release
+}
+func (c LightController) StopAnimation(ctx context.Context, params func(LightController_stopAnimation_Params) error) (LightController_stopAnimation_Results_Future, capnp.ReleaseFunc) {
+	s := capnp.Send{
+		Method: capnp.Method{
+			InterfaceID:   0xb169ce07794d2b2f,
+			MethodID:      7,
+			InterfaceName: "lights_capnp/lights.capnp:LightController",
+			MethodName:    "stopAnimation",
+		},
+	}
+	if params != nil {
+		s.ArgsSize = capnp.ObjectSize{DataSize: 0, PointerCount: 0}
+		s.PlaceArgs = func(s capnp.Struct) error { return params(LightController_stopAnimation_Params{Struct: s}) }
+	}
+	ans, release := c.Client.SendCall(ctx, s)
+	return LightController_stopAnimation_Results_Future{Future: ans.Future()}, release
+}
+func (c LightController) RegisterAnimation(ctx context.Context, params func(LightController_registerAnimation_Params) error) (LightController_registerAnimation_Results_Future, capnp.ReleaseFunc) {
+	s := capnp.Send{
+		Method: capnp.Method{
+			InterfaceID:   0xb169ce07794d2b2f,
+			MethodID:      8,
+			InterfaceName: "lights_capnp/lights.capnp:LightController",
+			MethodName:    "registerAnimation",
+		},
+	}
+	if params != nil {
+		s.ArgsSize = capnp.ObjectSize{DataSize: 0, PointerCount: 2}
+		s.PlaceArgs = func(s capnp.Struct) error { return params(LightController_registerAnimation_Params{Struct: s}) }
+	}
+	ans, release := c.Client.SendCall(ctx, s)
+	return LightController_registerAnimation_Results_Future{Future: ans.Future()}, release
+}
+func (c LightController) UnregisterAnimation(ctx context.Context, params func(LightController_unregisterAnimation_Params) error) (LightController_unregisterAnimation_Results_Future, capnp.ReleaseFunc) {
+	s := capnp.Send{
+		Method: capnp.Method{
+			InterfaceID:   0xb169ce07794d2b2f,
+			MethodID:      9,
+			InterfaceName: "lights_capnp/lights.capnp:LightController",
+			MethodName:    "unregisterAnimation",
+		},
+	}
+	if params != nil {
+		s.ArgsSize = capnp.ObjectSize{DataSize: 0, PointerCount: 1}
+		s.PlaceArgs = func(s capnp.Struct) error { return params(LightController_unregisterAnimation_Params{Struct: s}) }
+	}
+	ans, release := c.Client.SendCall(ctx, s)
+	return LightController_unregisterAnimation_Results_Future{Future: ans.Future()}, release
+}
+func (c LightController) ListAnimations(ctx context.Context, params func(LightController_listAnimations_Params) error) (LightController_listAnimations_Results_Future, capnp.ReleaseFunc) {
+	s := capnp.Send{
+		Method: capnp.Method{
+			InterfaceID:   0xb169ce07794d2b2f,
+			MethodID:      10,
+			InterfaceName: "lights_capnp/lights.capnp:LightController",
+			MethodName:    "listAnimations",
+		},
+	}
+	if params != nil {
+		s.ArgsSize = capnp.ObjectSize{DataSize: 0, PointerCount: 0}
+		s.PlaceArgs = func(s capnp.Struct) error { return params(LightController_listAnimations_Params{Struct: s}) }
+	}
+	ans, release := c.Client.SendCall(ctx, s)
+	return LightController_listAnimations_Results_Future{Future: ans.Future()}, release
+}
 
 func (c LightController) AddRef() LightController {
 	return LightController{
@@ -419,6 +499,16 @@ type LightController_Server interface {
 	Show(context.Context, LightController_show) error
 
 	SetAll(context.Context, LightController_setAll) error
+
+	Animate(context.Context, LightController_animate) error
+
+	StopAnimation(context.Context, LightController_stopAnimation) error
+
+	RegisterAnimation(context.Context, LightController_registerAnimation) error
+
+	UnregisterAnimation(context.Context, LightController_unregisterAnimation) error
+
+	ListAnimations(context.Context, LightController_listAnimations) error
 }
 
 // LightController_NewServer creates a new Server from an implementation of LightController_Server.
@@ -437,7 +527,7 @@ func LightController_ServerToClient(s LightController_Server, policy *server.Pol
 // This can be used to create a more complicated Server.
 func LightController_Methods(methods []server.Method, s LightController_Server) []server.Method {
 	if cap(methods) == 0 {
-		methods = make([]server.Method, 0, 6)
+		methods = make([]server.Method, 0, 11)
 	}
 
 	methods = append(methods, server.Method{
@@ -509,6 +599,66 @@ func LightController_Methods(methods []server.Method, s LightController_Server) 
 		},
 		Impl: func(ctx context.Context, call *server.Call) error {
 			return s.SetAll(ctx, LightController_setAll{call})
+		},
+	})
+
+	methods = append(methods, server.Method{
+		Method: capnp.Method{
+			InterfaceID:   0xb169ce07794d2b2f,
+			MethodID:      6,
+			InterfaceName: "lights_capnp/lights.capnp:LightController",
+			MethodName:    "animate",
+		},
+		Impl: func(ctx context.Context, call *server.Call) error {
+			return s.Animate(ctx, LightController_animate{call})
+		},
+	})
+
+	methods = append(methods, server.Method{
+		Method: capnp.Method{
+			InterfaceID:   0xb169ce07794d2b2f,
+			MethodID:      7,
+			InterfaceName: "lights_capnp/lights.capnp:LightController",
+			MethodName:    "stopAnimation",
+		},
+		Impl: func(ctx context.Context, call *server.Call) error {
+			return s.StopAnimation(ctx, LightController_stopAnimation{call})
+		},
+	})
+
+	methods = append(methods, server.Method{
+		Method: capnp.Method{
+			InterfaceID:   0xb169ce07794d2b2f,
+			MethodID:      8,
+			InterfaceName: "lights_capnp/lights.capnp:LightController",
+			MethodName:    "registerAnimation",
+		},
+		Impl: func(ctx context.Context, call *server.Call) error {
+			return s.RegisterAnimation(ctx, LightController_registerAnimation{call})
+		},
+	})
+
+	methods = append(methods, server.Method{
+		Method: capnp.Method{
+			InterfaceID:   0xb169ce07794d2b2f,
+			MethodID:      9,
+			InterfaceName: "lights_capnp/lights.capnp:LightController",
+			MethodName:    "unregisterAnimation",
+		},
+		Impl: func(ctx context.Context, call *server.Call) error {
+			return s.UnregisterAnimation(ctx, LightController_unregisterAnimation{call})
+		},
+	})
+
+	methods = append(methods, server.Method{
+		Method: capnp.Method{
+			InterfaceID:   0xb169ce07794d2b2f,
+			MethodID:      10,
+			InterfaceName: "lights_capnp/lights.capnp:LightController",
+			MethodName:    "listAnimations",
+		},
+		Impl: func(ctx context.Context, call *server.Call) error {
+			return s.ListAnimations(ctx, LightController_listAnimations{call})
 		},
 	})
 
@@ -615,6 +765,91 @@ func (c LightController_setAll) Args() LightController_setAll_Params {
 func (c LightController_setAll) AllocResults() (LightController_setAll_Results, error) {
 	r, err := c.Call.AllocResults(capnp.ObjectSize{DataSize: 0, PointerCount: 0})
 	return LightController_setAll_Results{Struct: r}, err
+}
+
+// LightController_animate holds the state for a server call to LightController.animate.
+// See server.Call for documentation.
+type LightController_animate struct {
+	*server.Call
+}
+
+// Args returns the call's arguments.
+func (c LightController_animate) Args() LightController_animate_Params {
+	return LightController_animate_Params{Struct: c.Call.Args()}
+}
+
+// AllocResults allocates the results struct.
+func (c LightController_animate) AllocResults() (LightController_animate_Results, error) {
+	r, err := c.Call.AllocResults(capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return LightController_animate_Results{Struct: r}, err
+}
+
+// LightController_stopAnimation holds the state for a server call to LightController.stopAnimation.
+// See server.Call for documentation.
+type LightController_stopAnimation struct {
+	*server.Call
+}
+
+// Args returns the call's arguments.
+func (c LightController_stopAnimation) Args() LightController_stopAnimation_Params {
+	return LightController_stopAnimation_Params{Struct: c.Call.Args()}
+}
+
+// AllocResults allocates the results struct.
+func (c LightController_stopAnimation) AllocResults() (LightController_stopAnimation_Results, error) {
+	r, err := c.Call.AllocResults(capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return LightController_stopAnimation_Results{Struct: r}, err
+}
+
+// LightController_registerAnimation holds the state for a server call to LightController.registerAnimation.
+// See server.Call for documentation.
+type LightController_registerAnimation struct {
+	*server.Call
+}
+
+// Args returns the call's arguments.
+func (c LightController_registerAnimation) Args() LightController_registerAnimation_Params {
+	return LightController_registerAnimation_Params{Struct: c.Call.Args()}
+}
+
+// AllocResults allocates the results struct.
+func (c LightController_registerAnimation) AllocResults() (LightController_registerAnimation_Results, error) {
+	r, err := c.Call.AllocResults(capnp.ObjectSize{DataSize: 8, PointerCount: 0})
+	return LightController_registerAnimation_Results{Struct: r}, err
+}
+
+// LightController_unregisterAnimation holds the state for a server call to LightController.unregisterAnimation.
+// See server.Call for documentation.
+type LightController_unregisterAnimation struct {
+	*server.Call
+}
+
+// Args returns the call's arguments.
+func (c LightController_unregisterAnimation) Args() LightController_unregisterAnimation_Params {
+	return LightController_unregisterAnimation_Params{Struct: c.Call.Args()}
+}
+
+// AllocResults allocates the results struct.
+func (c LightController_unregisterAnimation) AllocResults() (LightController_unregisterAnimation_Results, error) {
+	r, err := c.Call.AllocResults(capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return LightController_unregisterAnimation_Results{Struct: r}, err
+}
+
+// LightController_listAnimations holds the state for a server call to LightController.listAnimations.
+// See server.Call for documentation.
+type LightController_listAnimations struct {
+	*server.Call
+}
+
+// Args returns the call's arguments.
+func (c LightController_listAnimations) Args() LightController_listAnimations_Params {
+	return LightController_listAnimations_Params{Struct: c.Call.Args()}
+}
+
+// AllocResults allocates the results struct.
+func (c LightController_listAnimations) AllocResults() (LightController_listAnimations_Results, error) {
+	r, err := c.Call.AllocResults(capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return LightController_listAnimations_Results{Struct: r}, err
 }
 
 type LightController_set_Params struct{ capnp.Struct }
@@ -1401,72 +1636,750 @@ func (p LightController_setAll_Results_Future) Struct() (LightController_setAll_
 	return LightController_setAll_Results{s}, err
 }
 
-const schema_d91d0c9586c33e4f = "x\xda\x9cUoh\x1c\xd5\x17\xbd\xe7\xbd\xf9\x93\xfcH" +
-	"\xb2y\xbfM\xd1D\xcab\x1b\xa1\x89&m6\x82\x9a" +
-	"Xw5\x0d6\xa5\xc1\x9d\xd0\x12\xf0\x0f2I\xc6\xed" +
-	"\xd6\xc9n\x9c\x99\x18#\xa8\x8d\xc5\x8aH\x84\x0a\xa1\x14" +
-	"\x11\x11\xab\xa0\x82\x1a\xab\x14\x83\x08*\x82V\xab\x82\x18" +
-	"\xf0K\x14\xc9\x17E\xb4\x08\xa2h\xec\xc8\x9b\xdd\xd9\x99" +
-	"6j\xdc~\xdby\xf7\xdew\xcf;\xf7\xdc\xb3;\x0e" +
-	"\xb3,\xebQ3:\x91\xb1O\xd5\xfc\xfdg\xae\xffx" +
-	"\xec\xc8\xc1C$:A\xa4\xe8D\xbd\x8f\xf0\xefA\x8a" +
-	"\xff\xdb%\x8b\xb9W\xfaO\xc5#\xb3\xfcu\x19\xf9\xc6" +
-	"~\xe7\xb6\x95\xd1\xde92:\x11\x86\x0a\xfc[\x10\x92" +
-	"\x0f\xf0\x0c\xc1?\xf8\xf3\xf2\xda\xc2\x1f\xdd\x87c\xa5O" +
-	"\xf3%Yz\xb2\xed\xd8\xcb+O=>\x1f\x8b\xcc\xf3" +
-	"\xd32\xd2\xff\xbf\xc2\xed\xaf\xf1'\x8e\x92\xd1\x06\xf8\xb7" +
-	"\xdc\xf0\xfe\x91\x85\x86\xcd_\xd1 t\x0e\xf4\xce\xf16" +
-	"$\x8fr\x9d(9\xcf_%\xf8\xf7\x9b\xf9\x9f.;" +
-	"\xf6\xf0\x89\xd8E\xadJ\x80\xee\xe6\x95_F\xb7\xf5\x7f" +
-	"\xf9B\x1c]\xbd\x0c!\xd9\xaaHt\xdb\xaf\x1c\x9e\xd5" +
-	"?-,\x92h\xe3Q#B\xefu\xca\x08\x92\xc3A" +
-	"\xc1\x90\xf2(\x92;U\x9d\xc8oY\xfd\xb0{\xe6\xbe" +
-	"\xb3'/\x00\x16\xa4]\xa12${dZ\xb2K\x95" +
-	"\xb0\x0e-\xb5\xaa\xbf\xbe(>\x89\xc1\xfa@\x0d^\xfe" +
-	"\xe0\xec\xdbk\xf5\x9f\xaf\x9d!c+\x10\xbdv\x13t" +
-	"\x10\xf5\xbe\xa9\xee\x91\x00\xdfUg\x08~z\xe0\xc7'" +
-	"\xdf\x98\xbe|9v\xc9f-\xb8\xe4\xb9\x13\xcb\xabw" +
-	"\xd4\xf3\xafI\xb4\xb18\xf4d\xa3\xf6{\xb2U\x938" +
-	"6i\xd7\x10|\xfb\xd9\x1f&\xb5\x85\xbbW\xcbW\xa8" +
-	",\xe0G{I\xf6\xe8\xd0d\x8f\xa5/\xce\x9e\xfal" +
-	"W\xfa\xbbJ\x02d\xc2cZ\xc0\xd2qM\xb2\xb4\xf5" +
-	"tjn4\xff\xcc\xb9x\xc2[\xda{2\xe1#-" +
-	"C]\xbe]\xc8\x1f\xf0\xdc;\xc75s\xaa8\xb5\xbd" +
-	"\xfc\xd5=.?\xfa\xf6\xca\x8f\x81R\xd1sJ\xb6m" +
-	"9\xddc\x8e<(Z\xae\xdb>b\xb9\x89i\xdbs" +
-	"\xab\xe5\xea\xc6\xe5\xae\xe5\xb5\x8fX)\xf7\xbc\xba\xda\xda" +
-	"\xe6LG7']C\xe1\x0a\x91\x02\"\xd1\x98&2" +
-	"\xea8\x8c\x16\x86\x94m\xddk\xd9\xd0\x88A\x93\xe4\xd5" +
-	"\x00\xed@i\xa6}$c\xd5\x8c\xcd\xb5\xbc\x1bm[" +
-	"\xd2!+\x89\xaa\xb5|}m\xae\xe4\x16\xbc\x02/\x15" +
-	"s\x80\xd1\xc0\x95\x06\xdf\x0f\x9e0\xd8Gdd9\x8c" +
-	"\xbd\x0c\x8d8\xe7\x03\x91\xca\xc4P\x9aX#\xfb\xd3o" +
-	"\x01'\x12=\x9dD\xc6U\x1c\xc6n\x86\x8c[(\xe6" +
-	"m\x0b:1\xe8\x84\x94c\x16\xf3V\xc2.\xb8\x1e\x9a" +
-	"\x089\x8e \xd2t\x11D\xe4R\xa6cN\xd64\xdb" +
-	"\xc9\xd2\x84\x15\xd6\xc5\xa7\xd3\x19M'!s\x90\x88\xc4" +
-	"O@\"\x86N\xd9\xa8\x0b\x1cI\xdc\xa5\\\x954W" +
-	"\x16\x03\xa1\xbd\x89\xc5-\xc4\xc4\xf3:\xa2\x9d@\xb8\x80" +
-	"\xe2x'11\xaf\x83U=\x0f\xa1a\x8a\xb9[\x89" +
-	"\x89Y\x1d\xbc\xea8\x08\xb7_L\xca:S\x87R\xf5" +
-	")\x84\x9e(\xf6\xcb\xd8\x90\x0e\xb5\xbab\x08]Q\xec" +
-	"\xec#&zt\xdd\xb5\xbc,\x12w\x15l;\x0b?" +
-	"\x941q\xd7\xcd\x96\xd9\xc8\"!\x09\xcf\"S\xd6Q" +
-	"\x169\xe0\xdf$4P\xb2K\x0eU\xf4S\xe1x\xf0" +
-	"\xff\x91|\x04\xd0\"\xddR\x0c\xc9\xc3]\x1cF\x8eA" +
-	"0\xd6\x02F$\x86\xe5\xe1n\x0ec\x1f\x03\x9cpO" +
-	"\x90\xaf\xfe\x1a\xbb\x98\xdd\x09F\xbfnw\x94\x7f\xd2\x7f" +
-	"\xa9\xd8\x1d(5\x10\x86BT\xc6\xdb!\xd7\xb8\x9d\xc3" +
-	"\xd8!\x1fQ\xc1\xdb\xb5\x85\xc8\xd8\xc6a\\\xcd\x90r" +
-	"=\xd3\xf1B\xb1\xebVq\"\xfc]\x0bV9\x8a\xf5" +
-	"X\xd9\x85\x85\x99\xa9\xbe\xe1\xd2\x84%y\xae\x0b\x90\x88" +
-	"\xb4T\xab\xa8\xbf\x89(u\xcf\xb45m=T(\xba" +
-	"\x9eY\xf4j\xf5\xbf\x9c\x99\x08V\xa4\xae:\xbe\x8e=" +
-	"\xd1#\xab\xe3\xebIW\xf6\xfcZ\x06\x7f\xaa\xc2\x1b\x11" +
-	"\xa19\xfa\xcb!\xa0\x99\x90\x1a\x97\x92@s\xf4\xffV" +
-	">\xaf\x99\x95\xbfY\xde\xb8\xb5n\xd4\xe6\xbf{e." +
-	"\xe8C\xf1F}\x95F\xed\x0c\x99\xa0\x91\x1bZ\xd8\xf9" +
-	"\x0d\x9b\x08\x7f\x05\x00\x00\xff\xff\xb1}\xa66"
+type LightController_animate_Params struct{ capnp.Struct }
+
+// LightController_animate_Params_TypeID is the unique identifier for the type LightController_animate_Params.
+const LightController_animate_Params_TypeID = 0xd487cf95fcaf6bc4
+
+func NewLightController_animate_Params(s *capnp.Segment) (LightController_animate_Params, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return LightController_animate_Params{st}, err
+}
+
+func NewRootLightController_animate_Params(s *capnp.Segment) (LightController_animate_Params, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return LightController_animate_Params{st}, err
+}
+
+func ReadRootLightController_animate_Params(msg *capnp.Message) (LightController_animate_Params, error) {
+	root, err := msg.Root()
+	return LightController_animate_Params{root.Struct()}, err
+}
+
+func (s LightController_animate_Params) String() string {
+	str, _ := text.Marshal(0xd487cf95fcaf6bc4, s.Struct)
+	return str
+}
+
+func (s LightController_animate_Params) Name() (string, error) {
+	p, err := s.Struct.Ptr(0)
+	return p.Text(), err
+}
+
+func (s LightController_animate_Params) HasName() bool {
+	return s.Struct.HasPtr(0)
+}
+
+func (s LightController_animate_Params) NameBytes() ([]byte, error) {
+	p, err := s.Struct.Ptr(0)
+	return p.TextBytes(), err
+}
+
+func (s LightController_animate_Params) SetName(v string) error {
+	return s.Struct.SetText(0, v)
+}
+
+// LightController_animate_Params_List is a list of LightController_animate_Params.
+type LightController_animate_Params_List struct{ capnp.List }
+
+// NewLightController_animate_Params creates a new list of LightController_animate_Params.
+func NewLightController_animate_Params_List(s *capnp.Segment, sz int32) (LightController_animate_Params_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1}, sz)
+	return LightController_animate_Params_List{l}, err
+}
+
+func (s LightController_animate_Params_List) At(i int) LightController_animate_Params {
+	return LightController_animate_Params{s.List.Struct(i)}
+}
+
+func (s LightController_animate_Params_List) Set(i int, v LightController_animate_Params) error {
+	return s.List.SetStruct(i, v.Struct)
+}
+
+func (s LightController_animate_Params_List) String() string {
+	str, _ := text.MarshalList(0xd487cf95fcaf6bc4, s.List)
+	return str
+}
+
+// LightController_animate_Params_Future is a wrapper for a LightController_animate_Params promised by a client call.
+type LightController_animate_Params_Future struct{ *capnp.Future }
+
+func (p LightController_animate_Params_Future) Struct() (LightController_animate_Params, error) {
+	s, err := p.Future.Struct()
+	return LightController_animate_Params{s}, err
+}
+
+type LightController_animate_Results struct{ capnp.Struct }
+
+// LightController_animate_Results_TypeID is the unique identifier for the type LightController_animate_Results.
+const LightController_animate_Results_TypeID = 0x8d6a731b54f8bffd
+
+func NewLightController_animate_Results(s *capnp.Segment) (LightController_animate_Results, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return LightController_animate_Results{st}, err
+}
+
+func NewRootLightController_animate_Results(s *capnp.Segment) (LightController_animate_Results, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return LightController_animate_Results{st}, err
+}
+
+func ReadRootLightController_animate_Results(msg *capnp.Message) (LightController_animate_Results, error) {
+	root, err := msg.Root()
+	return LightController_animate_Results{root.Struct()}, err
+}
+
+func (s LightController_animate_Results) String() string {
+	str, _ := text.Marshal(0x8d6a731b54f8bffd, s.Struct)
+	return str
+}
+
+// LightController_animate_Results_List is a list of LightController_animate_Results.
+type LightController_animate_Results_List struct{ capnp.List }
+
+// NewLightController_animate_Results creates a new list of LightController_animate_Results.
+func NewLightController_animate_Results_List(s *capnp.Segment, sz int32) (LightController_animate_Results_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0}, sz)
+	return LightController_animate_Results_List{l}, err
+}
+
+func (s LightController_animate_Results_List) At(i int) LightController_animate_Results {
+	return LightController_animate_Results{s.List.Struct(i)}
+}
+
+func (s LightController_animate_Results_List) Set(i int, v LightController_animate_Results) error {
+	return s.List.SetStruct(i, v.Struct)
+}
+
+func (s LightController_animate_Results_List) String() string {
+	str, _ := text.MarshalList(0x8d6a731b54f8bffd, s.List)
+	return str
+}
+
+// LightController_animate_Results_Future is a wrapper for a LightController_animate_Results promised by a client call.
+type LightController_animate_Results_Future struct{ *capnp.Future }
+
+func (p LightController_animate_Results_Future) Struct() (LightController_animate_Results, error) {
+	s, err := p.Future.Struct()
+	return LightController_animate_Results{s}, err
+}
+
+type LightController_stopAnimation_Params struct{ capnp.Struct }
+
+// LightController_stopAnimation_Params_TypeID is the unique identifier for the type LightController_stopAnimation_Params.
+const LightController_stopAnimation_Params_TypeID = 0x8a4b433c8d1fab17
+
+func NewLightController_stopAnimation_Params(s *capnp.Segment) (LightController_stopAnimation_Params, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return LightController_stopAnimation_Params{st}, err
+}
+
+func NewRootLightController_stopAnimation_Params(s *capnp.Segment) (LightController_stopAnimation_Params, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return LightController_stopAnimation_Params{st}, err
+}
+
+func ReadRootLightController_stopAnimation_Params(msg *capnp.Message) (LightController_stopAnimation_Params, error) {
+	root, err := msg.Root()
+	return LightController_stopAnimation_Params{root.Struct()}, err
+}
+
+func (s LightController_stopAnimation_Params) String() string {
+	str, _ := text.Marshal(0x8a4b433c8d1fab17, s.Struct)
+	return str
+}
+
+// LightController_stopAnimation_Params_List is a list of LightController_stopAnimation_Params.
+type LightController_stopAnimation_Params_List struct{ capnp.List }
+
+// NewLightController_stopAnimation_Params creates a new list of LightController_stopAnimation_Params.
+func NewLightController_stopAnimation_Params_List(s *capnp.Segment, sz int32) (LightController_stopAnimation_Params_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0}, sz)
+	return LightController_stopAnimation_Params_List{l}, err
+}
+
+func (s LightController_stopAnimation_Params_List) At(i int) LightController_stopAnimation_Params {
+	return LightController_stopAnimation_Params{s.List.Struct(i)}
+}
+
+func (s LightController_stopAnimation_Params_List) Set(i int, v LightController_stopAnimation_Params) error {
+	return s.List.SetStruct(i, v.Struct)
+}
+
+func (s LightController_stopAnimation_Params_List) String() string {
+	str, _ := text.MarshalList(0x8a4b433c8d1fab17, s.List)
+	return str
+}
+
+// LightController_stopAnimation_Params_Future is a wrapper for a LightController_stopAnimation_Params promised by a client call.
+type LightController_stopAnimation_Params_Future struct{ *capnp.Future }
+
+func (p LightController_stopAnimation_Params_Future) Struct() (LightController_stopAnimation_Params, error) {
+	s, err := p.Future.Struct()
+	return LightController_stopAnimation_Params{s}, err
+}
+
+type LightController_stopAnimation_Results struct{ capnp.Struct }
+
+// LightController_stopAnimation_Results_TypeID is the unique identifier for the type LightController_stopAnimation_Results.
+const LightController_stopAnimation_Results_TypeID = 0xc3be3d503e406ecf
+
+func NewLightController_stopAnimation_Results(s *capnp.Segment) (LightController_stopAnimation_Results, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return LightController_stopAnimation_Results{st}, err
+}
+
+func NewRootLightController_stopAnimation_Results(s *capnp.Segment) (LightController_stopAnimation_Results, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return LightController_stopAnimation_Results{st}, err
+}
+
+func ReadRootLightController_stopAnimation_Results(msg *capnp.Message) (LightController_stopAnimation_Results, error) {
+	root, err := msg.Root()
+	return LightController_stopAnimation_Results{root.Struct()}, err
+}
+
+func (s LightController_stopAnimation_Results) String() string {
+	str, _ := text.Marshal(0xc3be3d503e406ecf, s.Struct)
+	return str
+}
+
+// LightController_stopAnimation_Results_List is a list of LightController_stopAnimation_Results.
+type LightController_stopAnimation_Results_List struct{ capnp.List }
+
+// NewLightController_stopAnimation_Results creates a new list of LightController_stopAnimation_Results.
+func NewLightController_stopAnimation_Results_List(s *capnp.Segment, sz int32) (LightController_stopAnimation_Results_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0}, sz)
+	return LightController_stopAnimation_Results_List{l}, err
+}
+
+func (s LightController_stopAnimation_Results_List) At(i int) LightController_stopAnimation_Results {
+	return LightController_stopAnimation_Results{s.List.Struct(i)}
+}
+
+func (s LightController_stopAnimation_Results_List) Set(i int, v LightController_stopAnimation_Results) error {
+	return s.List.SetStruct(i, v.Struct)
+}
+
+func (s LightController_stopAnimation_Results_List) String() string {
+	str, _ := text.MarshalList(0xc3be3d503e406ecf, s.List)
+	return str
+}
+
+// LightController_stopAnimation_Results_Future is a wrapper for a LightController_stopAnimation_Results promised by a client call.
+type LightController_stopAnimation_Results_Future struct{ *capnp.Future }
+
+func (p LightController_stopAnimation_Results_Future) Struct() (LightController_stopAnimation_Results, error) {
+	s, err := p.Future.Struct()
+	return LightController_stopAnimation_Results{s}, err
+}
+
+type LightController_registerAnimation_Params struct{ capnp.Struct }
+
+// LightController_registerAnimation_Params_TypeID is the unique identifier for the type LightController_registerAnimation_Params.
+const LightController_registerAnimation_Params_TypeID = 0xca21ce09d0db60e9
+
+func NewLightController_registerAnimation_Params(s *capnp.Segment) (LightController_registerAnimation_Params, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 2})
+	return LightController_registerAnimation_Params{st}, err
+}
+
+func NewRootLightController_registerAnimation_Params(s *capnp.Segment) (LightController_registerAnimation_Params, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 2})
+	return LightController_registerAnimation_Params{st}, err
+}
+
+func ReadRootLightController_registerAnimation_Params(msg *capnp.Message) (LightController_registerAnimation_Params, error) {
+	root, err := msg.Root()
+	return LightController_registerAnimation_Params{root.Struct()}, err
+}
+
+func (s LightController_registerAnimation_Params) String() string {
+	str, _ := text.Marshal(0xca21ce09d0db60e9, s.Struct)
+	return str
+}
+
+func (s LightController_registerAnimation_Params) Name() (string, error) {
+	p, err := s.Struct.Ptr(0)
+	return p.Text(), err
+}
+
+func (s LightController_registerAnimation_Params) HasName() bool {
+	return s.Struct.HasPtr(0)
+}
+
+func (s LightController_registerAnimation_Params) NameBytes() ([]byte, error) {
+	p, err := s.Struct.Ptr(0)
+	return p.TextBytes(), err
+}
+
+func (s LightController_registerAnimation_Params) SetName(v string) error {
+	return s.Struct.SetText(0, v)
+}
+
+func (s LightController_registerAnimation_Params) Animation() ([]byte, error) {
+	p, err := s.Struct.Ptr(1)
+	return []byte(p.Data()), err
+}
+
+func (s LightController_registerAnimation_Params) HasAnimation() bool {
+	return s.Struct.HasPtr(1)
+}
+
+func (s LightController_registerAnimation_Params) SetAnimation(v []byte) error {
+	return s.Struct.SetData(1, v)
+}
+
+// LightController_registerAnimation_Params_List is a list of LightController_registerAnimation_Params.
+type LightController_registerAnimation_Params_List struct{ capnp.List }
+
+// NewLightController_registerAnimation_Params creates a new list of LightController_registerAnimation_Params.
+func NewLightController_registerAnimation_Params_List(s *capnp.Segment, sz int32) (LightController_registerAnimation_Params_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 2}, sz)
+	return LightController_registerAnimation_Params_List{l}, err
+}
+
+func (s LightController_registerAnimation_Params_List) At(i int) LightController_registerAnimation_Params {
+	return LightController_registerAnimation_Params{s.List.Struct(i)}
+}
+
+func (s LightController_registerAnimation_Params_List) Set(i int, v LightController_registerAnimation_Params) error {
+	return s.List.SetStruct(i, v.Struct)
+}
+
+func (s LightController_registerAnimation_Params_List) String() string {
+	str, _ := text.MarshalList(0xca21ce09d0db60e9, s.List)
+	return str
+}
+
+// LightController_registerAnimation_Params_Future is a wrapper for a LightController_registerAnimation_Params promised by a client call.
+type LightController_registerAnimation_Params_Future struct{ *capnp.Future }
+
+func (p LightController_registerAnimation_Params_Future) Struct() (LightController_registerAnimation_Params, error) {
+	s, err := p.Future.Struct()
+	return LightController_registerAnimation_Params{s}, err
+}
+
+type LightController_registerAnimation_Results struct{ capnp.Struct }
+
+// LightController_registerAnimation_Results_TypeID is the unique identifier for the type LightController_registerAnimation_Results.
+const LightController_registerAnimation_Results_TypeID = 0xcf13d2abd006bf25
+
+func NewLightController_registerAnimation_Results(s *capnp.Segment) (LightController_registerAnimation_Results, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 8, PointerCount: 0})
+	return LightController_registerAnimation_Results{st}, err
+}
+
+func NewRootLightController_registerAnimation_Results(s *capnp.Segment) (LightController_registerAnimation_Results, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 8, PointerCount: 0})
+	return LightController_registerAnimation_Results{st}, err
+}
+
+func ReadRootLightController_registerAnimation_Results(msg *capnp.Message) (LightController_registerAnimation_Results, error) {
+	root, err := msg.Root()
+	return LightController_registerAnimation_Results{root.Struct()}, err
+}
+
+func (s LightController_registerAnimation_Results) String() string {
+	str, _ := text.Marshal(0xcf13d2abd006bf25, s.Struct)
+	return str
+}
+
+func (s LightController_registerAnimation_Results) Success() bool {
+	return s.Struct.Bit(0)
+}
+
+func (s LightController_registerAnimation_Results) SetSuccess(v bool) {
+	s.Struct.SetBit(0, v)
+}
+
+// LightController_registerAnimation_Results_List is a list of LightController_registerAnimation_Results.
+type LightController_registerAnimation_Results_List struct{ capnp.List }
+
+// NewLightController_registerAnimation_Results creates a new list of LightController_registerAnimation_Results.
+func NewLightController_registerAnimation_Results_List(s *capnp.Segment, sz int32) (LightController_registerAnimation_Results_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 8, PointerCount: 0}, sz)
+	return LightController_registerAnimation_Results_List{l}, err
+}
+
+func (s LightController_registerAnimation_Results_List) At(i int) LightController_registerAnimation_Results {
+	return LightController_registerAnimation_Results{s.List.Struct(i)}
+}
+
+func (s LightController_registerAnimation_Results_List) Set(i int, v LightController_registerAnimation_Results) error {
+	return s.List.SetStruct(i, v.Struct)
+}
+
+func (s LightController_registerAnimation_Results_List) String() string {
+	str, _ := text.MarshalList(0xcf13d2abd006bf25, s.List)
+	return str
+}
+
+// LightController_registerAnimation_Results_Future is a wrapper for a LightController_registerAnimation_Results promised by a client call.
+type LightController_registerAnimation_Results_Future struct{ *capnp.Future }
+
+func (p LightController_registerAnimation_Results_Future) Struct() (LightController_registerAnimation_Results, error) {
+	s, err := p.Future.Struct()
+	return LightController_registerAnimation_Results{s}, err
+}
+
+type LightController_unregisterAnimation_Params struct{ capnp.Struct }
+
+// LightController_unregisterAnimation_Params_TypeID is the unique identifier for the type LightController_unregisterAnimation_Params.
+const LightController_unregisterAnimation_Params_TypeID = 0xe9fd053b212bbac7
+
+func NewLightController_unregisterAnimation_Params(s *capnp.Segment) (LightController_unregisterAnimation_Params, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return LightController_unregisterAnimation_Params{st}, err
+}
+
+func NewRootLightController_unregisterAnimation_Params(s *capnp.Segment) (LightController_unregisterAnimation_Params, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return LightController_unregisterAnimation_Params{st}, err
+}
+
+func ReadRootLightController_unregisterAnimation_Params(msg *capnp.Message) (LightController_unregisterAnimation_Params, error) {
+	root, err := msg.Root()
+	return LightController_unregisterAnimation_Params{root.Struct()}, err
+}
+
+func (s LightController_unregisterAnimation_Params) String() string {
+	str, _ := text.Marshal(0xe9fd053b212bbac7, s.Struct)
+	return str
+}
+
+func (s LightController_unregisterAnimation_Params) Name() (string, error) {
+	p, err := s.Struct.Ptr(0)
+	return p.Text(), err
+}
+
+func (s LightController_unregisterAnimation_Params) HasName() bool {
+	return s.Struct.HasPtr(0)
+}
+
+func (s LightController_unregisterAnimation_Params) NameBytes() ([]byte, error) {
+	p, err := s.Struct.Ptr(0)
+	return p.TextBytes(), err
+}
+
+func (s LightController_unregisterAnimation_Params) SetName(v string) error {
+	return s.Struct.SetText(0, v)
+}
+
+// LightController_unregisterAnimation_Params_List is a list of LightController_unregisterAnimation_Params.
+type LightController_unregisterAnimation_Params_List struct{ capnp.List }
+
+// NewLightController_unregisterAnimation_Params creates a new list of LightController_unregisterAnimation_Params.
+func NewLightController_unregisterAnimation_Params_List(s *capnp.Segment, sz int32) (LightController_unregisterAnimation_Params_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1}, sz)
+	return LightController_unregisterAnimation_Params_List{l}, err
+}
+
+func (s LightController_unregisterAnimation_Params_List) At(i int) LightController_unregisterAnimation_Params {
+	return LightController_unregisterAnimation_Params{s.List.Struct(i)}
+}
+
+func (s LightController_unregisterAnimation_Params_List) Set(i int, v LightController_unregisterAnimation_Params) error {
+	return s.List.SetStruct(i, v.Struct)
+}
+
+func (s LightController_unregisterAnimation_Params_List) String() string {
+	str, _ := text.MarshalList(0xe9fd053b212bbac7, s.List)
+	return str
+}
+
+// LightController_unregisterAnimation_Params_Future is a wrapper for a LightController_unregisterAnimation_Params promised by a client call.
+type LightController_unregisterAnimation_Params_Future struct{ *capnp.Future }
+
+func (p LightController_unregisterAnimation_Params_Future) Struct() (LightController_unregisterAnimation_Params, error) {
+	s, err := p.Future.Struct()
+	return LightController_unregisterAnimation_Params{s}, err
+}
+
+type LightController_unregisterAnimation_Results struct{ capnp.Struct }
+
+// LightController_unregisterAnimation_Results_TypeID is the unique identifier for the type LightController_unregisterAnimation_Results.
+const LightController_unregisterAnimation_Results_TypeID = 0xad11904b5da9710d
+
+func NewLightController_unregisterAnimation_Results(s *capnp.Segment) (LightController_unregisterAnimation_Results, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return LightController_unregisterAnimation_Results{st}, err
+}
+
+func NewRootLightController_unregisterAnimation_Results(s *capnp.Segment) (LightController_unregisterAnimation_Results, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return LightController_unregisterAnimation_Results{st}, err
+}
+
+func ReadRootLightController_unregisterAnimation_Results(msg *capnp.Message) (LightController_unregisterAnimation_Results, error) {
+	root, err := msg.Root()
+	return LightController_unregisterAnimation_Results{root.Struct()}, err
+}
+
+func (s LightController_unregisterAnimation_Results) String() string {
+	str, _ := text.Marshal(0xad11904b5da9710d, s.Struct)
+	return str
+}
+
+// LightController_unregisterAnimation_Results_List is a list of LightController_unregisterAnimation_Results.
+type LightController_unregisterAnimation_Results_List struct{ capnp.List }
+
+// NewLightController_unregisterAnimation_Results creates a new list of LightController_unregisterAnimation_Results.
+func NewLightController_unregisterAnimation_Results_List(s *capnp.Segment, sz int32) (LightController_unregisterAnimation_Results_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0}, sz)
+	return LightController_unregisterAnimation_Results_List{l}, err
+}
+
+func (s LightController_unregisterAnimation_Results_List) At(i int) LightController_unregisterAnimation_Results {
+	return LightController_unregisterAnimation_Results{s.List.Struct(i)}
+}
+
+func (s LightController_unregisterAnimation_Results_List) Set(i int, v LightController_unregisterAnimation_Results) error {
+	return s.List.SetStruct(i, v.Struct)
+}
+
+func (s LightController_unregisterAnimation_Results_List) String() string {
+	str, _ := text.MarshalList(0xad11904b5da9710d, s.List)
+	return str
+}
+
+// LightController_unregisterAnimation_Results_Future is a wrapper for a LightController_unregisterAnimation_Results promised by a client call.
+type LightController_unregisterAnimation_Results_Future struct{ *capnp.Future }
+
+func (p LightController_unregisterAnimation_Results_Future) Struct() (LightController_unregisterAnimation_Results, error) {
+	s, err := p.Future.Struct()
+	return LightController_unregisterAnimation_Results{s}, err
+}
+
+type LightController_listAnimations_Params struct{ capnp.Struct }
+
+// LightController_listAnimations_Params_TypeID is the unique identifier for the type LightController_listAnimations_Params.
+const LightController_listAnimations_Params_TypeID = 0x879df598dd94462d
+
+func NewLightController_listAnimations_Params(s *capnp.Segment) (LightController_listAnimations_Params, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return LightController_listAnimations_Params{st}, err
+}
+
+func NewRootLightController_listAnimations_Params(s *capnp.Segment) (LightController_listAnimations_Params, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0})
+	return LightController_listAnimations_Params{st}, err
+}
+
+func ReadRootLightController_listAnimations_Params(msg *capnp.Message) (LightController_listAnimations_Params, error) {
+	root, err := msg.Root()
+	return LightController_listAnimations_Params{root.Struct()}, err
+}
+
+func (s LightController_listAnimations_Params) String() string {
+	str, _ := text.Marshal(0x879df598dd94462d, s.Struct)
+	return str
+}
+
+// LightController_listAnimations_Params_List is a list of LightController_listAnimations_Params.
+type LightController_listAnimations_Params_List struct{ capnp.List }
+
+// NewLightController_listAnimations_Params creates a new list of LightController_listAnimations_Params.
+func NewLightController_listAnimations_Params_List(s *capnp.Segment, sz int32) (LightController_listAnimations_Params_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 0}, sz)
+	return LightController_listAnimations_Params_List{l}, err
+}
+
+func (s LightController_listAnimations_Params_List) At(i int) LightController_listAnimations_Params {
+	return LightController_listAnimations_Params{s.List.Struct(i)}
+}
+
+func (s LightController_listAnimations_Params_List) Set(i int, v LightController_listAnimations_Params) error {
+	return s.List.SetStruct(i, v.Struct)
+}
+
+func (s LightController_listAnimations_Params_List) String() string {
+	str, _ := text.MarshalList(0x879df598dd94462d, s.List)
+	return str
+}
+
+// LightController_listAnimations_Params_Future is a wrapper for a LightController_listAnimations_Params promised by a client call.
+type LightController_listAnimations_Params_Future struct{ *capnp.Future }
+
+func (p LightController_listAnimations_Params_Future) Struct() (LightController_listAnimations_Params, error) {
+	s, err := p.Future.Struct()
+	return LightController_listAnimations_Params{s}, err
+}
+
+type LightController_listAnimations_Results struct{ capnp.Struct }
+
+// LightController_listAnimations_Results_TypeID is the unique identifier for the type LightController_listAnimations_Results.
+const LightController_listAnimations_Results_TypeID = 0xbc1a47de96b1fb62
+
+func NewLightController_listAnimations_Results(s *capnp.Segment) (LightController_listAnimations_Results, error) {
+	st, err := capnp.NewStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return LightController_listAnimations_Results{st}, err
+}
+
+func NewRootLightController_listAnimations_Results(s *capnp.Segment) (LightController_listAnimations_Results, error) {
+	st, err := capnp.NewRootStruct(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1})
+	return LightController_listAnimations_Results{st}, err
+}
+
+func ReadRootLightController_listAnimations_Results(msg *capnp.Message) (LightController_listAnimations_Results, error) {
+	root, err := msg.Root()
+	return LightController_listAnimations_Results{root.Struct()}, err
+}
+
+func (s LightController_listAnimations_Results) String() string {
+	str, _ := text.Marshal(0xbc1a47de96b1fb62, s.Struct)
+	return str
+}
+
+func (s LightController_listAnimations_Results) Names() (capnp.TextList, error) {
+	p, err := s.Struct.Ptr(0)
+	return capnp.TextList{List: p.List()}, err
+}
+
+func (s LightController_listAnimations_Results) HasNames() bool {
+	return s.Struct.HasPtr(0)
+}
+
+func (s LightController_listAnimations_Results) SetNames(v capnp.TextList) error {
+	return s.Struct.SetPtr(0, v.List.ToPtr())
+}
+
+// NewNames sets the names field to a newly
+// allocated capnp.TextList, preferring placement in s's segment.
+func (s LightController_listAnimations_Results) NewNames(n int32) (capnp.TextList, error) {
+	l, err := capnp.NewTextList(s.Struct.Segment(), n)
+	if err != nil {
+		return capnp.TextList{}, err
+	}
+	err = s.Struct.SetPtr(0, l.List.ToPtr())
+	return l, err
+}
+
+// LightController_listAnimations_Results_List is a list of LightController_listAnimations_Results.
+type LightController_listAnimations_Results_List struct{ capnp.List }
+
+// NewLightController_listAnimations_Results creates a new list of LightController_listAnimations_Results.
+func NewLightController_listAnimations_Results_List(s *capnp.Segment, sz int32) (LightController_listAnimations_Results_List, error) {
+	l, err := capnp.NewCompositeList(s, capnp.ObjectSize{DataSize: 0, PointerCount: 1}, sz)
+	return LightController_listAnimations_Results_List{l}, err
+}
+
+func (s LightController_listAnimations_Results_List) At(i int) LightController_listAnimations_Results {
+	return LightController_listAnimations_Results{s.List.Struct(i)}
+}
+
+func (s LightController_listAnimations_Results_List) Set(i int, v LightController_listAnimations_Results) error {
+	return s.List.SetStruct(i, v.Struct)
+}
+
+func (s LightController_listAnimations_Results_List) String() string {
+	str, _ := text.MarshalList(0xbc1a47de96b1fb62, s.List)
+	return str
+}
+
+// LightController_listAnimations_Results_Future is a wrapper for a LightController_listAnimations_Results promised by a client call.
+type LightController_listAnimations_Results_Future struct{ *capnp.Future }
+
+func (p LightController_listAnimations_Results_Future) Struct() (LightController_listAnimations_Results, error) {
+	s, err := p.Future.Struct()
+	return LightController_listAnimations_Results{s}, err
+}
+
+const schema_d91d0c9586c33e4f = "x\xda\x9cV\x7fl\x14i\x19~\x9fov:\xbb\x9b" +
+	"\xb6\xcb8%\x84\x12\xb3)\x94\x04\x0a-t\xabQZ" +
+	"`\x17J\xe5w\xdci $*\xd1m\x19\xcb\xc2\xec" +
+	"l\xd9\x99\x15KT@\x03\x04\x0dF\x88\x15\x89!\x06" +
+	"\x05\x93J*\"\x1abC \x11\x09\xa6\x0aE\x14\x12" +
+	"b\xa8w\x84\xfb\x83\xcb\xe5\x8e\\B\x8e@a.\xdf" +
+	"\xec\xce\xec\x94\xc2\xb5\xcb\x7f3\xdf\xfb=\xdf\xfb\xeb{" +
+	"\x9f\xe7[\xfc@H\xb0f\xf1\\\x98H\xfd\x9eXa" +
+	"o\xbe\xb1\xf4\x9f]\x07w\xec#\xb9\x01D\x01\x89\xa8" +
+	"e\x99\xf8>(`?\x9dq>\xf9\x87\xb6\x8b~K" +
+	"\xb3\xf8'nyG\xbf\xfc\xf5\xd1--\xfbIm\x80" +
+	"k\xaa\x13\x1f\x80\xa0|Q\x8c\x13\xec\x1d\x1f\xdf\x1d\xeb" +
+	"\x7f\xde\xf4#\x1ft\xb38\xc4\xa1\x8d_\xf9\xf9\xfd_" +
+	">9y\xc8g\xe9\x10\x19\xa3\x80=\xe3l\xf4\xc8\xd2" +
+	"\xf6\xf5?\xf6Y\x96\x88\xcf8\xe6\xc5\x95\xa7\x9bf\x99" +
+	";\x8e\xf8,\x8d\xe2mn\xb9P{\xfc\xec\xe8\xaf~" +
+	"\xe2\xb7\xd4\x89\xc3\xdc\xd2\x16N\x7f\xe3\x8f\xc2O\x8f\x92" +
+	"Z\x0b\xd8_]~\xf5`\x7f\xe5\xe7\xefQ\x07$\x01" +
+	"h\x99.\xd6B\x99+JDJ\x9dx\x8e`\xefI" +
+	"\xf5|4\xeb\xf8\x0fO\xfb\x0e\x1a,\xe4\xbaz\xf4\xc9" +
+	"\x96ymw~\xe7\xcf\xf5$7A\x19tr\xad\xda" +
+	"5\xb0u\xfd\xcf\xe4A\x1f\xf4\x86\x18\xe3\x19-Z\xb0" +
+	"\xb1O\xba\x99>Or\xadP\x0a\x81\xd0rM\xec\x84" +
+	"r\x8f\xbbo\xb9#^g\xca\x80$\x11\xd95\x0f\xff" +
+	"\xd1\xb4\xfb\xbb\x8f/\xbc\x12\xb2s\xe2Q\x89A9\xc9" +
+	"\xb7)'$\x1ep\xd7\xf3\xf3\xbf\x18]]{\xa9\xe0" +
+	"U\x84\xd3\x9d`\x98\x11\x94\xb5A\x1e\xd6\x88\x91X\x9e" +
+	"\\v\xf9\xaa/\xac\xbe\xa0S\xe8G\xdf\xfa\xdf\xad\xd0" +
+	"\xcd\xba\xe1\"\x94qS&X\xcb\xa1\x07\x82\xbb\x09\xf6" +
+	"\xbe\xa1\x99\xe2'\x03\xf2\xbf|\xd0\xf7\x82N\xf7~\xd0" +
+	"wi,tk\xec\x06\xa9s\x80R\x8d\xa7C\x02\xcf" +
+	"%\xb8\x8e\x97\xe5]\xe7\x90\xb9W*n\x9d\xbd\xad\x8c" +
+	"\xf8\xeb\xb6,4\x9b{\xd9\x1c\xe2\x01\xfe}\xe7\xb9\xb1" +
+	"\xfe\x91C\xff\xf5g\x90\x0f\x0d\xf3\x13\x0e;\x1bb\xed" +
+	"\x1f\x1e\xfbs\xbe\xee\xae/\x8c\x81\x90\x13\xc6oO\xdf" +
+	"}\xb85$\xfc\x9f\xe4Z\xe6/\xacr\"\xf4L9" +
+	"\x13\xe2U:\x15\xfa\x12\xc1\xd6O}\x90\xa9\xe8\xdf\xf9" +
+	"\xd0\x9f\xea\x99\xd0\xef\xb9\x8f\xbf\x84x\x94C\xffy|" +
+	"qdU\xec\x91?\x88\xe9a\xa7\xbbs\xc3<\x88\xeb" +
+	"C\x0b\xea\xda\xc4\x17\xe36t\x84\x1bx\x1a[\x9d\x0d" +
+	"s\x86\xa3\xfb\xb7\xf4\xfc\xfa\xa5\x7f\xc3\xf7\xc3\x7f\xe3'" +
+	"\x1c\x09\xc7\xa9\xd1\xd6\xd3=\xdb-\xf3\x9b\xdd\x15\xa9^" +
+	"\xa3wQ\xe1\xaf\xa9\x9b\xff\xb4n\xe0?\xedY\xc3\xca" +
+	"eu]\xcb5u\xe5\xf8\x82\xa1\x99f}\xa7fF" +
+	"\xf2\xbaezpqr\xb8\xa9Y\xf5\x9dZ\xd4\x1c\x87" +
+	"+\xcfm2\x95\x93R\x19S\x0d\x08\x01\xa2\x00\x88\xe4" +
+	"\xaa\x18\x91\x1a\x14\xa0\xd60Du\xed;\x9a\x8e\x0ab" +
+	"\xa8\xe0\xd5-#\xb4\xed\xd9\xdd\xf5\x9dqm|l\xd5" +
+	"\x93\x03\xf5\xb4i\xad0\xd2\x99\x94\x95\xce\x1aN|\xa9" +
+	"\x8cI\xee\x01Sple{=|}\xbc\x80/\xa7" +
+	"8)\x07\xac\xf1\x86\xe4u\x0beaM\xcdZ\xa1\xeb" +
+	"E\xa8I\xe4a\x85\x89\xd8d\xd6L[i!k$" +
+	"\x01\xb5R\x08T\xda\xb6S\xff\x8eV\"5!@\xdd" +
+	"\xc0P\x85\x976P\x9aBym\x8cX\x15{a\xd7" +
+	"@ \x92\x9b\x1b\x88\xd4\x85\x02\xd45\x0cq3m\xf4" +
+	"\xe8\x1a$b\x90\x08\xd1\\\xca\xe8\xd1\"\xbc\x9a\xa8&" +
+	"$\x058\x96\xea\xb7\xe8b2:\xbe\x86S\xc0e\xb2" +
+	"\xdb4\x17\xe7\xbfZ\x0d\xa5\xab\x15\xe1{\x10)\x8d6" +
+	"\x01\x11_t\xd2\xe4^\xf2FN\xebI\x9b\x96\x96+" +
+	"5|\xc28\x04&;\x079\xde\x80\x85\x82\xc8\xdbU" +
+	"\xa4\x0f\xb8R\xa8\xa8\x98ML\xe9\x80\x84\x12w\xc0%" +
+	"*e\x09\x1a\x88)\x8d\x90\xc0<\x8d\x84+\xb0J\x1d" +
+	"\xbeFL\x99\x09\x09\x82\xa7*p\xb9V\xa9r\xb0\x80" +
+	"\x84\x80\xa7FpuT~\xd2@L~$A\xf4\xf8" +
+	"\x06\xae\xf6\xc9\xf7[\x89\xc9\xff\x96P\xe1Q*\\\xc5" +
+	"\x94\xaf\xad$&\xffU\x82\xe4\xc9+\\a\x90\x07s" +
+	"\xc4\xe43\x12\x82\x9e\"\xc0%m\xf9\xc41br\xbf" +
+	"\x84\x90G\x80puN>\xfc\x1bb\xf2\x01\x09aO" +
+	"\xcc\xe1\xaa\x91\xdc\xb7\x87\x98\xbcK\x92L\xcdJ \xf2" +
+	"\xed\xb4\xae'`\xbb\xfcB\x82i&\x0a\x9dN \xc2" +
+	"/S\x02\xf1\xc2\x8c$\xb0\xb78h\x09\xd8\xee\xccR" +
+	"\xd4ib\x02\xb6\xdbX\xb8\x9d\x05_u\x1b\x0e\xb7\xe3" +
+	"Ra\xb7\xcb\x19\x14/\xb0F\x02I\xe0\xb3f\xaf=" +
+	"\xabgsT\x1c\xbc\xe2\xe5\xec\xf8\\i\xeed\xa0\x86" +
+	"\x8b\x98\xbc\x96/\xae\x12\xa0&\x19d\xc6j\xc0\x88\xe4" +
+	"\x8d|q\x8d\x00u\x13\x03r.;\xa2\xc7\xfb\xea\x9a" +
+	"\xc0\x98R\xd9\xc4\xe7q\xc8\xeb\xa8\xb9\x9e!j\xa42" +
+	"\x9a\xe9\xcev\xe5+\xb3\x1d)\x97(]wS'\xda" +
+	"\x89\xb3\xc7\xb9V\xc8\x98j\xd0\x0bx>\x1f\xf8z\x01" +
+	"\xeab_M\x1b;\x8b\xac\xf5e\x86\x08\xcf\xc2\x89\xbe" +
+	"\x92`\xa7\x8aG\x11\x0cT\x11CUyl\xe5\xb0\xce" +
+	"\x04\xcd\x09\xbc\x89z\xb3F\x93C\x92NM\x03D\x85" +
+	"\xe8\xe6\xc7\xfc!\x17;\xde8\x9bH\x9d'@\xfd\x02" +
+	"C\xd4\xb4R9\xcb\xe5YI3\xb6\xb9\xdf\xe5t\xfb" +
+	"u\xcce\xe6%\xdd\x1a\xc7\x97+K|\xb9\xd7\xccw" +
+	"wk\xa6\x09\x10\x03|\xce\xca\x90\xb4\xa2\x98\xd2\x9b(" +
+	"y\\3\xca(<\x1f\xfb\x89\x85g\xaf\x02\xe3\xbd\xad" +
+	"\x1b\xb3\xdb4>vA\xa7\xacr\x8c\xb3\xbe\x1cZI" +
+	"\x14\xdd\x95\xd7\xf2\xda\xde\xb4aZ)\xc3*\xf7\x11\x94" +
+	"LE\x1c\xa9\xf1\xdd\xbcu\xa5\x8ey7\xaf9V\xba" +
+	"yvo\xf1\x12\x10\x11\xa6\x95\x9e\xb6\x04L#D\xbb" +
+	"9C`Z\xe9\x8d^X/\xbb*\xaf\x11A\xff\xfb" +
+	"j27o\xa9\x82n=\xca\xe9\xf3\xd4\x9f7\xc5k" +
+	"\xe4?\xbd\xb5DLq''\x8f\x99\xc6\xe7VM\xf8" +
+	"4\x00\x00\xff\xff7Ah\x98"
 
 func init() {
 	schemas.Register(schema_d91d0c9586c33e4f,
@@ -1474,17 +2387,27 @@ func init() {
 		0x80b73bae50b117f8,
 		0x813357de5bbe6ce0,
 		0x832efb95fcd6f26a,
+		0x879df598dd94462d,
+		0x8a4b433c8d1fab17,
+		0x8d6a731b54f8bffd,
 		0x8d8b9bdeab971ab3,
 		0x918e03b05c690a3b,
 		0xa482971bef67617a,
 		0xa6d53b2857f5de47,
+		0xad11904b5da9710d,
 		0xb169ce07794d2b2f,
 		0xb3f078772ec8e414,
+		0xbc1a47de96b1fb62,
+		0xc3be3d503e406ecf,
+		0xca21ce09d0db60e9,
 		0xcc11a9f70519ba80,
 		0xcdfcd009fcbc797e,
+		0xcf13d2abd006bf25,
+		0xd487cf95fcaf6bc4,
 		0xd62175b492ee4332,
 		0xdf03095de4d6a4a3,
 		0xe46b95066deca16c,
 		0xe93244cfb7f0d3ba,
+		0xe9fd053b212bbac7,
 		0xfe9f6757811fca23)
 }

@@ -38,6 +38,12 @@ const (
 	MessagePresetUsed
 	// MessageApplyPreset displays a preset onto the strip
 	MessageApplyPreset
+	// MessageAnimationStatus notifies clients about the current animation state
+	MessageAnimationStatus
+	// MessageStartAnimation is used to start an animation by name
+	MessageStartAnimation
+	// MessageStopAnimation is used to stop the current animation (if it's running)
+	MessageStopAnimation
 )
 
 // Message is used to determine the type of message to decode as
@@ -178,4 +184,25 @@ func NewPresetUsed(name string) PresetUsed {
 // ApplyPreset is received when a client wishes to apply a preset to the strip
 type ApplyPreset struct {
 	Name string `json:"name"`
+}
+
+// AnimationStatus is used to broadcast the current status of the animation. When an animation is stopped, the name
+// is populated with an empty string.
+type AnimationStatus struct {
+	Type    MessageType `json:"type"`
+	Name    string      `json:"name"`
+	Running bool        `json:"running"`
+}
+
+func NewAnimationStatus(name string, running bool) AnimationStatus {
+	return AnimationStatus{
+		Type:    MessageAnimationStatus,
+		Name:    name,
+		Running: running,
+	}
+}
+
+// StartAnimation is received when a client wishes to run a registered animation
+type StartAnimation struct {
+	Name string
 }
