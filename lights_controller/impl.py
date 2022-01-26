@@ -1,8 +1,9 @@
 from typing import List
 
 from lights_capnp import lights
-from . import ANIMATOR, pixels
+from . import pixels
 from .animation import Animation, ValidationException
+from .animator import ANIMATOR
 from .logger import get as get_logger
 
 logger = get_logger("server")

@@ -2,7 +2,8 @@ import asyncio
 import signal
 import socket
 
-from lights_controller import logger, ANIMATOR, SETTINGS
+from lights_controller import logger, SETTINGS
+from lights_controller.animator import ANIMATOR
 from lights_controller.server import on_connection
 
 
@@ -52,6 +53,9 @@ def main():
 
     log.info("starting controller")
 
+    # Launch the animation controller
+    ANIMATOR.start()
+
     # Completion callback
     def stop_loop_on_completion(_):
         loop.stop()
@@ -80,6 +84,10 @@ def main():
         log.info("cleaning up tasks")
         cancel_tasks(loop)
 
+    # Stop running animations
+    log.info("waiting for animator to exit...")
+    ANIMATOR.stop()
+
     log.info("server exited gracefully. good bye!")
 
     # Shutdown the event loop and cleanup tasks
@@ -88,9 +96,6 @@ def main():
 
         # Stop async generators
         loop.run_until_complete(loop.shutdown_asyncgens())
-
-        # Stop running animations
-        ANIMATOR.stop()
     finally:
         loop.close()
 

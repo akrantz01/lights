@@ -21,7 +21,10 @@ class Animator(Thread):
         while self.running:
             if self.item is None:
                 # If we don't have an animation, block until we have one
-                self.item = _queue.get()
+                try:
+                    self.item = _queue.get(block=False, timeout=10)
+                except Empty:
+                    pass
             else:
                 try:
                     # Execute an animation frame
@@ -54,11 +57,4 @@ class Animator(Thread):
         self.join()
 
 
-def launch() -> Animator:
-    """
-    Launch an instance of the animator
-    :return: the animator
-    """
-    animator = Animator()
-    animator.start()
-    return animator
+ANIMATOR = Animator()

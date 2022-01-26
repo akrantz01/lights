@@ -1,4 +1,3 @@
-from . import animator, settings
+from . import settings
 
-ANIMATOR = animator.launch()
 SETTINGS = settings.load()
