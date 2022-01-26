@@ -73,6 +73,6 @@ class LightControllerImpl(lights.LightController.Server):
         except ValidationException as e:
             logger.warn(f"failed to load animation: {e}")
 
-    def unregisterAnimation(self, name: str):
+    def unregisterAnimation(self, name: str, **_):
         Animation.remove(name)
         logger.info(f"unloaded animation: '{name}'")
