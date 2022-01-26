@@ -37,34 +37,34 @@ enum Mode @0xdf03095de4d6a4a3 {
 interface LightController @0xb169ce07794d2b2f {
   # Controls an individual strip of NeoPixels
 
-  set @0 (position: Position, color: Color);
+  set @0 (position :Position, color :Color);
   # Set the color of one or many pixels
 
-  fill @1 (color: Color);
+  fill @1 (color :Color);
   # Fill the entire strip with the given color. Equivalent to setting a range from
   # the start to end as a single color.
 
-  brightness @2 (level: UInt8);
+  brightness @2 (level :UInt8);
   # Set the brightness of the strip. Only values 0-100 inclusive are accepted.
 
-  mode @3 (mode: Mode);
+  mode @3 (mode :Mode);
   # Set the display mode for the strip.
 
   show @4 ();
   # Write any queued changes to the strip. This is a no-op if the mode is set to instant.
 
-  setAll @5 (colors: List(Color));
+  setAll @5 (colors :List(Color));
   # Set the color of all pixels at the same time. The length of `colors` must be the same as the number of pixels.
 
-  animate @6 (name: Text);
+  animate @6 (name :Text);
   # Run the specified animation by name. Once started, no other actions can be performed until stopped.
 
   stopAnimation @7 ();
   # Stop the currently running animation. This method is idempotent.
 
-  registerAnimation @8 (name: Text, animation: Data);
+  registerAnimation @8 (name :Text, animation :Data);
   # Register an animation and assign a name to it.
 
-  unregisterAnimation @9 (name: Text);
+  unregisterAnimation @9 (name :Text);
   # Remove an animation from the registry by name.
 }
