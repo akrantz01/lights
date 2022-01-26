@@ -21,6 +21,9 @@ class Settings:
     strip_density: int
     strip_length: int
 
+    # Whether to run in development mode
+    development: bool
+
     @property
     def led_count(self):
         return self.strip_density * self.strip_length
@@ -35,6 +38,14 @@ def load() -> Settings:
     except ValueError:
         level = logging.getLevelName(raw_level)
 
+    raw_development = environ.get("LIGHTS_DEVELOPMENT", "no").lower()
+    development = (
+        raw_development == "yes"
+        or raw_development == "y"
+        or raw_development == "true"
+        or raw_development == "t"
+    )
+
     return Settings(
         controller_host=environ.get("LIGHTS_CONTROLLER_HOST", "127.0.0.1"),
         controller_port=int(environ.get("LIGHTS_CONTROLLER_PORT", 30000)),
@@ -44,4 +55,5 @@ def load() -> Settings:
         strip_density=int(environ.get("LIGHTS_STRIP_DENSITY", 30)),
         strip_length=int(environ.get("LIGHTS_STRIP_LENGTH", 5)),
         log_level=level,
+        development=development,
     )

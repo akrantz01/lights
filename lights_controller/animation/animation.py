@@ -1,10 +1,14 @@
 import os
 from wasmer import engine, Function, Instance, Module, Store
-from wasmer_compiler_cranelift import Compiler
 
 from .. import SETTINGS
 from . import imports
 from .exceptions import InvalidEntrypoint, MethodNotFound
+
+if SETTINGS.development:
+    from wasmer_compiler_cranelift import Compiler
+else:
+    from wasmer_compiler_llvm import Compiler
 
 
 class Animation(object):

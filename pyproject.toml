@@ -20,6 +20,7 @@ adafruit-circuitpython-neopixel = "^6.2.1"
 python-dotenv = "^0.19.0"
 wasmer = "^1.1.0"
 wasmer-compiler-cranelift = "^1.1.0"
+wasmer-compiler-llvm = "^1.1.0"
 
 [tool.poetry.dev-dependencies]
 black = "^21.9b0"
