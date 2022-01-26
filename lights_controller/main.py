@@ -56,6 +56,10 @@ def main():
     # Launch the animation controller
     ANIMATOR.start()
 
+    # Ensure directory exists prior to running
+    if not SETTINGS.animations_path.exists():
+        SETTINGS.animations_path.mkdir(parents=True, exist_ok=True)
+
     # Completion callback
     def stop_loop_on_completion(_):
         loop.stop()
