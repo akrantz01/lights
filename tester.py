@@ -1,12 +1,9 @@
 import capnp
 import click
-from dotenv import load_dotenv
 import typing as t
 
 from lights_capnp import lights
 from lights_controller import SETTINGS
-
-load_dotenv()
 
 
 class MutuallyExclusiveOption(click.Option):
@@ -191,6 +188,7 @@ def set_all(obj: lights.LightController, color: t.List[t.Dict[str, int]]):
 )
 @click.pass_obj
 def fill(obj: lights.LightController, color: t.Dict[str, int]):
+    print(color)
     obj.fill(color).wait()
 
 
@@ -218,6 +216,39 @@ def set_mode(obj: lights.LightController, mode: str):
 @click.pass_obj
 def show(obj: lights.LightController):
     obj.show().wait()
+
+
+@main.group(help="Manage strip animations")
+def animation():
+    pass
+
+
+@animation.command(help="Start an animation")
+@click.argument("name", required=True)
+@click.pass_obj
+def start(obj: lights.LightController, name: str):
+    obj.animate(name).wait()
+
+
+@animation.command(help="Stop the currently running animation")
+@click.pass_obj
+def stop(obj: lights.LightController):
+    obj.stopAnimation().wait()
+
+
+@animation.command(help="Register a new animation")
+@click.argument("name", required=True)
+@click.argument("wasm", required=True, type=click.File("rb"))
+@click.pass_obj
+def register(obj: lights.LightController, name: str, wasm: t.BinaryIO):
+    obj.registerAnimation(name, wasm.read()).wait()
+
+
+@animation.command(help="Unregister an animation")
+@click.argument("name", required=True)
+@click.pass_obj
+def unregister(obj: lights.LightController, name: str):
+    obj.unregisterAnimation(name).wait()
 
 
 if __name__ == "__main__":
