@@ -76,6 +76,13 @@ func Handler(hub *Hub) func(w http.ResponseWriter, r *http.Request) {
 			}
 
 			client.send <- NewCurrentPixels(pixels)
+		} else if mode == database.PixelModeAnimation {
+			animation, err := db.GetCurrentAnimation()
+			if err != nil {
+				logger.Error("failed to get current animation", zap.Error(err))
+			}
+
+			client.send <- NewAnimationStatus(animation, len(animation) != 0)
 		}
 	}
 }

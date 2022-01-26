@@ -62,7 +62,7 @@ func (d *Database) SetCurrentAnimation(name string) error {
 }
 
 // GetCurrentAnimation gets the currently running animation
-func (d *Database) GetCurrentAnimation() (*string, error) {
+func (d *Database) GetCurrentAnimation() (string, error) {
 	var animation string
 
 	err := d.db.View(func(txn *badger.Txn) error {
@@ -83,10 +83,5 @@ func (d *Database) GetCurrentAnimation() (*string, error) {
 		return nil
 	})
 
-	// Convert to string pointer
-	if len(animation) == 0 {
-		return nil, err
-	} else {
-		return &animation, err
-	}
+	return animation, err
 }
