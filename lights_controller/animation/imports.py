@@ -1,3 +1,4 @@
+import time
 from wasmer import Function, FunctionType, ImportObject, Store, Type
 
 from .. import pixels
@@ -21,10 +22,10 @@ def register(store: Store) -> ImportObject:
                 pixels.fill,
                 FunctionType(params=[Type.I32, Type.I32, Type.I32], results=[]),
             ),
-            "instant_mode": Function(
+            "mode_instant": Function(
                 store, lambda: pixels.mode(True), FunctionType(params=[], results=[])
             ),
-            "queue_mode": Function(
+            "mode_queue": Function(
                 store, lambda: pixels.mode(False), FunctionType(params=[], results=[])
             ),
             "set": Function(
@@ -35,6 +36,9 @@ def register(store: Store) -> ImportObject:
                 ),
             ),
             "show": Function(store, pixels.show, FunctionType(params=[], results=[])),
+            "sleep": Function(
+                store, time.sleep, FunctionType(params=[Type.F64], results=[])
+            ),
         },
     )
     return imports
