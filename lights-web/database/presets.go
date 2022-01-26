@@ -13,7 +13,7 @@ const presetPrefix = "preset-"
 func (d *Database) ListPresets() ([]string, error) {
 	var presets []string
 
-	err := d.db.Update(func(txn *badger.Txn) error {
+	err := d.db.View(func(txn *badger.Txn) error {
 		iterator := txn.NewIterator(badger.DefaultIteratorOptions)
 		defer iterator.Close()
 
