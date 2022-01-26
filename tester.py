@@ -241,7 +241,9 @@ def stop(obj: lights.LightController):
 @click.argument("wasm", required=True, type=click.File("rb"))
 @click.pass_obj
 def register(obj: lights.LightController, name: str, wasm: t.BinaryIO):
-    obj.registerAnimation(name, wasm.read()).wait()
+    result = obj.registerAnimation(name, wasm.read()).wait()
+    if not result.success:
+        click.echo("Registration unsuccessful")
 
 
 @animations.command(help="Unregister an animation")

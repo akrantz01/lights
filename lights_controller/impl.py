@@ -66,13 +66,15 @@ class LightControllerImpl(lights.LightController.Server):
         ANIMATOR.pause()
         logger.info("stopped the current animation")
 
-    def registerAnimation(self, name: str, animation: bytes, **_):
+    def registerAnimation(self, name: str, animation: bytes, **_) -> bool:
         try:
             compiled = Animation.build(animation)
             compiled.save(name)
             logger.info(f"loaded new animation '{name}'")
+            return True
         except ValidationException as e:
             logger.warn(f"failed to load animation: {e}")
+            return False
 
     def unregisterAnimation(self, name: str, **_):
         Animation.remove(name)

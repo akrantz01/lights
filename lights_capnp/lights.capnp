@@ -62,7 +62,7 @@ interface LightController @0xb169ce07794d2b2f {
   stopAnimation @7 ();
   # Stop the currently running animation. This method is idempotent.
 
-  registerAnimation @8 (name :Text, animation :Data);
+  registerAnimation @8 (name :Text, animation :Data) -> (success :Bool);
   # Register an animation and assign a name to it.
 
   unregisterAnimation @9 (name :Text);
