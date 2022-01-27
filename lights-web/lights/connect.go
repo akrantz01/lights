@@ -8,6 +8,7 @@ import (
 )
 
 // Connect starts an RPC connection to the controller
+// TODO: handle reconnections
 func Connect(address string) (LightController, error) {
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
