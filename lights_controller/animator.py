@@ -2,6 +2,7 @@ from queue import Empty, SimpleQueue
 from threading import Thread
 from typing import Optional
 
+from . import pixels
 from .animation import Animation
 
 _queue = SimpleQueue()
@@ -62,6 +63,7 @@ class Animator(Thread):
         Stop the currently running animation
         """
         self.item = None
+        pixels.mode(True)
 
     def stop(self):
         """

@@ -1,4 +1,5 @@
 import board
+from functools import wraps
 import neopixel
 from threading import Lock
 
@@ -18,6 +19,7 @@ def with_lock(func):
     :return: whether the operation was successful
     """
 
+    @wraps(func)
     def wrapper(*args, **kwargs):
         if not lock.acquire(blocking=False):
             return False
