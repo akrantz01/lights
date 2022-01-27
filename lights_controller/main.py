@@ -1,56 +1,12 @@
-import asyncio
-import signal
-import socket
+import capnp
 
 from lights_controller import logger, SETTINGS
 from lights_controller.animator import ANIMATOR
-from lights_controller.server import on_connection
-
-
-def cancel_tasks(loop: asyncio.AbstractEventLoop):
-    # Get all the tasks
-    tasks = {t for t in asyncio.all_tasks(loop=loop) if not t.done()}
-
-    if not tasks:
-        return
-
-    # Cancel the tasks
-    for task in tasks:
-        task.cancel()
-
-    # Wait until tasks are completed
-    loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=True))
-
-    # Ensure all tasks canceled gracefully
-    for task in tasks:
-        if task.cancelled():
-            continue
-        if task.exception() is not None:
-            loop.call_exception_handler(
-                {
-                    "message": "Unhandled exception during shutdown",
-                    "exception": task.exception(),
-                    "task": task,
-                }
-            )
-
-
-async def start_listener():
-    listener = await asyncio.start_server(
-        on_connection,
-        SETTINGS.controller_host,
-        str(SETTINGS.controller_port),
-        family=socket.AF_INET,
-    )
-
-    async with listener:
-        await listener.serve_forever()
+from lights_controller.impl import LightControllerImpl
 
 
 def main():
-    loop = asyncio.get_event_loop()
     log = logger.get()
-
     log.info("starting controller")
 
     # Launch the animation controller
@@ -60,48 +16,22 @@ def main():
     if not SETTINGS.animations_path.exists():
         SETTINGS.animations_path.mkdir(parents=True, exist_ok=True)
 
-    # Completion callback
-    def stop_loop_on_completion(_):
-        loop.stop()
-
-    # Attempt to register signal handlers
-    try:
-        loop.add_signal_handler(signal.SIGINT, lambda: loop.stop())
-        loop.add_signal_handler(signal.SIGTERM, lambda: loop.stop())
-    except NotImplemented:
-        pass
-
-    # Start the server
-    future = asyncio.ensure_future(start_listener(), loop=loop)
-    future.add_done_callback(stop_loop_on_completion)
+    # Initialize the server
+    address = f"{SETTINGS.controller_host}:{SETTINGS.controller_port}"
+    server = capnp.TwoPartyServer(socket=address, bootstrap=LightControllerImpl())
 
     # Run until complete
     try:
-        log.info(
-            f"server started on {SETTINGS.controller_host}:{SETTINGS.controller_port}"
-        )
-        loop.run_forever()
+        log.info(f"server started on {address}")
+        server.run_forever()
     except KeyboardInterrupt:
-        log.info("received termination signal")
-    finally:
-        future.remove_done_callback(stop_loop_on_completion)
-        log.info("cleaning up tasks")
-        cancel_tasks(loop)
+        pass
 
     # Stop running animations
     log.info("waiting for animator to exit...")
     ANIMATOR.stop()
 
     log.info("server exited gracefully. good bye!")
-
-    # Shutdown the event loop and cleanup tasks
-    try:
-        cancel_tasks(loop)
-
-        # Stop async generators
-        loop.run_until_complete(loop.shutdown_asyncgens())
-    finally:
-        loop.close()
 
 
 if __name__ == "__main__":
