@@ -43,6 +43,20 @@ func (d *Database) AddAnimation(name string) error {
 	})
 }
 
+// GetAnimation retrieves all the details about an animation
+// Currently this is equivalent to an existence check
+func (d *Database) GetAnimation(name string) (string, error) {
+	// Build the key
+	key := []byte(animationPrefix)
+	key = append(key, []byte(name)...)
+
+	err := d.db.View(func(txn *badger.Txn) error {
+		_, err := txn.Get(key)
+		return err
+	})
+	return name, err
+}
+
 // RemoveAnimation deletes an animation from the database by name
 func (d *Database) RemoveAnimation(name string) error {
 	// Build the key

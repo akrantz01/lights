@@ -56,21 +56,12 @@ func create(w http.ResponseWriter, r *http.Request) {
 		schedule.Preset = nil
 
 		// Check that the animation exists
-		animations, err := db.ListAnimations()
-		if err != nil {
-			handlers.Respond(w, handlers.AsFatal())
-			zap.L().Named("schedules:create").Error("failed to list animations", zap.Error(err))
-			return
-		}
-		found := false
-		for _, animation := range animations {
-			if animation == *schedule.Animation {
-				found = true
-				break
-			}
-		}
-		if !found {
+		if _, err := db.GetAnimation(*schedule.Animation); err == database.ErrNotFound {
 			handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("animation not found"))
+			return
+		} else if err != nil {
+			handlers.Respond(w, handlers.AsFatal())
+			zap.L().Named("schedules:create").Error("failed to check existence of animation", zap.Error(err), zap.String("name", *schedule.Animation))
 			return
 		}
 	default:

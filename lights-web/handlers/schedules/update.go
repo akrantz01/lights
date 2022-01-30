@@ -83,6 +83,16 @@ func update(w http.ResponseWriter, r *http.Request) {
 	case database.ScheduleTypePreset:
 		if updatedFields.Preset != nil {
 			schedule.Preset = updatedFields.Preset
+
+			// Check the preset exists
+			if _, err := db.GetPreset(*schedule.Preset); err == database.ErrNotFound {
+				handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("preset not found"))
+				return
+			} else if err != nil {
+				handlers.Respond(w, handlers.AsFatal())
+				zap.L().Named("schedules:update").Error("failed to check existence of preset", zap.Error(err), zap.String("name", *schedule.Preset))
+				return
+			}
 		} else if schedule.Preset == nil {
 			handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("missing required field 'preset'"))
 			return
@@ -90,6 +100,16 @@ func update(w http.ResponseWriter, r *http.Request) {
 	case database.ScheduleTypeAnimation:
 		if updatedFields.Animation != nil {
 			schedule.Animation = updatedFields.Animation
+
+			// Check that the animation exists
+			if _, err := db.GetAnimation(*schedule.Animation); err == database.ErrNotFound {
+				handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("animation not found"))
+				return
+			} else if err != nil {
+				handlers.Respond(w, handlers.AsFatal())
+				zap.L().Named("schedules:update").Error("failed to check existence of animation", zap.Error(err), zap.String("name", *schedule.Animation))
+				return
+			}
 		} else if schedule.Animation == nil {
 			handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("missing required field 'animation'"))
 			return
