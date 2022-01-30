@@ -27,3 +27,9 @@ func (l loggerShim) Debugf(template string, args ...interface{}) {
 	msg := fmt.Sprintf(template, args...)
 	zap.L().WithOptions(zap.AddCallerSkip(1)).Debug(msg)
 }
+
+// buildKey creates a database key from a string prefix and the name
+func buildKey(base, name string) []byte {
+	key := []byte(base)
+	return append(key, []byte(name)...)
+}

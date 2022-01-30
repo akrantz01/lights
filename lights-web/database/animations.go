@@ -34,10 +34,7 @@ func (d *Database) ListAnimations() ([]string, error) {
 
 // AddAnimation inserts a new animation into the database
 func (d *Database) AddAnimation(name string) error {
-	// Build the key
-	key := []byte(animationPrefix)
-	key = append(key, []byte(name)...)
-
+	key := buildKey(animationPrefix, name)
 	return d.db.Update(func(txn *badger.Txn) error {
 		return txn.Set(key, []byte{})
 	})
@@ -46,10 +43,7 @@ func (d *Database) AddAnimation(name string) error {
 // GetAnimation retrieves all the details about an animation
 // Currently this is equivalent to an existence check
 func (d *Database) GetAnimation(name string) (string, error) {
-	// Build the key
-	key := []byte(animationPrefix)
-	key = append(key, []byte(name)...)
-
+	key := buildKey(animationPrefix, name)
 	err := d.db.View(func(txn *badger.Txn) error {
 		_, err := txn.Get(key)
 		return err
@@ -59,10 +53,7 @@ func (d *Database) GetAnimation(name string) (string, error) {
 
 // RemoveAnimation deletes an animation from the database by name
 func (d *Database) RemoveAnimation(name string) error {
-	// Build the key
-	key := []byte(animationPrefix)
-	key = append(key, []byte(name)...)
-
+	key := buildKey(animationPrefix, name)
 	return d.db.Update(func(txn *badger.Txn) error {
 		return txn.Delete(key)
 	})

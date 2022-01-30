@@ -41,10 +41,7 @@ func (d *Database) AddSchedule(schedule Schedule) error {
 		return err
 	}
 
-	// Build the key
-	key := []byte(schedulePrefix)
-	key = append(key, []byte(schedule.Name)...)
-
+	key := buildKey(schedulePrefix, schedule.Name)
 	return d.db.Update(func(txn *badger.Txn) error {
 		return txn.Set(key, encoded)
 	})
@@ -52,9 +49,7 @@ func (d *Database) AddSchedule(schedule Schedule) error {
 
 // GetSchedule retrieves a schedule from the database
 func (d *Database) GetSchedule(name string) (Schedule, error) {
-	// Create a new key
-	key := []byte(schedulePrefix)
-	key = append(key, []byte(name)...)
+	key := buildKey(schedulePrefix, name)
 
 	var schedule Schedule
 	err := d.db.View(func(txn *badger.Txn) error {
@@ -75,10 +70,7 @@ func (d *Database) GetSchedule(name string) (Schedule, error) {
 
 // RemoveSchedule deletes a schedule from the database by name
 func (d *Database) RemoveSchedule(name string) error {
-	// Build the key
-	key := []byte(schedulePrefix)
-	key = append(key, []byte(name)...)
-
+	key := buildKey(schedulePrefix, name)
 	return d.db.Update(func(txn *badger.Txn) error {
 		return txn.Delete(key)
 	})
