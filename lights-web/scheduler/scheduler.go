@@ -44,9 +44,9 @@ func New(timezoneName string, db *database.Database, actions chan rpc.Callable) 
 func (s *Scheduler) Add(name, at string, repeats database.ScheduleRepeats) error {
 	// Determine if we need to repeat this task
 	if repeats == 0 {
-		s.At(at).LimitRunsTo(1)
+		s.Every(1).Day().At(at).LimitRunsTo(1)
 	} else {
-		s.At(at).Every(1).Week()
+		s.Every(1).Week().At(at)
 
 		// Set the days of the week that should be repeated
 		if repeats&database.ScheduleRepeatsSunday == database.ScheduleRepeatsSunday {
@@ -112,7 +112,7 @@ func (s *Scheduler) LoadFromDatabase() error {
 		}
 	}
 
-	zap.L().Named("schedules:load").Info("loaded all schedules")
+	zap.L().Named("schedules:load").Info("loaded all schedules", zap.Int("count", len(schedules)))
 
 	return nil
 }

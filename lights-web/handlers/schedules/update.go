@@ -84,14 +84,14 @@ func update(w http.ResponseWriter, r *http.Request) {
 		if updatedFields.Preset != nil {
 			schedule.Preset = updatedFields.Preset
 		} else if schedule.Preset == nil {
-			handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("missing required field 'preset_name'"))
+			handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("missing required field 'preset'"))
 			return
 		}
 	case database.ScheduleTypeAnimation:
 		if updatedFields.Animation != nil {
 			schedule.Animation = updatedFields.Animation
-		} else if schedule.Color == nil {
-			handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("missing required field 'animation_name'"))
+		} else if schedule.Animation == nil {
+			handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("missing required field 'animation'"))
 			return
 		}
 	}
