@@ -188,7 +188,6 @@ def set_all(obj: lights.LightController, color: t.List[t.Dict[str, int]]):
 )
 @click.pass_obj
 def fill(obj: lights.LightController, color: t.Dict[str, int]):
-    print(color)
     obj.fill(color).wait()
 
 
