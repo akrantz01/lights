@@ -21,6 +21,7 @@ import (
 	"github.com/akrantz01/lights/lights-web/lights"
 	"github.com/akrantz01/lights/lights-web/logging"
 	"github.com/akrantz01/lights/lights-web/rpc"
+	"github.com/akrantz01/lights/lights-web/scheduler"
 	"github.com/akrantz01/lights/lights-web/ws"
 )
 
@@ -51,6 +52,17 @@ func main() {
 	// Start the action processor
 	actions, processorCancel := rpc.NewProcessor(db, lc)
 
+	// Start the schedule processor
+	s, err := scheduler.New(config.Timezone, db, actions)
+	if err != nil {
+		logger.Fatal("failed to setup scheduler", zap.Error(err))
+	}
+
+	// Load the pre-existing schedules
+	if err := s.LoadFromDatabase(); err != nil {
+		logger.Fatal("failed to load existing schedules", zap.Error(err))
+	}
+
 	// Start the websocket hub
 	hub := ws.NewHub()
 
@@ -64,6 +76,7 @@ func main() {
 	r.Use(middleware.Heartbeat("/ping"))
 	r.Use(database.WithDatabase(db))
 	r.Use(rpc.WithActions(actions))
+	r.Use(scheduler.WithScheduler(s))
 	r.Use(handlers.WithRequestContext(config.StripLength))
 
 	// Register routes
@@ -113,6 +126,7 @@ func main() {
 
 	processorCancel()
 
+	s.Stop()
 	hub.Stop()
 
 	if err := db.Close(); err != nil {

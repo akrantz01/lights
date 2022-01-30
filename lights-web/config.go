@@ -16,6 +16,7 @@ type Config struct {
 
 	DatabasePath string
 
+	Timezone    string
 	LogLevel    string
 	Development bool
 
@@ -52,6 +53,7 @@ func ReadConfig() (*Config, error) {
 		ListenAddr:     listenAddress,
 		ControllerAddr: controllerAddress,
 		DatabasePath:   getEnvOrDefault("LIGHTS_WEB_DATABASE_PATH", "./badger"),
+		Timezone:       getEnvOrDefault("LIGHTS_TIMEZONE", "UTC"),
 		LogLevel:       getEnvOrDefault("LIGHTS_LOG_LEVEL", "info"),
 		Development:    development,
 		StripLength:    uint16(stripDensity * stripLength),

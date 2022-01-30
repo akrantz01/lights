@@ -9,11 +9,13 @@ import (
 
 	"github.com/akrantz01/lights/lights-web/database"
 	"github.com/akrantz01/lights/lights-web/handlers"
+	"github.com/akrantz01/lights/lights-web/scheduler"
 )
 
 // Create a new schedule in the database
 func create(w http.ResponseWriter, r *http.Request) {
 	db := database.GetDatabase(r.Context())
+	s := scheduler.GetScheduler(r.Context())
 
 	var schedule database.Schedule
 	if err := json.NewDecoder(r.Body).Decode(&schedule); err != nil {
@@ -77,6 +79,13 @@ func create(w http.ResponseWriter, r *http.Request) {
 	}
 	if !valid {
 		handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("invalid request fields"))
+		return
+	}
+
+	// Add the schedule to the scheduler
+	if err := s.Add(schedule.Name, schedule.At, schedule.Repeats); err != nil {
+		handlers.Respond(w, handlers.AsFatal())
+		zap.L().Named("schedules:create").Error("failed to register schedule", zap.Error(err))
 		return
 	}
 

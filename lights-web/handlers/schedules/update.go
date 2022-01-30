@@ -9,6 +9,7 @@ import (
 
 	"github.com/akrantz01/lights/lights-web/database"
 	"github.com/akrantz01/lights/lights-web/handlers"
+	"github.com/akrantz01/lights/lights-web/scheduler"
 )
 
 // The body containing the fields that are allowed to be updated
@@ -25,6 +26,7 @@ type scheduleUpdate struct {
 func update(w http.ResponseWriter, r *http.Request) {
 	name := chi.URLParam(r, "name")
 	db := database.GetDatabase(r.Context())
+	s := scheduler.GetScheduler(r.Context())
 
 	// Ensure the schedule exists
 	schedule, err := db.GetSchedule(name)
@@ -90,6 +92,16 @@ func update(w http.ResponseWriter, r *http.Request) {
 			schedule.Animation = updatedFields.Animation
 		} else if schedule.Color == nil {
 			handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("missing required field 'animation_name'"))
+			return
+		}
+	}
+
+	// Update the schedule job if the repeated days or at changes
+	if updatedFields.At != nil || updatedFields.Repeats != nil {
+		s.Remove(schedule.Name)
+		if err := s.Add(schedule.Name, schedule.At, schedule.Repeats); err != nil {
+			handlers.Respond(w, handlers.AsFatal())
+			zap.L().Named("schedules:update").Error("failed to update job", zap.Error(err), zap.String("name", name))
 			return
 		}
 	}

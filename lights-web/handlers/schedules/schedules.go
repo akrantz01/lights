@@ -8,6 +8,7 @@ import (
 
 	"github.com/akrantz01/lights/lights-web/database"
 	"github.com/akrantz01/lights/lights-web/handlers"
+	"github.com/akrantz01/lights/lights-web/scheduler"
 )
 
 // Router registers all the methods for handling schedules
@@ -55,7 +56,12 @@ func read(w http.ResponseWriter, r *http.Request) {
 func remove(w http.ResponseWriter, r *http.Request) {
 	name := chi.URLParam(r, "name")
 	db := database.GetDatabase(r.Context())
+	s := scheduler.GetScheduler(r.Context())
 
+	// Remove from scheduler
+	s.Remove(name)
+
+	// Remove from database
 	if err := db.RemovePreset(name); err != nil {
 		handlers.Respond(w, handlers.AsFatal())
 		zap.L().Named("schedules:remove").Error("failed to delete schedule", zap.Error(err), zap.String("name", name))
