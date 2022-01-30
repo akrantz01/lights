@@ -62,7 +62,7 @@ func remove(w http.ResponseWriter, r *http.Request) {
 	s.Remove(name)
 
 	// Remove from database
-	if err := db.RemovePreset(name); err != nil {
+	if err := db.RemoveSchedule(name); err != nil {
 		handlers.Respond(w, handlers.AsFatal())
 		zap.L().Named("schedules:remove").Error("failed to delete schedule", zap.Error(err), zap.String("name", name))
 	} else {
