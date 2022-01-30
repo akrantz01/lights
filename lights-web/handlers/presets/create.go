@@ -8,12 +8,14 @@ import (
 
 	"github.com/akrantz01/lights/lights-web/database"
 	"github.com/akrantz01/lights/lights-web/handlers"
+	"github.com/akrantz01/lights/lights-web/logging"
 )
 
 // Create a new preset in the database
 func create(w http.ResponseWriter, r *http.Request) {
 	db := database.GetDatabase(r.Context())
 	length := handlers.GetStripLength(r.Context())
+	l := logging.GetLogger(r.Context(), "presets:create")
 
 	var preset database.Preset
 	if err := json.NewDecoder(r.Body).Decode(&preset); err != nil {
@@ -38,7 +40,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	// Save to database
 	if err := db.AddPreset(preset); err != nil {
 		handlers.Respond(w, handlers.AsFatal())
-		zap.L().Named("presets:create").Error("failed to insert into database", zap.Error(err), zap.String("name", preset.Name))
+		l.Error("failed to insert into database", zap.Error(err), zap.String("name", preset.Name))
 	} else {
 		handlers.Respond(w)
 	}

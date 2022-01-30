@@ -9,6 +9,7 @@ import (
 
 	"github.com/akrantz01/lights/lights-web/database"
 	"github.com/akrantz01/lights/lights-web/handlers"
+	"github.com/akrantz01/lights/lights-web/logging"
 )
 
 // The body containing the fields that are allowed to be updated
@@ -22,6 +23,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 	name := chi.URLParam(r, "name")
 	db := database.GetDatabase(r.Context())
 	length := handlers.GetStripLength(r.Context())
+	l := logging.GetLogger(r.Context(), "presets:update").With(zap.String("name", name))
 
 	// Ensure the preset exists
 	preset, err := db.GetPreset(name)
@@ -30,7 +32,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 		return
 	} else if err != nil {
 		handlers.Respond(w, handlers.AsFatal())
-		zap.L().Named("presets:update").Error("failed to get preset", zap.Error(err), zap.String("name", name))
+		l.Error("failed to get preset", zap.Error(err))
 		return
 	}
 
@@ -61,7 +63,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 	// Save the changes
 	if err := db.AddPreset(preset); err != nil {
 		handlers.Respond(w, handlers.AsFatal())
-		zap.L().Named("presets:update").Error("failed to update preset", zap.Error(err), zap.String("name", name))
+		l.Error("failed to update preset", zap.Error(err))
 	} else {
 		handlers.Respond(w)
 	}

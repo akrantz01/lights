@@ -8,6 +8,7 @@ import (
 
 	"github.com/akrantz01/lights/lights-web/database"
 	"github.com/akrantz01/lights/lights-web/handlers"
+	"github.com/akrantz01/lights/lights-web/logging"
 )
 
 // Router registers all the methods for handling presets
@@ -23,11 +24,12 @@ func Router(r chi.Router) {
 // Get a list of all presets
 func list(w http.ResponseWriter, r *http.Request) {
 	db := database.GetDatabase(r.Context())
+	l := logging.GetLogger(r.Context(), "presets:list")
 
 	presets, err := db.ListPresets()
 	if err != nil {
 		handlers.Respond(w, handlers.AsFatal())
-		zap.L().Named("presets:list").Error("failed to list presets", zap.Error(err))
+		l.Error("failed to list presets", zap.Error(err))
 	} else if presets == nil {
 		handlers.Respond(w, handlers.WithData([]string{}))
 	} else {
@@ -39,13 +41,14 @@ func list(w http.ResponseWriter, r *http.Request) {
 func read(w http.ResponseWriter, r *http.Request) {
 	name := chi.URLParam(r, "name")
 	db := database.GetDatabase(r.Context())
+	l := logging.GetLogger(r.Context(), "presets:read").With(zap.String("name", name))
 
 	preset, err := db.GetPreset(name)
 	if err == database.ErrNotFound {
 		handlers.Respond(w, handlers.WithStatus(404), handlers.WithError("not found"))
 	} else if err != nil {
 		handlers.Respond(w, handlers.AsFatal())
-		zap.L().Named("presets:read").Error("failed to read preset", zap.Error(err), zap.String("name", name))
+		l.Error("failed to read preset", zap.Error(err))
 	} else {
 		handlers.Respond(w, handlers.WithData(preset))
 	}
@@ -55,10 +58,11 @@ func read(w http.ResponseWriter, r *http.Request) {
 func remove(w http.ResponseWriter, r *http.Request) {
 	name := chi.URLParam(r, "name")
 	db := database.GetDatabase(r.Context())
+	l := logging.GetLogger(r.Context(), "presets:remove").With(zap.String("name", name))
 
 	if err := db.RemovePreset(name); err != nil {
 		handlers.Respond(w, handlers.AsFatal())
-		zap.L().Named("presets:remove").Error("failed to delete preset", zap.Error(err), zap.String("name", name))
+		l.Error("failed to delete preset", zap.Error(err))
 	} else {
 		handlers.Respond(w)
 	}

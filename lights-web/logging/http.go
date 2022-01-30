@@ -12,9 +12,9 @@ import (
 )
 
 // GetLogger retrieves the scoped logger for a given request
-func GetLogger(ctx context.Context) *zap.Logger {
+func GetLogger(ctx context.Context, name string) *zap.Logger {
 	entry := ctx.Value(middleware.LogEntryCtxKey).(*RequestLoggerEntry)
-	return entry.Logger
+	return entry.Logger.Named(name)
 }
 
 // Request is an HTTP middleware to log requests and responses

@@ -8,19 +8,15 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/akrantz01/lights/lights-web/handlers"
+	"github.com/akrantz01/lights/lights-web/logging"
 	"github.com/akrantz01/lights/lights-web/rpc"
 )
-
-// The body containing the fields that are allowed to be updated
-type animationUpsert struct {
-	Name string `json:"name"`
-	Wasm string `json:"wasm"`
-}
 
 // Update/create an animation
 func upsert(w http.ResponseWriter, r *http.Request) {
 	name := chi.URLParam(r, "name")
 	actions := rpc.GetActions(r.Context())
+	l := logging.GetLogger(r.Context(), "animations:upsert").With(zap.String("name", name))
 
 	// Limit uploads to 10MB
 	if err := r.ParseMultipartForm(10 << 20); err != nil {
@@ -32,7 +28,7 @@ func upsert(w http.ResponseWriter, r *http.Request) {
 	file, _, err := r.FormFile("wasm")
 	if err != nil {
 		handlers.Respond(w, handlers.AsFatal())
-		zap.L().Named("animations:upsert").Error("failed to open form file", zap.Error(err), zap.String("name", name))
+		l.Error("failed to open form file", zap.Error(err))
 		return
 	}
 	defer file.Close()
@@ -41,7 +37,7 @@ func upsert(w http.ResponseWriter, r *http.Request) {
 	wasm, err := ioutil.ReadAll(file)
 	if err != nil {
 		handlers.Respond(w, handlers.AsFatal())
-		zap.L().Named("animations:upsert").Error("failed to read file", zap.Error(err), zap.String("name", name))
+		l.Error("failed to read file", zap.Error(err))
 		return
 	}
 

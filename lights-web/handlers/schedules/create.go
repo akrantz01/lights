@@ -9,12 +9,14 @@ import (
 
 	"github.com/akrantz01/lights/lights-web/database"
 	"github.com/akrantz01/lights/lights-web/handlers"
+	"github.com/akrantz01/lights/lights-web/logging"
 	"github.com/akrantz01/lights/lights-web/scheduler"
 )
 
 // Create a new schedule in the database
 func create(w http.ResponseWriter, r *http.Request) {
 	db := database.GetDatabase(r.Context())
+	l := logging.GetLogger(r.Context(), "schedules:create")
 	s := scheduler.GetScheduler(r.Context())
 
 	var schedule database.Schedule
@@ -47,7 +49,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 			return
 		} else if err != nil {
 			handlers.Respond(w, handlers.AsFatal())
-			zap.L().Named("schedules:create").Error("failed to check existence of preset", zap.Error(err), zap.String("name", *schedule.Preset))
+			l.Error("failed to check existence of preset", zap.Error(err), zap.String("name", *schedule.Preset))
 			return
 		}
 	case database.ScheduleTypeAnimation:
@@ -61,7 +63,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 			return
 		} else if err != nil {
 			handlers.Respond(w, handlers.AsFatal())
-			zap.L().Named("schedules:create").Error("failed to check existence of animation", zap.Error(err), zap.String("name", *schedule.Animation))
+			l.Error("failed to check existence of animation", zap.Error(err), zap.String("name", *schedule.Animation))
 			return
 		}
 	default:
@@ -76,14 +78,14 @@ func create(w http.ResponseWriter, r *http.Request) {
 	// Add the schedule to the scheduler
 	if err := s.Add(schedule.Name, schedule.At, schedule.Repeats); err != nil {
 		handlers.Respond(w, handlers.AsFatal())
-		zap.L().Named("schedules:create").Error("failed to register schedule", zap.Error(err))
+		l.Error("failed to register schedule", zap.Error(err))
 		return
 	}
 
 	// Save to database
 	if err := db.AddSchedule(schedule); err != nil {
 		handlers.Respond(w, handlers.AsFatal())
-		zap.L().Named("schedules:create").Error("failed to insert into database", zap.Error(err))
+		l.Error("failed to insert into database", zap.Error(err))
 	} else {
 		handlers.Respond(w)
 	}

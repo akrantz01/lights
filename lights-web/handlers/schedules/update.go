@@ -9,6 +9,7 @@ import (
 
 	"github.com/akrantz01/lights/lights-web/database"
 	"github.com/akrantz01/lights/lights-web/handlers"
+	"github.com/akrantz01/lights/lights-web/logging"
 	"github.com/akrantz01/lights/lights-web/scheduler"
 )
 
@@ -26,6 +27,7 @@ type scheduleUpdate struct {
 func update(w http.ResponseWriter, r *http.Request) {
 	name := chi.URLParam(r, "name")
 	db := database.GetDatabase(r.Context())
+	l := logging.GetLogger(r.Context(), "schedules:update").With(zap.String("name", name))
 	s := scheduler.GetScheduler(r.Context())
 
 	// Ensure the schedule exists
@@ -35,7 +37,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 		return
 	} else if err != nil {
 		handlers.Respond(w, handlers.AsFatal())
-		zap.L().Named("schedules:update").Error("failed to get schedule", zap.Error(err), zap.String("name", name))
+		l.Error("failed to get schedule", zap.Error(err))
 		return
 	}
 
@@ -90,7 +92,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 				return
 			} else if err != nil {
 				handlers.Respond(w, handlers.AsFatal())
-				zap.L().Named("schedules:update").Error("failed to check existence of preset", zap.Error(err), zap.String("name", *schedule.Preset))
+				l.Error("failed to check existence of preset", zap.Error(err))
 				return
 			}
 		} else if schedule.Preset == nil {
@@ -107,7 +109,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 				return
 			} else if err != nil {
 				handlers.Respond(w, handlers.AsFatal())
-				zap.L().Named("schedules:update").Error("failed to check existence of animation", zap.Error(err), zap.String("name", *schedule.Animation))
+				l.Error("failed to check existence of animation", zap.Error(err))
 				return
 			}
 		} else if schedule.Animation == nil {
@@ -121,7 +123,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 		s.Remove(schedule.Name)
 		if err := s.Add(schedule.Name, schedule.At, schedule.Repeats); err != nil {
 			handlers.Respond(w, handlers.AsFatal())
-			zap.L().Named("schedules:update").Error("failed to update job", zap.Error(err), zap.String("name", name))
+			l.Error("failed to update job", zap.Error(err))
 			return
 		}
 	}
@@ -129,7 +131,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 	// Save the changes
 	if err := db.AddSchedule(schedule); err != nil {
 		handlers.Respond(w, handlers.AsFatal())
-		zap.L().Named("schedules:update").Error("failed to update schedule", zap.Error(err), zap.String("name", name))
+		l.Error("failed to update schedule", zap.Error(err))
 	} else {
 		handlers.Respond(w)
 	}
