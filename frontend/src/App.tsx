@@ -1,11 +1,12 @@
 import React from 'react';
+import { RouteComponentProps } from '@reach/router';
 
 import logo from './logo.svg';
 
-function App() {
+const App: React.FC<RouteComponentProps> = () => {
   return (
     <div className="text-center">
-      <header className="bg-gray-800 min-h-screen flex flex-col items-center justify-center text-white">
+      <header className="min-h-screen flex flex-col items-center justify-center text-gray-700">
         <img
           src={logo}
           className="h-[40vmin] pointer-events-none motion-safe:animate-[spin_infinite_20s_linear]"
@@ -20,6 +21,6 @@ function App() {
       </header>
     </div>
   );
-}
+};
 
 export default App;
