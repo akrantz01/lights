@@ -11,7 +11,7 @@ export default (): Middleware => {
 
     // Only handle our actions
     try {
-      if (connect.match(action)) socket.connect(store, action);
+      if (connect.match(action)) socket.connect(store);
       else if (disconnect.match(action)) socket.disconnect();
       else if (send.match(action)) socket.send(store, action);
     } catch (e) {

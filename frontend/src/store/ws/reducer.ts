@@ -1,6 +1,6 @@
 import { createReducer } from '@reduxjs/toolkit';
 
-import { beginReconnect, broken, closed, open, reconnected } from './actions';
+import { beginReconnect, broken, closed, opened, reconnected } from './actions';
 
 interface WebSocketState {
   connected: boolean;
@@ -23,7 +23,7 @@ const reducer = createReducer(initialState, (builder) =>
     .addCase(closed, (state) => {
       state.connected = false;
     })
-    .addCase(open, (state) => {
+    .addCase(opened, (state) => {
       state.connected = true;
     })
     .addCase(reconnected, (state) => {

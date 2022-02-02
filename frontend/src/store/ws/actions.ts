@@ -5,7 +5,7 @@ import { Action } from 'redux';
  * Initiate a connection to the given websocket server
  * @param url the URL of the server
  */
-export const connect = createAction<string>('websocket/connect');
+export const connect = createAction('websocket/connect');
 /**
  * Disconnect from the current server
  */
@@ -34,4 +34,4 @@ export const error = createAction('websocket/connection/error', (originalAction:
 export const message = createAction('websocket/connection/message', (event: MessageEvent) => ({
   payload: JSON.parse(event.data),
 }));
-export const open = createAction('websocket/connection/opened');
+export const opened = createAction('websocket/connection/opened');

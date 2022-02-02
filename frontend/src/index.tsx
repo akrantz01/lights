@@ -12,7 +12,7 @@ import NotFound from './NotFound';
 import './index.css';
 
 // Connect to the websocket API
-store.dispatch(connect('ws://127.0.0.1:4000/ws'));
+store.dispatch(connect());
 
 ReactDOM.render(
   <React.StrictMode>

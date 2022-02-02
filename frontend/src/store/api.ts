@@ -38,7 +38,7 @@ interface Response<T> {
 
 const api = createApi({
   reducerPath: 'api',
-  baseQuery: fetchBaseQuery({ baseUrl: '/' }),
+  baseQuery: fetchBaseQuery({ baseUrl: process.env.REACT_APP_API_URL || '/' }),
   tagTypes: Object.values(Tag),
   endpoints: (builder) => ({
     // Animations API

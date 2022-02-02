@@ -1,11 +1,10 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { Dispatch, MiddlewareAPI } from 'redux';
 
-import { beginReconnect, attemptReconnect, reconnected, broken, closed, error, message, open } from './actions';
+import { beginReconnect, attemptReconnect, reconnected, broken, closed, error, message, opened } from './actions';
 
 export default class Socket {
   private ws: WebSocket | null = null;
-  private url: string | null = null;
 
   // Track number of reconnection attempts
   private reconnectionAttempts = 0;
@@ -18,10 +17,7 @@ export default class Socket {
   /**
    * Connect to the server
    */
-  connect = ({ dispatch }: MiddlewareAPI, { payload }: PayloadAction<string>) => {
-    this.url = payload;
-    this.open(dispatch);
-  };
+  connect = ({ dispatch }: MiddlewareAPI) => this.open(dispatch);
 
   /**
    * Disconnect from the server
@@ -77,7 +73,7 @@ export default class Socket {
     }
 
     // Mark that we've opened the connection
-    dispatch(open());
+    dispatch(opened());
     this.opened = true;
   };
 
@@ -96,7 +92,7 @@ export default class Socket {
     this.close();
 
     // Connect to the server
-    this.ws = new WebSocket(this.url as string);
+    this.ws = new WebSocket(process.env.REACT_APP_WEBSOCKET_URL || 'ws://127.0.0.1:4000/ws');
 
     // Register event listeners
     this.ws.addEventListener('close', this.onClose(dispatch));
