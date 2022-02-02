@@ -1,6 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Color } from '../types';
 
+interface SetPixelsByIndexPayload {
+  indexes: number[];
+  color: Color;
+}
+
 interface AnimationState {
   name?: string;
   running: boolean;
@@ -38,9 +43,15 @@ export const displaySlice = createSlice({
       state.type = Type.Fill;
       state.fill = action.payload;
     },
-    setPixels: (state, action: PayloadAction<Color[]>) => {
+    setAllPixels: (state, action: PayloadAction<Color[]>) => {
       state.type = Type.Pixels;
       state.pixels = action.payload;
+    },
+    setPixelsByIndex: (state, action: PayloadAction<SetPixelsByIndexPayload>) => {
+      state.type = Type.Pixels;
+      if (state.pixels) {
+        for (const index of action.payload.indexes) state.pixels[index] = action.payload.color;
+      }
     },
     setPreset: (state, action: PayloadAction<string>) => {
       state.type = Type.Preset;
@@ -62,5 +73,6 @@ export const displaySlice = createSlice({
   },
 });
 
-export const { setFill, setPixels, setPreset, startAnimation, stopAnimation } = displaySlice.actions;
+export const { setAllPixels, setFill, setPixelsByIndex, setPreset, startAnimation, stopAnimation } =
+  displaySlice.actions;
 export default displaySlice.reducer;
