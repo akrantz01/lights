@@ -1,7 +1,7 @@
+import { PayloadAction } from '@reduxjs/toolkit';
 import { Dispatch, MiddlewareAPI } from 'redux';
 
 import { beginReconnect, attemptReconnect, reconnected, broken, closed, error, message, open } from './actions';
-import { PayloadAction, ConnectPayload } from './types';
 
 export default class Socket {
   private ws: WebSocket | null = null;
@@ -18,8 +18,8 @@ export default class Socket {
   /**
    * Connect to the server
    */
-  connect = ({ dispatch }: MiddlewareAPI, { payload }: PayloadAction<ConnectPayload>) => {
-    this.url = payload.url;
+  connect = ({ dispatch }: MiddlewareAPI, { payload }: PayloadAction<string>) => {
+    this.url = payload;
     this.open(dispatch);
   };
 
@@ -54,7 +54,7 @@ export default class Socket {
    * Handle errors occurring in the connection
    */
   private onError = (dispatch: Dispatch) => () => {
-    dispatch(error(null, new Error()));
+    dispatch(error(null, new Error('an error occurred in the connection')));
 
     if (this.canAttemptReconnect()) this.reconnect(dispatch);
   };
