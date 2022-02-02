@@ -3,6 +3,7 @@ import { Disclosure } from '@headlessui/react';
 import { LightBulbIcon, MenuIcon, XIcon } from '@heroicons/react/outline';
 import classNames from 'classnames';
 import { useLocation } from '@reach/router';
+import StatusIndicator from './StatusIndicator';
 
 const navigation = [
   { name: 'Dashboard', href: '/' },
@@ -49,8 +50,9 @@ const Navigation = (): JSX.Element => {
                       </div>
                     </div>
                   </div>
-                  <div className="-mr-2 flex md:hidden">
-                    <Disclosure.Button className="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+                  <div className="-mr-2 flex">
+                    <StatusIndicator />
+                    <Disclosure.Button className="md:hidden bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
                       <span className="sr-only">Open main menu</span>
                       {open ? (
                         <XIcon className="block h-6 w-6" aria-hidden="true" />
@@ -86,7 +88,7 @@ const Navigation = (): JSX.Element => {
           </>
         )}
       </Disclosure>
-      <header className="py-10">
+      <header className="py-5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold text-white">{title}</h1>
         </div>
