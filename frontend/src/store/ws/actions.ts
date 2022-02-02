@@ -26,7 +26,7 @@ function build<T>(type: string, payload?: T): Action | PayloadAction<T> {
   const base: Action = {
     type,
     meta: {
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
     },
   };
   if (payload instanceof Error) base.error = true;

@@ -1,7 +1,7 @@
 export interface Action {
   type: string;
   meta: {
-    timestamp: Date;
+    timestamp: string;
   };
   error?: boolean;
 }
