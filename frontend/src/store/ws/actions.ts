@@ -54,9 +54,8 @@ export const beginReconnect = () => build(RECONNECT_BEGIN);
 export const attemptReconnect = (attemptNumber: number) => build(RECONNECT_ATTEMPT, { count: attemptNumber });
 export const reconnected = () => build(RECONNECT_COMPLETE);
 export const broken = () => build(CONNECTION_BROKEN);
-export const closed = (event: Event) => build(CONNECTION_CLOSED, event);
+export const closed = (event: CloseEvent) => build(CONNECTION_CLOSED, { code: event.code, clean: event.wasClean });
 export const error = <T>(originalAction: Action | PayloadAction<T> | null, error: Error) =>
   build(CONNECTION_ERROR, { message: error.message, name: error.name, originalAction });
-export const message = (event: MessageEvent) =>
-  build(CONNECTION_MESSAGE, { event, message: JSON.parse(event.data), origin: event.origin });
-export const open = (event: Event) => build(CONNECTION_OPEN, event);
+export const message = (event: MessageEvent) => build(CONNECTION_MESSAGE, { message: JSON.parse(event.data) });
+export const open = () => build(CONNECTION_OPEN);

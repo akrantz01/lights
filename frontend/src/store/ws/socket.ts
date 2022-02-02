@@ -10,6 +10,7 @@ export default class Socket {
   // Track number of reconnection attempts
   private reconnectionAttempts = 0;
   private reconnectionInterval: NodeJS.Timeout | null = null;
+  private reconnectionQueue: string[] | null = null;
 
   // Keep track of if the connection has ever been opened successfully
   private opened = false;
@@ -36,8 +37,8 @@ export default class Socket {
    * @throws {Error} Websocket connection must be initialized
    */
   send = <T>(store: MiddlewareAPI, { payload }: PayloadAction<T>) => {
-    if (this.ws) this.ws.send(JSON.stringify(payload));
-    else throw new Error('WebSocket not initialized');
+    const message = JSON.stringify(payload);
+    this.sendMessage(message);
   };
 
   /**
@@ -61,18 +62,22 @@ export default class Socket {
   /**
    * Handle the connection opening
    */
-  private onOpen = (dispatch: Dispatch) => (event: Event) => {
+  private onOpen = (dispatch: Dispatch) => () => {
     // Cleanup stuff from reconnection
     if (this.reconnectionInterval) {
       clearInterval(this.reconnectionInterval);
       this.reconnectionInterval = null;
       this.reconnectionAttempts = 0;
 
+      // Clear the queued messages
+      this.reconnectionQueue?.map((message) => this.sendMessage(message));
+      this.reconnectionQueue = null;
+
       dispatch(reconnected());
     }
 
     // Mark that we've opened the connection
-    dispatch(open(event));
+    dispatch(open());
     this.opened = true;
   };
 
@@ -101,6 +106,16 @@ export default class Socket {
   };
 
   /**
+   * Handle the sending logic
+   * @throws {Error} Websocket connection must be initialized
+   */
+  private sendMessage = (message: string) => {
+    if (this.ws) this.ws.send(message);
+    else if (this.reconnectionInterval !== null) this.reconnectionQueue?.push(message);
+    else throw new Error('WebSocket not initialized');
+  };
+
+  /**
    * Close the connection
    * @param code a numeric code explaining why the connection was closed
    * @param reason a human-readable explanation for the closing
@@ -124,6 +139,7 @@ export default class Socket {
     dispatch(beginReconnect());
 
     // Notify attempting reconnection
+    this.reconnectionQueue = [];
     this.reconnectionAttempts = 1;
     dispatch(attemptReconnect(this.reconnectionAttempts));
 
