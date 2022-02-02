@@ -21,3 +21,34 @@ setupListeners(store.dispatch);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type Dispatch = typeof store.dispatch;
+
+// Re-export stuff
+export {
+  useListAnimationsQuery,
+  useUpsertAnimationMutation,
+  useRemoveAnimationMutation,
+  useListPresetsQuery,
+  useGetPresetQuery,
+  useCreatePresetMutation,
+  useUpdatePresetMutation,
+  useRemovePresetMutation,
+  useListSchedulesQuery,
+  useGetScheduleQuery,
+  useCreateScheduleMutation,
+  useUpdateScheduleMutation,
+  useRemoveScheduleMutation,
+} from './api';
+export { useDispatch, useSelector } from './hooks';
+export {
+  applyPreset,
+  setArbitraryPixels,
+  setBrightness,
+  setColor,
+  setPixel,
+  setPixelRange,
+  startAnimation,
+  stopAnimation,
+  turnOff,
+  turnOn,
+} from './server';
+export { connect } from './ws';

@@ -1,7 +1,6 @@
-import { PayloadAction } from '@reduxjs/toolkit';
-import { Dispatch, MiddlewareAPI } from 'redux';
+import { Action, Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
 
-import { beginReconnect, attemptReconnect, reconnected, broken, closed, error, message, opened } from './actions';
+import { beginReconnect, attemptReconnect, reconnected, broken, closed, error, opened } from './actions';
 
 export default class Socket {
   private ws: WebSocket | null = null;
@@ -32,8 +31,8 @@ export default class Socket {
    * Send a message to the server
    * @throws {Error} Websocket connection must be initialized
    */
-  send = <T>(store: MiddlewareAPI, { payload }: PayloadAction<T>) => {
-    const message = JSON.stringify(payload);
+  send = <T>(action: Action<string> | PayloadAction<T>) => {
+    const message = JSON.stringify(action);
     this.sendMessage(message);
   };
 
@@ -81,7 +80,8 @@ export default class Socket {
    * Handle messages being received
    */
   private onMessage = (dispatch: Dispatch) => (event: MessageEvent) => {
-    dispatch(message(event));
+    const action: Action = JSON.parse(event.data);
+    dispatch(action);
   };
 
   /**

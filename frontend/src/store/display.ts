@@ -73,6 +73,4 @@ export const displaySlice = createSlice({
   },
 });
 
-export const { setAllPixels, setFill, setPixelsByIndex, setPreset, startAnimation, stopAnimation } =
-  displaySlice.actions;
 export default displaySlice.reducer;

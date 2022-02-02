@@ -1,4 +1,3 @@
-import { connect, disconnect, send } from './actions';
 import middleware from './middleware';
 import reducer from './reducer';
 
@@ -8,4 +7,4 @@ export default {
 };
 
 // Re-export dispatchers
-export { connect, disconnect, send };
+export { connect, disconnect, send } from './actions';

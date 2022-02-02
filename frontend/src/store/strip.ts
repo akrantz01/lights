@@ -28,5 +28,4 @@ export const stripSlice = createSlice({
   },
 });
 
-export const { setLength } = stripSlice.actions;
 export default stripSlice.reducer;

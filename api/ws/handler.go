@@ -82,7 +82,11 @@ func Handler(hub *Hub) func(w http.ResponseWriter, r *http.Request) {
 				logger.Error("failed to get current animation", zap.Error(err))
 			}
 
-			client.send <- NewAnimationStatus(animation, len(animation) != 0)
+			if len(animation) != 0 {
+				client.send <- NewAnimationStarted(animation)
+			} else {
+				client.send <- NewAnimationStopped()
+			}
 		}
 	}
 }

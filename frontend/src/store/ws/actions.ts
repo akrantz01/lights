@@ -1,5 +1,4 @@
-import { createAction } from '@reduxjs/toolkit';
-import { Action } from 'redux';
+import { Action, createAction } from '@reduxjs/toolkit';
 
 /**
  * Initiate a connection to the given websocket server
@@ -30,8 +29,5 @@ export const error = createAction('websocket/connection/error', (originalAction:
     name: error.name,
     message: error.message,
   },
-}));
-export const message = createAction('websocket/connection/message', (event: MessageEvent) => ({
-  payload: JSON.parse(event.data),
 }));
 export const opened = createAction('websocket/connection/opened');

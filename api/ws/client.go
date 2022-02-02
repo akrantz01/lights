@@ -125,8 +125,8 @@ func (c *Client) reader(actions chan rpc.Callable) {
 				continue
 			}
 
-			actions <- rpc.NewSetPixel(setPixel.Index, setPixel.Color)
-			c.hub.broadcast <- NewSingleModifiedPixel(setPixel.Index, setPixel.Color)
+			actions <- rpc.NewSetPixel(setPixel.Payload.Index, setPixel.Payload.Color)
+			c.hub.broadcast <- NewSingleModifiedPixel(setPixel.Payload.Index, setPixel.Payload.Color)
 
 		// Sets the color of a range of pixels
 		case MessageSetRange:
@@ -137,10 +137,10 @@ func (c *Client) reader(actions chan rpc.Callable) {
 			}
 
 			// Determine the range of all pixels modified
-			modified := util.RangeToIndexes(setRange.Start, setRange.End)
+			modified := util.RangeToIndexes(setRange.Payload.Start, setRange.Payload.End)
 
-			actions <- rpc.NewPixelRange(setRange.Start, setRange.End, setRange.Color)
-			c.hub.broadcast <- NewModifiedPixels(modified, setRange.Color)
+			actions <- rpc.NewPixelRange(setRange.Payload.Start, setRange.Payload.End, setRange.Payload.Color)
+			c.hub.broadcast <- NewModifiedPixels(modified, setRange.Payload.Color)
 
 		// Sets an arbitrary set of pixels to the same color
 		case MessageSetArbitrary:
@@ -150,13 +150,13 @@ func (c *Client) reader(actions chan rpc.Callable) {
 				continue
 			}
 
-			if len(setArbitrary.Indexes) == 0 || setArbitrary.Indexes == nil {
+			if len(setArbitrary.Payload.Indexes) == 0 || setArbitrary.Payload.Indexes == nil {
 				c.logger.Warn("no indexes to set")
 				continue
 			}
 
-			actions <- rpc.NewArbitraryPixels(setArbitrary.Indexes, setArbitrary.Color)
-			c.hub.broadcast <- NewModifiedPixels(setArbitrary.Indexes, setArbitrary.Color)
+			actions <- rpc.NewArbitraryPixels(setArbitrary.Payload.Indexes, setArbitrary.Payload.Color)
+			c.hub.broadcast <- NewModifiedPixels(setArbitrary.Payload.Indexes, setArbitrary.Payload.Color)
 
 		// Apply a preset to the strip
 		case MessageApplyPreset:
@@ -178,16 +178,16 @@ func (c *Client) reader(actions chan rpc.Callable) {
 			}
 
 			actions <- rpc.NewStartAnimation(startAnimation.Name)
-			c.hub.broadcast <- NewAnimationStatus(startAnimation.Name, true)
+			c.hub.broadcast <- NewAnimationStarted(startAnimation.Name)
 
 		// Stop the currently running animation
 		case MessageStopAnimation:
 			actions <- rpc.NewStopAnimation()
-			c.hub.broadcast <- NewAnimationStatus("", false)
+			c.hub.broadcast <- NewAnimationStopped()
 
 		// Handle any unknown messages
 		default:
-			c.logger.Warn("unknown message type", zap.Uint8("type", uint8(msg.Type)))
+			c.logger.Warn("unknown message type", zap.String("type", string(msg.Type)))
 			break
 		}
 	}

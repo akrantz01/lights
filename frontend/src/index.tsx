@@ -4,8 +4,7 @@ import { Router, LocationProvider } from '@reach/router';
 import { Provider } from 'react-redux';
 
 import Layout from './components/Layout';
-import { store } from './store';
-import { connect } from './store/ws';
+import { connect, store } from './store';
 import App from './App';
 import NotFound from './NotFound';
 
