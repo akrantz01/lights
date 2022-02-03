@@ -7,6 +7,7 @@ import Layout from './components/Layout';
 import Dashboard from './dashboard';
 import NotFound from './NotFound';
 import { Presets, PresetDetail } from './presets';
+import { Schedules } from './schedules';
 import { connect, store } from './store';
 
 import './index.css';
@@ -23,6 +24,7 @@ ReactDOM.render(
             <Dashboard path="/" />
             <Presets path="/presets" />
             <PresetDetail path="/presets/:name" />
+            <Schedules path="/schedules" />
             <NotFound default />
           </Router>
         </Layout>
