@@ -1,16 +1,15 @@
 import React from 'react';
 import { ChevronRightIcon } from '@heroicons/react/solid';
 import { Link } from '@reach/router';
-import classNames from 'classnames';
 
 import Button from '../components/Button';
 import { applyPreset, useDispatch } from '../store';
 
-interface PresetListItemProps {
+interface Props {
   name: string;
 }
 
-const PresetListItem = ({ name }: PresetListItemProps): JSX.Element => {
+const ListItem = ({ name }: Props): JSX.Element => {
   const dispatch = useDispatch();
 
   const apply = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -39,19 +38,4 @@ const PresetListItem = ({ name }: PresetListItemProps): JSX.Element => {
   );
 };
 
-interface Props {
-  presets: string[];
-  className?: string;
-}
-
-const PresetList = ({ presets, className }: Props): JSX.Element => (
-  <div className={classNames('bg-white shadow overflow-hidden sm:rounded-md', className)}>
-    <ul role="list" className="divide-y divide-gray-200">
-      {presets.map((preset) => (
-        <PresetListItem key={preset} name={preset} />
-      ))}
-    </ul>
-  </div>
-);
-
-export default PresetList;
+export default ListItem;
