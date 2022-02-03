@@ -9,6 +9,7 @@ import NotFound from './NotFound';
 import { connect, store } from './store';
 
 import './index.css';
+import Presets from './presets';
 
 // Connect to the websocket API
 store.dispatch(connect());
@@ -20,6 +21,7 @@ ReactDOM.render(
         <Layout>
           <Router>
             <Dashboard path="/" />
+            <Presets path="/presets" />
             <NotFound default />
           </Router>
         </Layout>
