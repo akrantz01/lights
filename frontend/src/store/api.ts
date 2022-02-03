@@ -44,7 +44,7 @@ const api = createApi({
     // Animations API
     listAnimations: builder.query<string[], void>({
       query: () => '/animations',
-      transformResponse: (response: { data: Response<string[]> }) => response.data.data,
+      transformResponse: (response: Response<string[]>) => response.data,
       providesTags: [Tag.Animation],
     }),
     upsertAnimation: builder.mutation<void, UpsertAnimationArgs>({
@@ -71,12 +71,12 @@ const api = createApi({
     // Presets API
     listPresets: builder.query<string[], void>({
       query: () => '/presets',
-      transformResponse: (response: { data: Response<string[]> }) => response.data.data,
+      transformResponse: (response: Response<string[]>) => response.data,
       providesTags: (result: string[] = []) => [Tag.Preset, ...result.map((name) => ({ type: Tag.Preset, id: name }))],
     }),
     getPreset: builder.query<Preset, string>({
       query: (name) => `/presets/${name}`,
-      transformResponse: (response: { data: Response<Preset> }) => response.data.data,
+      transformResponse: (response: Response<Preset>) => response.data,
       providesTags: (result: Preset | undefined) =>
         result === undefined ? [] : [{ type: Tag.Preset, id: result.name }],
     }),
@@ -107,7 +107,7 @@ const api = createApi({
     // Schedules API
     listSchedules: builder.query<string[], void>({
       query: () => '/schedules',
-      transformResponse: (response: { data: Response<string[]> }) => response.data.data,
+      transformResponse: (response: Response<string[]>) => response.data,
       providesTags: (result: string[] = []) => [
         Tag.Schedule,
         ...result.map((name) => ({ type: Tag.Schedule, id: name })),
@@ -115,7 +115,7 @@ const api = createApi({
     }),
     getSchedule: builder.query<Schedule, string>({
       query: (name) => `/schedules/${name}`,
-      transformResponse: (response: { data: Response<Schedule> }) => response.data.data,
+      transformResponse: (response: Response<Schedule>) => response.data,
       providesTags: (result: Schedule | undefined) =>
         result === undefined ? [] : [{ type: Tag.Schedule, id: result.name }],
     }),

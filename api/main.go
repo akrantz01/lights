@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"go.uber.org/zap"
 
 	"github.com/akrantz01/lights/lights-web/database"
@@ -73,6 +74,7 @@ func main() {
 	r.Use(middleware.RealIP)
 	r.Use(logging.Request(logger))
 	r.Use(middleware.Recoverer)
+	r.Use(cors.AllowAll().Handler)
 	r.Use(middleware.Heartbeat("/ping"))
 	r.Use(database.WithDatabase(db))
 	r.Use(rpc.WithActions(actions))
