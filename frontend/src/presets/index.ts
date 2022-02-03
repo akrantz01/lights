@@ -1,2 +1,4 @@
 import Presets from './Presets';
-export default Presets;
+import PresetDetail from './PresetDetail';
+
+export { Presets, PresetDetail };

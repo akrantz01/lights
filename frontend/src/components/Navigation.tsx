@@ -16,7 +16,10 @@ const Navigation = (): JSX.Element => {
   const { pathname } = useLocation();
 
   // Get the page name
-  const pages = navigation.filter((item) => item.href === pathname).map((item) => item.name);
+  const pages = navigation
+    .filter((item) => pathname.startsWith(item.href))
+    .map((item) => item.name)
+    .reverse(); // We reverse the result because "/" matches all routes
   const title = pages.length === 0 ? 'Not found' : pages[0];
 
   const isActive = ({ isCurrent }: LinkGetProps) => ({

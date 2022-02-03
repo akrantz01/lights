@@ -11,7 +11,7 @@ interface AnimationState {
   running: boolean;
 }
 
-enum Type {
+export enum Type {
   Fill,
   Pixels,
   Preset,

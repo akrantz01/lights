@@ -6,10 +6,10 @@ import { Provider } from 'react-redux';
 import Layout from './components/Layout';
 import Dashboard from './dashboard';
 import NotFound from './NotFound';
+import { Presets, PresetDetail } from './presets';
 import { connect, store } from './store';
 
 import './index.css';
-import Presets from './presets';
 
 // Connect to the websocket API
 store.dispatch(connect());
@@ -22,6 +22,7 @@ ReactDOM.render(
           <Router>
             <Dashboard path="/" />
             <Presets path="/presets" />
+            <PresetDetail path="/presets/:name" />
             <NotFound default />
           </Router>
         </Layout>
