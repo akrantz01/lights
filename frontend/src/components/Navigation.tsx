@@ -1,8 +1,9 @@
 import React from 'react';
-import { Disclosure } from '@headlessui/react';
+import { Disclosure, Transition } from '@headlessui/react';
 import { LightBulbIcon, MenuIcon, XIcon } from '@heroicons/react/outline';
+import { Link, LinkGetProps, useLocation } from '@reach/router';
 import classNames from 'classnames';
-import { useLocation } from '@reach/router';
+
 import StatusIndicator from './StatusIndicator';
 
 const navigation = [
@@ -17,6 +18,14 @@ const Navigation = (): JSX.Element => {
   // Get the page name
   const pages = navigation.filter((item) => item.href === pathname).map((item) => item.name);
   const title = pages.length === 0 ? 'Not found' : pages[0];
+
+  const isActive = ({ isCurrent }: LinkGetProps) => ({
+    'aria-current': isCurrent ? 'page' : undefined,
+    className: classNames(
+      isCurrent ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+      'px-3 py-2 rounded-md text-sm font-medium',
+    ),
+  });
 
   return (
     <div className="bg-gray-800 pb-32">
@@ -33,19 +42,9 @@ const Navigation = (): JSX.Element => {
                     <div className="hidden md:block">
                       <div className="ml-10 flex items-baseline space-x-4">
                         {navigation.map((item) => (
-                          <a
-                            key={item.name}
-                            href={item.href}
-                            className={classNames(
-                              item.href === pathname
-                                ? 'bg-gray-900 text-white'
-                                : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                              'px-3 py-2 rounded-md text-sm font-medium',
-                            )}
-                            aria-current={item.href === pathname ? 'page' : undefined}
-                          >
+                          <Link key={item.name} to={item.href} getProps={isActive}>
                             {item.name}
-                          </a>
+                          </Link>
                         ))}
                       </div>
                     </div>
@@ -65,26 +64,24 @@ const Navigation = (): JSX.Element => {
               </div>
             </div>
 
-            <Disclosure.Panel className="border-b border-gray-700 md:hidden">
-              <div className="px-2 py-3 space-y-1 sm:px-3">
-                {navigation.map((item) => (
-                  <Disclosure.Button
-                    key={item.name}
-                    as="a"
-                    href={item.href}
-                    className={classNames(
-                      item.href === pathname
-                        ? 'bg-gray-900 text-white'
-                        : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                      'block px-3 py-2 rounded-md text-base font-medium',
-                    )}
-                    aria-current={item.href === pathname ? 'page' : undefined}
-                  >
-                    {item.name}
-                  </Disclosure.Button>
-                ))}
-              </div>
-            </Disclosure.Panel>
+            <Transition
+              enter="transition duration-150 ease-out"
+              enterFrom="transform -translate-y-3 scale-95 opacity-0"
+              enterTo="transform translate-y-0 scale-100 opacity-100"
+              leave="transition duration-150 ease-out"
+              leaveFrom="transform translate-y-0 scale-100 opacity-100"
+              leaveTo="transform -translate-y-3 scale-95 opacity-0"
+            >
+              <Disclosure.Panel className="border-b border-gray-700 md:hidden">
+                <div className="px-2 py-3 space-y-1 sm:px-3">
+                  {navigation.map((item) => (
+                    <Disclosure.Button key={item.name} as={Link} to={item.href} getProps={isActive}>
+                      {item.name}
+                    </Disclosure.Button>
+                  ))}
+                </div>
+              </Disclosure.Panel>
+            </Transition>
           </>
         )}
       </Disclosure>
