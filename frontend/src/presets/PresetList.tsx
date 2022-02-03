@@ -3,6 +3,7 @@ import { ChevronRightIcon } from '@heroicons/react/solid';
 import { Link } from '@reach/router';
 import classNames from 'classnames';
 
+import Button from '../components/Button';
 import { applyPreset, useDispatch } from '../store';
 
 interface PresetListItemProps {
@@ -24,13 +25,9 @@ const PresetListItem = ({ name }: PresetListItemProps): JSX.Element => {
           <div className="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between">
             <p className="text-sm font-medium text-indigo-600 truncate">{name}</p>
             <div className="mt-4 flex-shrink-0 sm:mt-0 sm:ml-5">
-              <button
-                type="button"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-indigo-700 bg-indigo-200 hover:bg-indigo-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                onClick={apply}
-              >
+              <Button onClick={apply} secondary={true}>
                 Apply
-              </button>
+              </Button>
             </div>
           </div>
           <div className="ml-5 flex-shrink-0">
