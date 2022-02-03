@@ -82,7 +82,7 @@ const api = createApi({
     }),
     createPreset: builder.mutation<void, Preset>({
       query: (preset) => ({
-        url: '/animations',
+        url: '/presets',
         method: 'POST',
         body: preset,
       }),
@@ -90,7 +90,7 @@ const api = createApi({
     }),
     updatePreset: builder.mutation<void, UpdatePresetArgs>({
       query: (preset) => ({
-        url: `/animations/${preset.name}`,
+        url: `/presets/${preset.name}`,
         method: 'PUT',
         body: preset,
       }),
@@ -98,7 +98,7 @@ const api = createApi({
     }),
     removePreset: builder.mutation<void, string>({
       query: (name) => ({
-        url: `/animations/${name}`,
+        url: `/presets/${name}`,
         method: 'DELETE',
       }),
       invalidatesTags: (result, error, arg) => [Tag.Preset, { type: Tag.Preset, id: arg }],
