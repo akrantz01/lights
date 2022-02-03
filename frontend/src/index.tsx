@@ -4,9 +4,9 @@ import { Router, LocationProvider } from '@reach/router';
 import { Provider } from 'react-redux';
 
 import Layout from './components/Layout';
-import { connect, store } from './store';
-import App from './App';
+import Dashboard from './dashboard';
 import NotFound from './NotFound';
+import { connect, store } from './store';
 
 import './index.css';
 
@@ -19,7 +19,7 @@ ReactDOM.render(
       <LocationProvider>
         <Layout>
           <Router>
-            <App path="/" />
+            <Dashboard path="/" />
             <NotFound default />
           </Router>
         </Layout>
