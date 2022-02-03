@@ -8,6 +8,7 @@ import StatusIndicator from './StatusIndicator';
 
 const navigation = [
   { name: 'Dashboard', href: '/' },
+  { name: 'Animations', href: '/animations' },
   { name: 'Presets', href: '/presets' },
   { name: 'Schedules', href: '/schedules' },
 ];
