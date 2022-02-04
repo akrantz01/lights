@@ -11,6 +11,7 @@ import { Presets, PresetDetail } from './presets';
 import { Schedules, ScheduleDetail } from './schedules';
 import { connect, store } from './store';
 
+import 'flatpickr/dist/flatpickr.min.css';
 import './index.css';
 
 // Connect to the websocket API

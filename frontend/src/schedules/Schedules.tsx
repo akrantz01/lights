@@ -5,6 +5,7 @@ import { Link, RouteComponentProps } from '@reach/router';
 
 import ListView from '../components/ListView';
 import { useListSchedulesQuery } from '../store';
+import CreateModal from './CreateModal';
 
 const Schedules: React.FC<RouteComponentProps> = () => {
   const { data: schedules, isLoading, isFetching, refetch } = useListSchedulesQuery();
@@ -17,6 +18,7 @@ const Schedules: React.FC<RouteComponentProps> = () => {
       refetch={refetch}
       icon={ClockIcon}
       typeName="schedule"
+      modal={CreateModal}
     >
       {(item) => (
         <li key={item}>
