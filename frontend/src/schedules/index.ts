@@ -1,3 +1,4 @@
 import Schedules from './Schedules';
+import ScheduleDetail from './ScheduleDetail';
 
-export { Schedules };
+export { Schedules, ScheduleDetail };
