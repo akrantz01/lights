@@ -32,7 +32,7 @@ const Presets: React.FC<RouteComponentProps> = () => {
               <div className="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between">
                 <p className="text-sm font-medium text-indigo-600 truncate">{item}</p>
                 <div className="mt-4 flex-shrink-0 sm:mt-0 sm:ml-5">
-                  <Button onClick={apply(item)} secondary={true}>
+                  <Button onClick={apply(item)} style="secondary">
                     Apply
                   </Button>
                 </div>

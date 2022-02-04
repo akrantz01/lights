@@ -24,7 +24,7 @@ const ListView = <T,>({ children, items, isFetching, isLoading, refetch, icon: I
   const header = (
     <div className="flex items-center justify-between">
       {createButton}
-      <Button onClick={refetch} secondary disabled={isFetching}>
+      <Button onClick={refetch} style="secondary" disabled={isFetching}>
         <RefreshIcon
           className={classNames('-ml-1 mr-2 h-5 w-5', { 'animate-spin': isFetching || isLoading })}
           aria-hidden="true"

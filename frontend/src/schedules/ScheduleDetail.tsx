@@ -43,7 +43,11 @@ const ScheduleDetail = ({ name }: Props): JSX.Element => {
   // TODO: add edit modal
 
   const backButton = (
-    <Button className="mt-3" onClick={() => navigate('/schedules')} secondary={data !== undefined}>
+    <Button
+      className="mt-3"
+      onClick={() => navigate('/schedules')}
+      style={data === undefined ? 'secondary' : 'primary'}
+    >
       <ArrowSmLeftIcon className="-ml-1 mr-1 h-5 w-5" />
       Back
     </Button>
@@ -79,7 +83,7 @@ const ScheduleDetail = ({ name }: Props): JSX.Element => {
   return (
     <>
       <div className="flex items-center justify-end">
-        <Button secondary={true}>
+        <Button style="secondary">
           <PencilIcon className="-ml-1 mr-2 h-5 w-5" />
           Edit
         </Button>

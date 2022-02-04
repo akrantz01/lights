@@ -36,7 +36,7 @@ const PresetDetail = ({ name }: Props): JSX.Element => {
   const isApplied = useSelector((state) => state.display.type === Type.Preset && state.display.preset === name);
 
   const backButton = (
-    <Button className="mt-3" onClick={() => navigate('/presets')} secondary={data !== undefined}>
+    <Button className="mt-3" onClick={() => navigate('/presets')} style={data === undefined ? 'secondary' : 'primary'}>
       <ArrowSmLeftIcon className="-ml-1 mr-1 h-5 w-5" />
       Back
     </Button>
@@ -76,7 +76,7 @@ const PresetDetail = ({ name }: Props): JSX.Element => {
           <PaperAirplaneIcon className="-ml-1 mr-2 h-5 w-5" />
           Apply
         </Button>
-        <Button secondary={true}>
+        <Button style="secondary">
           <PencilIcon className="-ml-1 mr-2 h-5 w-5" />
           Edit
         </Button>
