@@ -21,7 +21,7 @@ const StatusIndicator = (): JSX.Element => {
     <div className="has-tooltip">
       <span className="tooltip rounded shadow-lg p-1 bg-gray-100 mt-8 -ml-24 md:-ml-5">{text}</span>
       <span className="relative inline-flex">
-        <span className="flex absolute h-5 w-5 -top-1 right-3 md:right-6">
+        <span className="flex absolute h-5 w-5 -top-2 md:-top-3 right-3 md:right-6">
           <span
             className={classNames(
               'absolute inline-flex h-full w-full rounded-full opacity-75 transition-colors ease-in-out duration-500 animate-ping',
