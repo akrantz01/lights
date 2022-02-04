@@ -63,12 +63,12 @@ const DeleteConfirmation = (props: Props): JSX.Element => {
                   </div>
                 </div>
               </div>
-              <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-                <Button className="sm:ml-3 sm:w-auto sm:text-sm" onClick={props.callback} style="danger">
+              <div className="mt-5 sm:mt-4 flex flex-row-reverse">
+                <Button className="ml-3 w-auto text-sm" onClick={props.callback} style="danger">
                   Delete
                 </Button>
                 <Button
-                  className="mt-3 sm:mt-0 sm:w-auto sm:text-sm"
+                  className="mt-3 mt-0 w-auto text-sm"
                   onClick={props.close}
                   style="secondary"
                   ref={cancelButtonRef}
