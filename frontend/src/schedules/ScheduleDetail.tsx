@@ -3,9 +3,9 @@ import { ArrowSmLeftIcon, ClockIcon, PencilIcon, RefreshIcon, TrashIcon } from '
 import { Link, RouteComponentProps, useNavigate } from '@reach/router';
 
 import Button from '../components/Button';
-import { useDispatch, useGetScheduleQuery, useRemoveScheduleMutation } from '../store';
+import DeleteConfirmation from '../components/DeleteConfirmation';
+import { useGetScheduleQuery, useRemoveScheduleMutation } from '../store';
 import { ScheduleRepeats, ScheduleType } from '../types';
-import Alert from '../components/Alert';
 
 // Decode the "repeats" field from a number to a list of days
 const decodeRepeats = (repeats: number): string => {
@@ -139,13 +139,12 @@ const ScheduleDetail = ({ name }: Props): JSX.Element => {
           Delete
         </Button>
       </div>
-      <Alert
+      <DeleteConfirmation
         open={alertOpen}
         close={() => setAlertOpen(false)}
         callback={onDeleteCallback}
         title="Delete schedule"
         description="Are you sure you want to delete this schedule? All of the associated data will be permanently removed from the server forever."
-        confirmationText="Delete"
       />
     </>
   );

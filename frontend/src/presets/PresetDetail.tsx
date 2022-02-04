@@ -10,9 +10,9 @@ import {
 } from '@heroicons/react/outline';
 
 import Button from '../components/Button';
+import DeleteConfirmation from '../components/DeleteConfirmation';
 import { applyPreset, useDispatch, useGetPresetQuery, useRemovePresetMutation, useSelector } from '../store';
 import { Type } from '../store/display';
-import Alert from '../components/Alert';
 
 interface Props extends RouteComponentProps {
   name?: string;
@@ -108,13 +108,12 @@ const PresetDetail = ({ name }: Props): JSX.Element => {
           Delete
         </Button>
       </div>
-      <Alert
+      <DeleteConfirmation
         open={alertOpen}
         close={() => setAlertOpen(false)}
         callback={onDeleteCallback}
         title="Delete preset"
         description="Are you sure you want to delete this preset? All of the associated data will be permanently removed from the server forever. If the preset is currently applied, the lights will not change."
-        confirmationText="Delete"
       />
     </>
   );
