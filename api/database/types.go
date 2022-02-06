@@ -1,5 +1,10 @@
 package database
 
+type Animation struct {
+	Name string `json:"name"`
+	Slug string `json:"-" bson:"slug"`
+}
+
 type Color struct {
 	Red   uint8 `json:"r"`
 	Green uint8 `json:"g"`
@@ -8,12 +13,14 @@ type Color struct {
 
 type Preset struct {
 	Name       string  `json:"name"`
+	Slug       string  `json:"-" bson:"slug"`
 	Pixels     []Color `json:"pixels"`
 	Brightness uint8   `json:"brightness"`
 }
 
 type Schedule struct {
 	Name      string          `json:"name"`
+	Slug      string          `json:"-" bson:"slug"`
 	At        string          `json:"at"`
 	Repeats   ScheduleRepeats `json:"repeats"`
 	Type      ScheduleType    `json:"type"`

@@ -16,9 +16,9 @@ func Router(r chi.Router) {
 	r.Get("/", list)
 	r.Post("/", create)
 
-	r.Get("/{name}", read)
-	r.Patch("/{name}", update)
-	r.Delete("/{name}", remove)
+	r.Get("/{slug}", read)
+	r.Patch("/{slug}", update)
+	r.Delete("/{slug}", remove)
 }
 
 // Get a list of all presets
@@ -39,11 +39,11 @@ func list(w http.ResponseWriter, r *http.Request) {
 
 // Get all the details of a preset
 func read(w http.ResponseWriter, r *http.Request) {
-	name := chi.URLParam(r, "name")
+	slug := chi.URLParam(r, "slug")
 	db := database.GetDatabase(r.Context())
-	l := logging.GetLogger(r.Context(), "presets:read").With(zap.String("name", name))
+	l := logging.GetLogger(r.Context(), "presets:read").With(zap.String("slug", slug))
 
-	preset, err := db.GetPreset(name)
+	preset, err := db.GetPreset(slug)
 	if err == database.ErrNotFound {
 		handlers.Respond(w, handlers.WithStatus(404), handlers.WithError("not found"))
 	} else if err != nil {
@@ -56,11 +56,11 @@ func read(w http.ResponseWriter, r *http.Request) {
 
 // Delete a preset from the database
 func remove(w http.ResponseWriter, r *http.Request) {
-	name := chi.URLParam(r, "name")
+	slug := chi.URLParam(r, "slug")
 	db := database.GetDatabase(r.Context())
-	l := logging.GetLogger(r.Context(), "presets:remove").With(zap.String("name", name))
+	l := logging.GetLogger(r.Context(), "presets:remove").With(zap.String("slug", slug))
 
-	if err := db.RemovePreset(name); err != nil {
+	if err := db.RemovePreset(slug); err != nil {
 		handlers.Respond(w, handlers.AsFatal())
 		l.Error("failed to delete preset", zap.Error(err))
 	} else {

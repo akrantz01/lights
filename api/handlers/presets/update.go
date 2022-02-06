@@ -20,13 +20,13 @@ type presetUpdate struct {
 
 // Change the pixels or brightness in the preset
 func update(w http.ResponseWriter, r *http.Request) {
-	name := chi.URLParam(r, "name")
+	slug := chi.URLParam(r, "slug")
 	db := database.GetDatabase(r.Context())
 	length := handlers.GetStripLength(r.Context())
-	l := logging.GetLogger(r.Context(), "presets:update").With(zap.String("name", name))
+	l := logging.GetLogger(r.Context(), "presets:update").With(zap.String("slug", slug))
 
 	// Ensure the preset exists
-	preset, err := db.GetPreset(name)
+	preset, err := db.GetPreset(slug)
 	if err == database.ErrNotFound {
 		handlers.Respond(w, handlers.WithStatus(404), handlers.WithError("not found"))
 		return

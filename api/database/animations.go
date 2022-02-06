@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/dgraph-io/badger/v3"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 const animationPrefix = "animation-"
@@ -33,36 +34,53 @@ func (d *Database) ListAnimations() ([]string, error) {
 }
 
 // AddAnimation inserts a new animation into the database
-func (d *Database) AddAnimation(name string) error {
-	key := buildKey(animationPrefix, name)
+func (d *Database) AddAnimation(animation Animation) error {
+	// Encode the animation
+	encoded, err := bson.Marshal(animation)
+	if err != nil {
+		return err
+	}
+
+	key := buildKey(animationPrefix, animation.Slug)
 	return d.db.Update(func(txn *badger.Txn) error {
-		return txn.Set(key, []byte{})
+		return txn.Set(key, encoded)
 	})
 }
 
 // GetAnimation retrieves all the details about an animation
 // Currently this is equivalent to an existence check
-func (d *Database) GetAnimation(name string) (string, error) {
-	key := buildKey(animationPrefix, name)
+func (d *Database) GetAnimation(slug string) (Animation, error) {
+	key := buildKey(animationPrefix, slug)
+
+	var animation Animation
 	err := d.db.View(func(txn *badger.Txn) error {
-		_, err := txn.Get(key)
-		return err
+		item, err := txn.Get(key)
+		if err != nil {
+			return err
+		}
+
+		value, err := item.ValueCopy(nil)
+		if err != nil {
+			return err
+		}
+
+		return bson.Unmarshal(value, &animation)
 	})
-	return name, err
+	return animation, err
 }
 
 // RemoveAnimation deletes an animation from the database by name
-func (d *Database) RemoveAnimation(name string) error {
-	key := buildKey(animationPrefix, name)
+func (d *Database) RemoveAnimation(slug string) error {
+	key := buildKey(animationPrefix, slug)
 	return d.db.Update(func(txn *badger.Txn) error {
 		return txn.Delete(key)
 	})
 }
 
 // SetCurrentAnimation sets the currently running animation
-func (d *Database) SetCurrentAnimation(name string) error {
+func (d *Database) SetCurrentAnimation(slug string) error {
 	return d.db.Update(func(txn *badger.Txn) error {
-		return txn.Set([]byte("current-animation"), []byte(name))
+		return txn.Set([]byte("current-animation"), []byte(slug))
 	})
 }
 

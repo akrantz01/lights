@@ -91,9 +91,11 @@ func (aa AddAnimation) Type() string {
 }
 
 func (aa AddAnimation) Execute(ctx context.Context, db *database.Database, controller lights.LightController) error {
+	slug := database.Slugify(aa.Name)
+
 	// Add the animation
 	result, free := controller.RegisterAnimation(ctx, func(params lights.LightController_registerAnimation_Params) error {
-		if err := params.SetName(aa.Name); err != nil {
+		if err := params.SetName(slug); err != nil {
 			return err
 		}
 		return params.SetAnimation(aa.Wasm)
@@ -110,19 +112,22 @@ func (aa AddAnimation) Execute(ctx context.Context, db *database.Database, contr
 
 	// Add the animation to the database when successful
 	if data.Success() {
-		return db.AddAnimation(aa.Name)
+		return db.AddAnimation(database.Animation{
+			Name: aa.Name,
+			Slug: slug,
+		})
 	}
 	return nil
 }
 
 // RemoveAnimation deletes an animation from the controller
 type RemoveAnimation struct {
-	Name string
+	Slug string
 }
 
-func NewRemoveAnimation(name string) RemoveAnimation {
+func NewRemoveAnimation(slug string) RemoveAnimation {
 	return RemoveAnimation{
-		Name: name,
+		Slug: slug,
 	}
 }
 
@@ -133,12 +138,12 @@ func (ra RemoveAnimation) Type() string {
 func (ra RemoveAnimation) Execute(ctx context.Context, db *database.Database, controller lights.LightController) error {
 	// Remove the animation
 	result, free := controller.UnregisterAnimation(ctx, func(params lights.LightController_unregisterAnimation_Params) error {
-		return params.SetName(ra.Name)
+		return params.SetName(ra.Slug)
 	})
 	defer free()
 
 	// Remove animation from database
-	if err := db.RemoveAnimation(ra.Name); err != nil {
+	if err := db.RemoveAnimation(ra.Slug); err != nil {
 		return err
 	}
 

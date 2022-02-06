@@ -38,6 +38,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Save to database
+	preset.Slug = database.Slugify(preset.Name)
 	if err := db.AddPreset(preset); err != nil {
 		handlers.Respond(w, handlers.AsFatal())
 		l.Error("failed to insert into database", zap.Error(err), zap.String("name", preset.Name))

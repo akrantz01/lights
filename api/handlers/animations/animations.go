@@ -16,8 +16,8 @@ import (
 func Router(r chi.Router) {
 	r.Get("/", list)
 
-	r.Put("/{name}", upsert)
-	r.Delete("/{name}", remove)
+	r.Put("/{slug}", upsert)
+	r.Delete("/{slug}", remove)
 }
 
 // Get a list of all animations
@@ -38,9 +38,9 @@ func list(w http.ResponseWriter, r *http.Request) {
 
 // Delete an animation from the database
 func remove(w http.ResponseWriter, r *http.Request) {
-	name := chi.URLParam(r, "name")
+	slug := chi.URLParam(r, "slug")
 	actions := rpc.GetActions(r.Context())
 
-	actions <- rpc.NewRemoveAnimation(name)
+	actions <- rpc.NewRemoveAnimation(slug)
 	handlers.Respond(w)
 }

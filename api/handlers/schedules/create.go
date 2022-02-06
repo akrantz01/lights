@@ -83,6 +83,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Save to database
+	schedule.Slug = database.Slugify(schedule.Name)
 	if err := db.AddSchedule(schedule); err != nil {
 		handlers.Respond(w, handlers.AsFatal())
 		l.Error("failed to insert into database", zap.Error(err))

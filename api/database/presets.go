@@ -42,15 +42,15 @@ func (d *Database) AddPreset(preset Preset) error {
 		return err
 	}
 
-	key := buildKey(presetPrefix, preset.Name)
+	key := buildKey(presetPrefix, preset.Slug)
 	return d.db.Update(func(txn *badger.Txn) error {
 		return txn.Set(key, encoded)
 	})
 }
 
 // GetPreset retrieves a preset from the database
-func (d *Database) GetPreset(name string) (Preset, error) {
-	key := buildKey(presetPrefix, name)
+func (d *Database) GetPreset(slug string) (Preset, error) {
+	key := buildKey(presetPrefix, slug)
 
 	var preset Preset
 	err := d.db.View(func(txn *badger.Txn) error {
@@ -70,8 +70,8 @@ func (d *Database) GetPreset(name string) (Preset, error) {
 }
 
 // RemovePreset deletes a preset from the database by name
-func (d *Database) RemovePreset(name string) error {
-	key := buildKey(presetPrefix, name)
+func (d *Database) RemovePreset(slug string) error {
+	key := buildKey(presetPrefix, slug)
 	return d.db.Update(func(txn *badger.Txn) error {
 		return txn.Delete(key)
 	})
