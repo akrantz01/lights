@@ -14,9 +14,9 @@ import (
 
 // Update/create an animation
 func upsert(w http.ResponseWriter, r *http.Request) {
-	slug := chi.URLParam(r, "slug")
+	id := chi.URLParam(r, "id")
 	actions := rpc.GetActions(r.Context())
-	l := logging.GetLogger(r.Context(), "animations:upsert").With(zap.String("slug", slug))
+	l := logging.GetLogger(r.Context(), "animations:upsert").With(zap.String("id", id))
 
 	// Limit uploads to 10MB
 	if err := r.ParseMultipartForm(10 << 20); err != nil {
@@ -42,7 +42,7 @@ func upsert(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Trigger the action and wait for response
-	method, success := rpc.NewAddAnimation(slug, wasm)
+	method, success := rpc.NewAddAnimation(id, wasm)
 	actions <- method
 
 	if <-success {

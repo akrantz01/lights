@@ -25,13 +25,13 @@ type scheduleUpdate struct {
 
 // Update properties for a schedule
 func update(w http.ResponseWriter, r *http.Request) {
-	slug := chi.URLParam(r, "slug")
+	id := chi.URLParam(r, "id")
 	db := database.GetDatabase(r.Context())
-	l := logging.GetLogger(r.Context(), "schedules:update").With(zap.String("slug", slug))
+	l := logging.GetLogger(r.Context(), "schedules:update").With(zap.String("id", id))
 	s := scheduler.GetScheduler(r.Context())
 
 	// Ensure the schedule exists
-	schedule, err := db.GetSchedule(slug)
+	schedule, err := db.GetSchedule(id)
 	if err == database.ErrNotFound {
 		handlers.Respond(w, handlers.WithStatus(404), handlers.WithError("not found"))
 		return
@@ -120,8 +120,8 @@ func update(w http.ResponseWriter, r *http.Request) {
 
 	// Update the schedule job if the repeated days or at changes
 	if updatedFields.At != nil || updatedFields.Repeats != nil {
-		s.Remove(schedule.Slug)
-		if err := s.Add(schedule.Slug, schedule.At, schedule.Repeats); err != nil {
+		s.Remove(schedule.Id)
+		if err := s.Add(schedule.Id, schedule.At, schedule.Repeats); err != nil {
 			handlers.Respond(w, handlers.AsFatal())
 			l.Error("failed to update job", zap.Error(err))
 			return

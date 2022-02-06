@@ -4,14 +4,15 @@ import (
 	"strings"
 
 	"github.com/dgraph-io/badger/v3"
+	gonanoid "github.com/matoous/go-nanoid"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 const schedulePrefix = "schedule-"
 
 // ListSchedules gets a list of all schedules in the database
-func (d *Database) ListSchedules() ([]Schedule, error) {
-	var schedules []Schedule
+func (d *Database) ListSchedules() ([]PartialSchedule, error) {
+	var schedules []PartialSchedule
 
 	err := d.db.View(func(txn *badger.Txn) error {
 		iterator := txn.NewIterator(badger.DefaultIteratorOptions)
@@ -29,7 +30,7 @@ func (d *Database) ListSchedules() ([]Schedule, error) {
 					return err
 				}
 
-				var schedule Schedule
+				var schedule PartialSchedule
 				if err := bson.Unmarshal(value, &schedule); err != nil {
 					return err
 				}
@@ -45,21 +46,23 @@ func (d *Database) ListSchedules() ([]Schedule, error) {
 
 // AddSchedule inserts a new schedule into the database
 func (d *Database) AddSchedule(schedule Schedule) error {
+	schedule.Id = gonanoid.MustID(idLength)
+
 	// Encode the schedule
 	encoded, err := bson.Marshal(schedule)
 	if err != nil {
 		return err
 	}
 
-	key := buildKey(schedulePrefix, schedule.Slug)
+	key := buildKey(schedulePrefix, schedule.Id)
 	return d.db.Update(func(txn *badger.Txn) error {
 		return txn.Set(key, encoded)
 	})
 }
 
 // GetSchedule retrieves a schedule from the database
-func (d *Database) GetSchedule(slug string) (Schedule, error) {
-	key := buildKey(schedulePrefix, slug)
+func (d *Database) GetSchedule(id string) (Schedule, error) {
+	key := buildKey(schedulePrefix, id)
 
 	var schedule Schedule
 	err := d.db.View(func(txn *badger.Txn) error {
@@ -79,8 +82,8 @@ func (d *Database) GetSchedule(slug string) (Schedule, error) {
 }
 
 // RemoveSchedule deletes a schedule from the database by name
-func (d *Database) RemoveSchedule(slug string) error {
-	key := buildKey(schedulePrefix, slug)
+func (d *Database) RemoveSchedule(id string) error {
+	key := buildKey(schedulePrefix, id)
 	return d.db.Update(func(txn *badger.Txn) error {
 		return txn.Delete(key)
 	})

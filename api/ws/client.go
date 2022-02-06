@@ -166,8 +166,8 @@ func (c *Client) reader(actions chan rpc.Callable) {
 				continue
 			}
 
-			actions <- rpc.NewApplyPreset(applyPreset.Name)
-			c.hub.broadcast <- NewPresetUsed(applyPreset.Name)
+			actions <- rpc.NewApplyPreset(applyPreset.Id)
+			c.hub.broadcast <- NewPresetUsed(applyPreset.Id)
 
 		// Start an animation by name on the strip
 		case MessageStartAnimation:
@@ -177,8 +177,8 @@ func (c *Client) reader(actions chan rpc.Callable) {
 				continue
 			}
 
-			actions <- rpc.NewStartAnimation(startAnimation.Name)
-			c.hub.broadcast <- NewAnimationStarted(startAnimation.Name)
+			actions <- rpc.NewStartAnimation(startAnimation.Id)
+			c.hub.broadcast <- NewAnimationStarted(startAnimation.Id)
 
 		// Stop the currently running animation
 		case MessageStopAnimation:

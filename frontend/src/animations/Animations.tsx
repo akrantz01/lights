@@ -46,19 +46,19 @@ const Animations: React.FC<RouteComponentProps> = () => {
         typeName="animation"
       >
         {(item) => (
-          <li key={item}>
+          <li key={item.id}>
             <div className="px-4 py-4 flex items-center sm:px-6">
               <div className="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between">
-                <p className="text-sm font-medium text-indigo-600 truncate">{item}</p>
+                <p className="text-sm font-medium text-indigo-600 truncate">{item.name}</p>
                 <div className="mt-4 flex-shrink-0 sm:mt-0 sm:ml-5">
-                  <Button onClick={apply(item)} style="secondary" className="has-tooltip">
+                  <Button onClick={apply(item.id)} style="secondary" className="has-tooltip">
                     <span className="hidden md:inline tooltip rounded shadow-lg p-1 bg-gray-100 text-gray-900">
                       Start
                     </span>
                     <PlayIcon className="md:inline hidden -mx-1 h-5 w-5" />
                     <span className="md:hidden">Start</span>
                   </Button>
-                  <Button onClick={() => setDeleteSelection(item)} style="danger" className="ml-3 has-tooltip">
+                  <Button onClick={() => setDeleteSelection(item.id)} style="danger" className="ml-3 has-tooltip">
                     <span className="hidden md:inline tooltip rounded shadow-lg p-1 bg-gray-100 text-gray-900">
                       Delete
                     </span>

@@ -1,8 +1,8 @@
 package database
 
 type Animation struct {
+	Id   string `json:"id"`
 	Name string `json:"name"`
-	Slug string `json:"slug"`
 }
 
 type Color struct {
@@ -12,20 +12,27 @@ type Color struct {
 }
 
 type Preset struct {
+	Id         string  `json:"id"`
 	Name       string  `json:"name"`
-	Slug       string  `json:"slug"`
 	Pixels     []Color `json:"pixels"`
 	Brightness uint8   `json:"brightness"`
 }
 
 type PartialPreset struct {
+	Id   string `json:"id"`
 	Name string `json:"name"`
-	Slug string `json:"slug"`
+}
+
+type PartialSchedule struct {
+	Id      string          `json:"id"`
+	Name    string          `json:"name"`
+	At      string          `json:"at"`
+	Repeats ScheduleRepeats `json:"repeats"`
 }
 
 type Schedule struct {
+	Id        string          `json:"id"`
 	Name      string          `json:"name"`
-	Slug      string          `json:"slug"`
 	At        string          `json:"at"`
 	Repeats   ScheduleRepeats `json:"repeats"`
 	Type      ScheduleType    `json:"type"`

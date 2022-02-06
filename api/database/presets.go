@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/dgraph-io/badger/v3"
+	gonanoid "github.com/matoous/go-nanoid"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -46,21 +47,23 @@ func (d *Database) ListPresets() ([]PartialPreset, error) {
 
 // AddPreset inserts a new preset into the database
 func (d *Database) AddPreset(preset Preset) error {
+	preset.Id = gonanoid.MustID(idLength)
+
 	// Encode the preset
 	encoded, err := bson.Marshal(preset)
 	if err != nil {
 		return err
 	}
 
-	key := buildKey(presetPrefix, preset.Slug)
+	key := buildKey(presetPrefix, preset.Id)
 	return d.db.Update(func(txn *badger.Txn) error {
 		return txn.Set(key, encoded)
 	})
 }
 
 // GetPreset retrieves a preset from the database
-func (d *Database) GetPreset(slug string) (Preset, error) {
-	key := buildKey(presetPrefix, slug)
+func (d *Database) GetPreset(id string) (Preset, error) {
+	key := buildKey(presetPrefix, id)
 
 	var preset Preset
 	err := d.db.View(func(txn *badger.Txn) error {
@@ -80,8 +83,8 @@ func (d *Database) GetPreset(slug string) (Preset, error) {
 }
 
 // RemovePreset deletes a preset from the database by name
-func (d *Database) RemovePreset(slug string) error {
-	key := buildKey(presetPrefix, slug)
+func (d *Database) RemovePreset(id string) error {
+	key := buildKey(presetPrefix, id)
 	return d.db.Update(func(txn *badger.Txn) error {
 		return txn.Delete(key)
 	})

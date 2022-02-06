@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { Preset, Schedule } from '../types';
+import { Animation, Preset, PartialPreset, Schedule } from '../types';
 
 /**
  * The tags used for caching elements
@@ -21,12 +21,12 @@ interface UpsertAnimationArgs {
 /**
  * The arguments taken when updating a preset
  */
-type UpdatePresetArgs = Pick<Preset, 'name'> & Partial<Omit<Preset, 'name'>>;
+type UpdatePresetArgs = Pick<Preset, 'id'> & Partial<Omit<Preset, 'id'>>;
 
 /**
  * The arguments taken when updating a schedule
  */
-type UpdateScheduleArgs = Pick<Schedule, 'name'> & Partial<Omit<Schedule, 'name'>>;
+type UpdateScheduleArgs = Pick<Schedule, 'id'> & Partial<Omit<Schedule, 'id'>>;
 
 /**
  * The generic response format for the API
@@ -42,9 +42,9 @@ const api = createApi({
   tagTypes: Object.values(Tag),
   endpoints: (builder) => ({
     // Animations API
-    listAnimations: builder.query<string[], void>({
+    listAnimations: builder.query<Animation[], void>({
       query: () => '/animations',
-      transformResponse: (response: Response<string[]>) => response.data,
+      transformResponse: (response: Response<Animation[]>) => response.data,
       providesTags: [Tag.Animation],
     }),
     upsertAnimation: builder.mutation<void, UpsertAnimationArgs>({
@@ -69,18 +69,20 @@ const api = createApi({
     }),
 
     // Presets API
-    listPresets: builder.query<string[], void>({
+    listPresets: builder.query<PartialPreset[], void>({
       query: () => '/presets',
-      transformResponse: (response: Response<string[]>) => response.data,
-      providesTags: (result: string[] = []) => [Tag.Preset, ...result.map((name) => ({ type: Tag.Preset, id: name }))],
+      transformResponse: (response: Response<PartialPreset[]>) => response.data,
+      providesTags: (result: PartialPreset[] = []) => [
+        Tag.Preset,
+        ...result.map((preset) => ({ type: Tag.Preset, id: preset.id })),
+      ],
     }),
     getPreset: builder.query<Preset, string>({
-      query: (name) => `/presets/${name}`,
+      query: (id) => `/presets/${id}`,
       transformResponse: (response: Response<Preset>) => response.data,
-      providesTags: (result: Preset | undefined) =>
-        result === undefined ? [] : [{ type: Tag.Preset, id: result.name }],
+      providesTags: (result: Preset | undefined) => (result === undefined ? [] : [{ type: Tag.Preset, id: result.id }]),
     }),
-    createPreset: builder.mutation<void, Preset>({
+    createPreset: builder.mutation<void, Omit<Preset, 'id'>>({
       query: (preset) => ({
         url: '/presets',
         method: 'POST',
@@ -90,36 +92,36 @@ const api = createApi({
     }),
     updatePreset: builder.mutation<void, UpdatePresetArgs>({
       query: (preset) => ({
-        url: `/presets/${preset.name}`,
+        url: `/presets/${preset.id}`,
         method: 'PUT',
         body: preset,
       }),
-      invalidatesTags: (result, error, arg) => [{ type: Tag.Preset, id: arg.name }],
+      invalidatesTags: (result, error, arg) => [{ type: Tag.Preset, id: arg.id }],
     }),
     removePreset: builder.mutation<void, string>({
-      query: (name) => ({
-        url: `/presets/${name}`,
+      query: (id) => ({
+        url: `/presets/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: (result, error, arg) => [Tag.Preset, { type: Tag.Preset, id: arg }],
     }),
 
     // Schedules API
-    listSchedules: builder.query<string[], void>({
+    listSchedules: builder.query<Schedule[], void>({
       query: () => '/schedules',
-      transformResponse: (response: Response<string[]>) => response.data,
-      providesTags: (result: string[] = []) => [
+      transformResponse: (response: Response<Schedule[]>) => response.data,
+      providesTags: (result: Schedule[] = []) => [
         Tag.Schedule,
-        ...result.map((name) => ({ type: Tag.Schedule, id: name })),
+        ...result.map((schedule) => ({ type: Tag.Schedule, id: schedule.id })),
       ],
     }),
     getSchedule: builder.query<Schedule, string>({
-      query: (name) => `/schedules/${name}`,
+      query: (id) => `/schedules/${id}`,
       transformResponse: (response: Response<Schedule>) => response.data,
       providesTags: (result: Schedule | undefined) =>
-        result === undefined ? [] : [{ type: Tag.Schedule, id: result.name }],
+        result === undefined ? [] : [{ type: Tag.Schedule, id: result.id }],
     }),
-    createSchedule: builder.mutation<void, Schedule>({
+    createSchedule: builder.mutation<void, Omit<Schedule, 'id'>>({
       query: (schedule) => ({
         url: '/schedules',
         method: 'POST',
@@ -129,15 +131,15 @@ const api = createApi({
     }),
     updateSchedule: builder.mutation<void, UpdateScheduleArgs>({
       query: (schedule) => ({
-        url: `/schedules/${schedule.name}`,
+        url: `/schedules/${schedule.id}`,
         method: 'PUT',
         body: schedule,
       }),
-      invalidatesTags: (result, error, arg) => [{ type: Tag.Schedule, id: arg.name }],
+      invalidatesTags: (result, error, arg) => [{ type: Tag.Schedule, id: arg.id }],
     }),
     removeSchedule: builder.mutation<void, string>({
-      query: (name) => ({
-        url: `/schedules/${name}`,
+      query: (id) => ({
+        url: `/schedules/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: (result, error, arg) => [Tag.Schedule, { type: Tag.Schedule, id: arg }],

@@ -3,18 +3,20 @@ package rpc
 import (
 	"context"
 
+	gonanoid "github.com/matoous/go-nanoid"
+
 	"github.com/akrantz01/lights/lights-web/database"
 	"github.com/akrantz01/lights/lights-web/lights"
 )
 
 // StartAnimation queues an animation to be started
 type StartAnimation struct {
-	Name string
+	Id string
 }
 
-func NewStartAnimation(name string) StartAnimation {
+func NewStartAnimation(id string) StartAnimation {
 	return StartAnimation{
-		Name: name,
+		Id: id,
 	}
 }
 
@@ -25,7 +27,7 @@ func (sa StartAnimation) Type() string {
 func (sa StartAnimation) Execute(ctx context.Context, db *database.Database, controller lights.LightController) error {
 	// Start the animation
 	result, free := controller.Animate(ctx, func(params lights.LightController_animate_Params) error {
-		return params.SetName(sa.Name)
+		return params.SetName(sa.Id)
 	})
 	defer free()
 
@@ -33,7 +35,7 @@ func (sa StartAnimation) Execute(ctx context.Context, db *database.Database, con
 	if err := db.SetPixelMode(database.PixelModeAnimation); err != nil {
 		return err
 	}
-	if err := db.SetCurrentAnimation(sa.Name); err != nil {
+	if err := db.SetCurrentAnimation(sa.Id); err != nil {
 		return err
 	}
 
@@ -91,11 +93,11 @@ func (aa AddAnimation) Type() string {
 }
 
 func (aa AddAnimation) Execute(ctx context.Context, db *database.Database, controller lights.LightController) error {
-	slug := database.Slugify(aa.Name)
+	id := gonanoid.MustID(8)
 
 	// Add the animation
 	result, free := controller.RegisterAnimation(ctx, func(params lights.LightController_registerAnimation_Params) error {
-		if err := params.SetName(slug); err != nil {
+		if err := params.SetName(id); err != nil {
 			return err
 		}
 		return params.SetAnimation(aa.Wasm)
@@ -113,8 +115,8 @@ func (aa AddAnimation) Execute(ctx context.Context, db *database.Database, contr
 	// Add the animation to the database when successful
 	if data.Success() {
 		return db.AddAnimation(database.Animation{
+			Id:   id,
 			Name: aa.Name,
-			Slug: slug,
 		})
 	}
 	return nil
@@ -122,12 +124,12 @@ func (aa AddAnimation) Execute(ctx context.Context, db *database.Database, contr
 
 // RemoveAnimation deletes an animation from the controller
 type RemoveAnimation struct {
-	Slug string
+	Id string
 }
 
-func NewRemoveAnimation(slug string) RemoveAnimation {
+func NewRemoveAnimation(id string) RemoveAnimation {
 	return RemoveAnimation{
-		Slug: slug,
+		Id: id,
 	}
 }
 
@@ -138,12 +140,12 @@ func (ra RemoveAnimation) Type() string {
 func (ra RemoveAnimation) Execute(ctx context.Context, db *database.Database, controller lights.LightController) error {
 	// Remove the animation
 	result, free := controller.UnregisterAnimation(ctx, func(params lights.LightController_unregisterAnimation_Params) error {
-		return params.SetName(ra.Slug)
+		return params.SetName(ra.Id)
 	})
 	defer free()
 
 	// Remove animation from database
-	if err := db.RemoveAnimation(ra.Slug); err != nil {
+	if err := db.RemoveAnimation(ra.Id); err != nil {
 		return err
 	}
 

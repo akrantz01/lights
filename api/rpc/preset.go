@@ -9,12 +9,12 @@ import (
 
 // ApplyPreset changes all the pixels to colors as specified by the preset
 type ApplyPreset struct {
-	Slug string
+	Id string
 }
 
-func NewApplyPreset(slug string) ApplyPreset {
+func NewApplyPreset(id string) ApplyPreset {
 	return ApplyPreset{
-		Slug: slug,
+		Id: id,
 	}
 }
 
@@ -24,7 +24,7 @@ func (ap ApplyPreset) Type() string {
 
 func (ap ApplyPreset) Execute(ctx context.Context, db *database.Database, controller lights.LightController) error {
 	// Fetch the preset
-	preset, err := db.GetPreset(ap.Slug)
+	preset, err := db.GetPreset(ap.Id)
 	if err == database.ErrNotFound {
 		// Nothing to do if not exists
 		return nil

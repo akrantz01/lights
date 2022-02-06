@@ -190,16 +190,16 @@ type PresetUsed struct {
 	Payload string      `json:"payload"`
 }
 
-func NewPresetUsed(name string) PresetUsed {
+func NewPresetUsed(id string) PresetUsed {
 	return PresetUsed{
 		Type:    MessagePresetUsed,
-		Payload: name,
+		Payload: id,
 	}
 }
 
 // ApplyPreset is received when a client wishes to apply a preset to the strip
 type ApplyPreset struct {
-	Name string `json:"payload"`
+	Id string `json:"payload"`
 }
 
 // AnimationStarted is used to broadcast the newly started animation
@@ -208,16 +208,16 @@ type AnimationStarted struct {
 	Payload string      `json:"payload"`
 }
 
-func NewAnimationStarted(name string) AnimationStarted {
+func NewAnimationStarted(id string) AnimationStarted {
 	return AnimationStarted{
 		Type:    MessageAnimationStarted,
-		Payload: name,
+		Payload: id,
 	}
 }
 
 // StartAnimation is received when a client wishes to run a registered animation
 type StartAnimation struct {
-	Name string `json:"payload"`
+	Id string `json:"payload"`
 }
 
 // AnimationStopped is used to broadcast that the current animation was stopped

@@ -43,7 +43,7 @@ func New(timezoneName string, db *database.Database, actions chan rpc.Callable, 
 }
 
 // Add creates a new scheduled job
-func (s *Scheduler) Add(slug, at string, repeats database.ScheduleRepeats) error {
+func (s *Scheduler) Add(id, at string, repeats database.ScheduleRepeats) error {
 	// Determine if we need to repeat this task
 	if repeats == 0 {
 		s.Every(1).Day().At(at).LimitRunsTo(1)
@@ -75,20 +75,20 @@ func (s *Scheduler) Add(slug, at string, repeats database.ScheduleRepeats) error
 	}
 
 	// Create the job
-	job, err := s.Do(handler, slug, s.db, s.actions, s.broadcast)
+	job, err := s.Do(handler, id, s.db, s.actions, s.broadcast)
 	if err != nil {
 		return err
 	}
 
-	// Register the job by slug
-	s.jobs[slug] = job
+	// Register the job by id
+	s.jobs[id] = job
 
 	return nil
 }
 
-// Remove removes a job by its slug
-func (s *Scheduler) Remove(slug string) {
-	if job, ok := s.jobs[slug]; ok {
+// Remove removes a job by its id
+func (s *Scheduler) Remove(id string) {
+	if job, ok := s.jobs[id]; ok {
 		s.RemoveByReference(job)
 	}
 }
@@ -103,7 +103,7 @@ func (s *Scheduler) LoadFromDatabase() error {
 
 	// Add all the schedules
 	for _, schedule := range schedules {
-		if err := s.Add(schedule.Slug, schedule.At, schedule.Repeats); err != nil {
+		if err := s.Add(schedule.Id, schedule.At, schedule.Repeats); err != nil {
 			return err
 		}
 	}

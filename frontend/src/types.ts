@@ -1,3 +1,8 @@
+export interface Animation {
+  id: string;
+  name: string;
+}
+
 export interface Color {
   r: number;
   g: number;
@@ -5,9 +10,15 @@ export interface Color {
 }
 
 export interface Preset {
+  id: string;
   name: string;
   pixels: Color[];
   brightness: number;
+}
+
+export interface PartialPreset {
+  id: string;
+  name: string;
 }
 
 export enum ScheduleType {
@@ -26,7 +37,15 @@ export enum ScheduleRepeats {
   Saturday = 1 << 6,
 }
 
+export interface PartialSchedule {
+  id: string;
+  name: string;
+  at: string;
+  repeats: ScheduleRepeats;
+}
+
 export interface Schedule {
+  id: string;
   name: string;
   at: string;
   repeats: ScheduleRepeats;

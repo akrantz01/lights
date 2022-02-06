@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/dgraph-io/badger/v3"
+	gonanoid "github.com/matoous/go-nanoid"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -45,13 +46,15 @@ func (d *Database) ListAnimations() ([]Animation, error) {
 
 // AddAnimation inserts a new animation into the database
 func (d *Database) AddAnimation(animation Animation) error {
+	animation.Id = gonanoid.MustID(idLength)
+
 	// Encode the animation
 	encoded, err := bson.Marshal(animation)
 	if err != nil {
 		return err
 	}
 
-	key := buildKey(animationPrefix, animation.Slug)
+	key := buildKey(animationPrefix, animation.Id)
 	return d.db.Update(func(txn *badger.Txn) error {
 		return txn.Set(key, encoded)
 	})
@@ -59,8 +62,8 @@ func (d *Database) AddAnimation(animation Animation) error {
 
 // GetAnimation retrieves all the details about an animation
 // Currently this is equivalent to an existence check
-func (d *Database) GetAnimation(slug string) (Animation, error) {
-	key := buildKey(animationPrefix, slug)
+func (d *Database) GetAnimation(id string) (Animation, error) {
+	key := buildKey(animationPrefix, id)
 
 	var animation Animation
 	err := d.db.View(func(txn *badger.Txn) error {
@@ -80,17 +83,17 @@ func (d *Database) GetAnimation(slug string) (Animation, error) {
 }
 
 // RemoveAnimation deletes an animation from the database by name
-func (d *Database) RemoveAnimation(slug string) error {
-	key := buildKey(animationPrefix, slug)
+func (d *Database) RemoveAnimation(id string) error {
+	key := buildKey(animationPrefix, id)
 	return d.db.Update(func(txn *badger.Txn) error {
 		return txn.Delete(key)
 	})
 }
 
 // SetCurrentAnimation sets the currently running animation
-func (d *Database) SetCurrentAnimation(slug string) error {
+func (d *Database) SetCurrentAnimation(id string) error {
 	return d.db.Update(func(txn *badger.Txn) error {
-		return txn.Set([]byte("current-animation"), []byte(slug))
+		return txn.Set([]byte("current-animation"), []byte(id))
 	})
 }
 

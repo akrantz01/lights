@@ -8,6 +8,8 @@ import (
 	"go.uber.org/zap"
 )
 
+const idLength = 8
+
 type loggerShim struct{}
 
 func (l loggerShim) Errorf(template string, args ...interface{}) {

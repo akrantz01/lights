@@ -26,13 +26,13 @@ const Presets: React.FC<RouteComponentProps> = () => {
       icon={CollectionIcon}
     >
       {(item) => (
-        <li key={item}>
-          <Link to={`/presets/${item}`} className="block hover:bg-gray-50">
+        <li key={item.id}>
+          <Link to={`/presets/${item.id}`} className="block hover:bg-gray-50">
             <div className="px-4 py-4 flex items-center sm:px-6">
               <div className="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between">
-                <p className="text-sm font-medium text-indigo-600 truncate">{item}</p>
+                <p className="text-sm font-medium text-indigo-600 truncate">{item.name}</p>
                 <div className="mt-4 flex-shrink-0 sm:mt-0 sm:ml-5">
-                  <Button onClick={apply(item)} style="secondary">
+                  <Button onClick={apply(item.id)} style="secondary">
                     Apply
                   </Button>
                 </div>

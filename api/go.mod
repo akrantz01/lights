@@ -10,6 +10,7 @@ require (
 	github.com/go-co-op/gocron v1.11.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/joho/godotenv v1.4.0
+	github.com/matoous/go-nanoid v1.5.0
 	go.mongodb.org/mongo-driver v1.8.2
 	go.uber.org/zap v1.20.0
 )

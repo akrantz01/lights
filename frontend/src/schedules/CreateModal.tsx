@@ -27,8 +27,11 @@ const CreateModal = ({ open, close }: CreateModalProps): JSX.Element => {
   const [animation, setAnimation] = useState('');
 
   // Populate the initial value for preset and animation
-  useEffect(() => setAnimation((animations && animations[0]) || ''), [isAnimationsLoading]);
-  useEffect(() => setPreset((presets && presets[0]) || ''), [isPresetsLoading]);
+  useEffect(
+    () => setAnimation(animations !== undefined && animations.length !== 0 ? animations[0].id : ''),
+    [isAnimationsLoading],
+  );
+  useEffect(() => setPreset(presets !== undefined && presets.length !== 0 ? presets[0].id : ''), [isPresetsLoading]);
 
   const onSubmit = () => {
     createSchedule({
@@ -88,10 +91,22 @@ const CreateModal = ({ open, close }: CreateModalProps): JSX.Element => {
                   />
                   {type === ScheduleType.Fill && <ColorInput label="Color" value={color} onChange={setColor} />}
                   {type === ScheduleType.Preset && (
-                    <Dropdown label="Preset" options={presets || []} value={preset} onChange={setPreset} />
+                    <Dropdown
+                      label="Preset"
+                      options={(presets || []).map((p) => p.name)}
+                      values={(presets || []).map((p) => p.id)}
+                      value={preset}
+                      onChange={setPreset}
+                    />
                   )}
                   {type === ScheduleType.Animation && (
-                    <Dropdown label="Animation" options={animations || []} value={animation} onChange={setAnimation} />
+                    <Dropdown
+                      label="Animation"
+                      options={(animations || []).map((a) => a.name) || []}
+                      values={(animations || []).map((a) => a.id) || []}
+                      value={animation}
+                      onChange={setAnimation}
+                    />
                   )}
                 </div>
               </form>
