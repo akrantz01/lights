@@ -10,8 +10,8 @@ import (
 const schedulePrefix = "schedule-"
 
 // ListSchedules gets a list of all schedules in the database
-func (d *Database) ListSchedules() ([]string, error) {
-	var schedules []string
+func (d *Database) ListSchedules() ([]Schedule, error) {
+	var schedules []Schedule
 
 	err := d.db.View(func(txn *badger.Txn) error {
 		iterator := txn.NewIterator(badger.DefaultIteratorOptions)
@@ -24,7 +24,17 @@ func (d *Database) ListSchedules() ([]string, error) {
 
 			// Add only if it is preset
 			if strings.HasPrefix(key, schedulePrefix) {
-				schedules = append(schedules, strings.TrimPrefix(key, schedulePrefix))
+				value, err := item.ValueCopy(nil)
+				if err != nil {
+					return err
+				}
+
+				var schedule Schedule
+				if err := bson.Unmarshal(value, &schedule); err != nil {
+					return err
+				}
+
+				schedules = append(schedules, schedule)
 			}
 		}
 

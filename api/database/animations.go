@@ -10,8 +10,8 @@ import (
 const animationPrefix = "animation-"
 
 // ListAnimations retrieves a list of all known animations from the database
-func (d *Database) ListAnimations() ([]string, error) {
-	var animations []string
+func (d *Database) ListAnimations() ([]Animation, error) {
+	var animations []Animation
 
 	err := d.db.View(func(txn *badger.Txn) error {
 		iterator := txn.NewIterator(badger.DefaultIteratorOptions)
@@ -24,7 +24,17 @@ func (d *Database) ListAnimations() ([]string, error) {
 
 			// Add only if it is an animation
 			if strings.HasPrefix(key, animationPrefix) {
-				animations = append(animations, strings.TrimPrefix(key, animationPrefix))
+				value, err := item.ValueCopy(nil)
+				if err != nil {
+					return err
+				}
+
+				var animation Animation
+				if err := bson.Unmarshal(value, &animation); err != nil {
+					return err
+				}
+
+				animations = append(animations, animation)
 			}
 		}
 

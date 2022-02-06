@@ -2,7 +2,7 @@ package database
 
 type Animation struct {
 	Name string `json:"name"`
-	Slug string `json:"-" bson:"slug"`
+	Slug string `json:"slug"`
 }
 
 type Color struct {
@@ -13,14 +13,19 @@ type Color struct {
 
 type Preset struct {
 	Name       string  `json:"name"`
-	Slug       string  `json:"-" bson:"slug"`
+	Slug       string  `json:"slug"`
 	Pixels     []Color `json:"pixels"`
 	Brightness uint8   `json:"brightness"`
 }
 
+type PartialPreset struct {
+	Name string `json:"name"`
+	Slug string `json:"slug"`
+}
+
 type Schedule struct {
 	Name      string          `json:"name"`
-	Slug      string          `json:"-" bson:"slug"`
+	Slug      string          `json:"slug"`
 	At        string          `json:"at"`
 	Repeats   ScheduleRepeats `json:"repeats"`
 	Type      ScheduleType    `json:"type"`

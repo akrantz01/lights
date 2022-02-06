@@ -10,8 +10,8 @@ import (
 const presetPrefix = "preset-"
 
 // ListPresets gets a list of all presets in the database
-func (d *Database) ListPresets() ([]string, error) {
-	var presets []string
+func (d *Database) ListPresets() ([]PartialPreset, error) {
+	var presets []PartialPreset
 
 	err := d.db.View(func(txn *badger.Txn) error {
 		iterator := txn.NewIterator(badger.DefaultIteratorOptions)
@@ -24,7 +24,17 @@ func (d *Database) ListPresets() ([]string, error) {
 
 			// Add only if it is a preset
 			if strings.HasPrefix(key, presetPrefix) {
-				presets = append(presets, strings.TrimPrefix(key, presetPrefix))
+				value, err := item.ValueCopy(nil)
+				if err != nil {
+					return err
+				}
+
+				var preset PartialPreset
+				if err := bson.Unmarshal(value, &preset); err != nil {
+					return err
+				}
+
+				presets = append(presets, preset)
 			}
 		}
 

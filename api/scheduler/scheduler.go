@@ -101,15 +101,9 @@ func (s *Scheduler) LoadFromDatabase() error {
 		return err
 	}
 
-	for _, slug := range schedules {
-		// Retrieve the schedule
-		schedule, err := s.db.GetSchedule(slug)
-		if err != nil {
-			return err
-		}
-
-		// Add the job
-		if err := s.Add(slug, schedule.At, schedule.Repeats); err != nil {
+	// Add all the schedules
+	for _, schedule := range schedules {
+		if err := s.Add(schedule.Slug, schedule.At, schedule.Repeats); err != nil {
 			return err
 		}
 	}

@@ -17,7 +17,6 @@ func Router(r chi.Router) {
 	r.Get("/", list)
 	r.Post("/", create)
 
-	r.Get("/{slug}", read)
 	r.Patch("/{slug}", update)
 	r.Delete("/{slug}", remove)
 }
@@ -35,23 +34,6 @@ func list(w http.ResponseWriter, r *http.Request) {
 		handlers.Respond(w, handlers.WithData([]string{}))
 	} else {
 		handlers.Respond(w, handlers.WithData(schedules))
-	}
-}
-
-// Get all the details about a schedule
-func read(w http.ResponseWriter, r *http.Request) {
-	slug := chi.URLParam(r, "slug")
-	db := database.GetDatabase(r.Context())
-	l := logging.GetLogger(r.Context(), "schedules:read").With(zap.String("slug", slug))
-
-	schedule, err := db.GetSchedule(slug)
-	if err == database.ErrNotFound {
-		handlers.Respond(w, handlers.WithData(404), handlers.WithError("not found"))
-	} else if err != nil {
-		handlers.Respond(w, handlers.AsFatal())
-		l.Error("failed to read schedule", zap.Error(err))
-	} else {
-		handlers.Respond(w, handlers.WithData(schedule))
 	}
 }
 
