@@ -15,12 +15,13 @@ type Scheduler struct {
 	jobs map[string]*gocron.Job
 
 	// dependencies
-	db      *database.Database
-	actions chan rpc.Callable
+	db        *database.Database
+	actions   chan rpc.Callable
+	broadcast chan interface{}
 }
 
 // New creates and starts a new scheduler using the given timezone
-func New(timezoneName string, db *database.Database, actions chan rpc.Callable) (*Scheduler, error) {
+func New(timezoneName string, db *database.Database, actions chan rpc.Callable, broadcast chan interface{}) (*Scheduler, error) {
 	// Load the timezone and create the scheduler
 	tz, err := time.LoadLocation(timezoneName)
 	if err != nil {
@@ -31,6 +32,7 @@ func New(timezoneName string, db *database.Database, actions chan rpc.Callable) 
 		jobs:      make(map[string]*gocron.Job),
 		db:        db,
 		actions:   actions,
+		broadcast: broadcast,
 	}
 
 	// Start the scheduler
@@ -73,7 +75,7 @@ func (s *Scheduler) Add(name, at string, repeats database.ScheduleRepeats) error
 	}
 
 	// Create the job
-	job, err := s.Do(handler, name, s.db, s.actions)
+	job, err := s.Do(handler, name, s.db, s.actions, s.broadcast)
 	if err != nil {
 		return err
 	}

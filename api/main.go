@@ -53,8 +53,11 @@ func main() {
 	// Start the action processor
 	actions, processorCancel := rpc.NewProcessor(db, lc)
 
+	// Start the websocket hub
+	hub := ws.NewHub()
+
 	// Start the schedule processor
-	s, err := scheduler.New(config.Timezone, db, actions)
+	s, err := scheduler.New(config.Timezone, db, actions, hub.Broadcast())
 	if err != nil {
 		logger.Fatal("failed to setup scheduler", zap.Error(err))
 	}
@@ -63,9 +66,6 @@ func main() {
 	if err := s.LoadFromDatabase(); err != nil {
 		logger.Fatal("failed to load existing schedules", zap.Error(err))
 	}
-
-	// Start the websocket hub
-	hub := ws.NewHub()
 
 	r := chi.NewRouter()
 

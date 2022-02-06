@@ -33,6 +33,11 @@ func NewHub() *Hub {
 	return hub
 }
 
+// Broadcast gets the broadcast channel
+func (h *Hub) Broadcast() chan interface{} {
+	return h.broadcast
+}
+
 // run starts processing client registration and message broadcasting
 func (h *Hub) run() {
 	logger := zap.L().Named("hub")
