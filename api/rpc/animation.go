@@ -3,8 +3,6 @@ package rpc
 import (
 	"context"
 
-	gonanoid "github.com/matoous/go-nanoid"
-
 	"github.com/akrantz01/lights/lights-web/database"
 	"github.com/akrantz01/lights/lights-web/lights"
 )
@@ -74,15 +72,15 @@ func (sa StopAnimation) Execute(ctx context.Context, db *database.Database, cont
 
 // AddAnimation registers an animation with the controller
 type AddAnimation struct {
-	Name     string
+	Id       string
 	Wasm     []byte
 	Response chan bool
 }
 
-func NewAddAnimation(name string, wasm []byte) (AddAnimation, chan bool) {
+func NewAddAnimation(id string, wasm []byte) (AddAnimation, chan bool) {
 	success := make(chan bool)
 	return AddAnimation{
-		Name:     name,
+		Id:       id,
 		Wasm:     wasm,
 		Response: success,
 	}, success
@@ -92,12 +90,10 @@ func (aa AddAnimation) Type() string {
 	return "add-animation"
 }
 
-func (aa AddAnimation) Execute(ctx context.Context, db *database.Database, controller lights.LightController) error {
-	id := gonanoid.MustID(8)
-
+func (aa AddAnimation) Execute(ctx context.Context, _ *database.Database, controller lights.LightController) error {
 	// Add the animation
 	result, free := controller.RegisterAnimation(ctx, func(params lights.LightController_registerAnimation_Params) error {
-		if err := params.SetName(id); err != nil {
+		if err := params.SetName(aa.Id); err != nil {
 			return err
 		}
 		return params.SetAnimation(aa.Wasm)
@@ -112,13 +108,6 @@ func (aa AddAnimation) Execute(ctx context.Context, db *database.Database, contr
 	}
 	aa.Response <- data.Success()
 
-	// Add the animation to the database when successful
-	if data.Success() {
-		return db.AddAnimation(database.Animation{
-			Id:   id,
-			Name: aa.Name,
-		})
-	}
 	return nil
 }
 

@@ -15,8 +15,9 @@ import (
 // Router registers all the methods for handling animations
 func Router(r chi.Router) {
 	r.Get("/", list)
+	r.Post("/", create)
 
-	r.Put("/{id}", upsert)
+	r.Patch("/{id}", update)
 	r.Delete("/{id}", remove)
 }
 

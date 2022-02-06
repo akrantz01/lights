@@ -10,6 +10,14 @@ import (
 
 const animationPrefix = "animation-"
 
+// NewAnimation creates a new animation with the given name
+func NewAnimation(name string) Animation {
+	return Animation{
+		Id:   gonanoid.MustID(idLength),
+		Name: name,
+	}
+}
+
 // ListAnimations retrieves a list of all known animations from the database
 func (d *Database) ListAnimations() ([]Animation, error) {
 	var animations []Animation
@@ -46,8 +54,6 @@ func (d *Database) ListAnimations() ([]Animation, error) {
 
 // AddAnimation inserts a new animation into the database
 func (d *Database) AddAnimation(animation Animation) error {
-	animation.Id = gonanoid.MustID(idLength)
-
 	// Encode the animation
 	encoded, err := bson.Marshal(animation)
 	if err != nil {
