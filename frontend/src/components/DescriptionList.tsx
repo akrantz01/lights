@@ -1,7 +1,7 @@
-import React, { ComponentType, useState } from 'react';
+import React, { ComponentType, ReactNode, useState } from 'react';
 import { PencilAltIcon, SaveIcon, XIcon } from '@heroicons/react/outline';
 
-import { BaseBitwiseCheckbox, BaseColorInput, BaseDropdown, BaseInput, BaseTimeInput, Toggle } from './form';
+import { BaseBitwiseCheckbox, BaseColorInput, BaseDropdown, BaseInput, BaseTimeInput, Slider, Toggle } from './form';
 import { Color } from '../types';
 
 interface UpdateInputProps<T> {
@@ -28,6 +28,10 @@ const DropdownInput =
   // eslint-disable-next-line react/display-name
   ({ value, onChange }: UpdateInputProps<string>) =>
     <BaseDropdown options={options} value={value} onChange={onChange} />;
+
+const SliderInput = ({ value, onChange }: UpdateInputProps<number>): JSX.Element => (
+  <Slider value={value} onChange={onChange} />
+);
 
 const StringInput = ({ value, onChange }: UpdateInputProps<string>): JSX.Element => (
   <BaseInput value={value} onChange={onChange} />
@@ -111,10 +115,17 @@ interface ListProps {
   name: string;
   description?: string;
   onSave: (v: string) => void;
-  children: React.ReactNode;
+  rightContent?: ReactNode;
+  children: ReactNode;
 }
 
-const DescriptionList = ({ name: initialName, description, onSave, children }: ListProps): JSX.Element => {
+const DescriptionList = ({
+  name: initialName,
+  description,
+  onSave,
+  rightContent,
+  children,
+}: ListProps): JSX.Element => {
   const [isUpdating, setUpdating] = useState(false);
   const [name, setName] = useState(initialName);
 
@@ -125,28 +136,35 @@ const DescriptionList = ({ name: initialName, description, onSave, children }: L
 
   return (
     <>
-      <div>
-        <h3 className="text-lg leading-6 font-medium text-gray-900 flex">
-          {!isUpdating && name}
-          {isUpdating && (
-            <>
-              <BaseInput value={name} onChange={setName} />
-              <button
-                type="button"
-                className="mx-1 text-sm text-gray-400 hover:text-gray-600"
-                onClick={() => setUpdating(false)}
-              >
-                <XIcon className="w-4 h-4" />
-              </button>
-            </>
-          )}
+      <div className="flex">
+        <div className="flex-grow">
+          <h3 className="text-lg leading-6 font-medium text-gray-900 flex">
+            {!isUpdating && name}
+            {isUpdating && (
+              <>
+                <BaseInput value={name} onChange={setName} />
+                <button
+                  type="button"
+                  className="mx-1 text-sm text-gray-400 hover:text-gray-600"
+                  onClick={() => setUpdating(false)}
+                >
+                  <XIcon className="w-4 h-4" />
+                </button>
+              </>
+            )}
 
-          <button type="button" className="ml-1 text-sm text-indigo-400 hover:text-indigo-600" onClick={toggleUpdating}>
-            {isUpdating && <SaveIcon className="w-4 h-4" />}
-            {!isUpdating && <PencilAltIcon className="w-4 h-4" />}
-          </button>
-        </h3>
-        {description && <p className="mt-1 max-w-2xl text-sm text-gray-500">{description}</p>}
+            <button
+              type="button"
+              className="ml-1 text-sm text-indigo-400 hover:text-indigo-600"
+              onClick={toggleUpdating}
+            >
+              {isUpdating && <SaveIcon className="w-4 h-4" />}
+              {!isUpdating && <PencilAltIcon className="w-4 h-4" />}
+            </button>
+          </h3>
+          {description && <p className="mt-1 max-w-2xl text-sm text-gray-500">{description}</p>}
+        </div>
+        <div className="flex-shrink-0">{rightContent}</div>
       </div>
       <div className="mt-5 border-t border-b border-gray-300">
         <dl className="sm:divide-y sm:divide-gray-300">{children}</dl>
@@ -161,6 +179,7 @@ DescriptionList.BitwiseCheckboxInput = BitwiseCheckboxInput;
 DescriptionList.BooleanInput = BooleanInput;
 DescriptionList.ColorInput = ColorInput;
 DescriptionList.DropdownInput = DropdownInput;
+DescriptionList.SliderInput = SliderInput;
 DescriptionList.StringInput = StringInput;
 DescriptionList.TimeInput = TimeInput;
 

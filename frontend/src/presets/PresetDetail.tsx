@@ -11,7 +11,15 @@ import {
 
 import Button from '../components/Button';
 import DeleteConfirmation from '../components/DeleteConfirmation';
-import { applyPreset, useDispatch, useGetPresetQuery, useRemovePresetMutation, useSelector } from '../store';
+import DescriptionList from '../components/DescriptionList';
+import {
+  applyPreset,
+  useDispatch,
+  useGetPresetQuery,
+  useRemovePresetMutation,
+  useSelector,
+  useUpdatePresetMutation,
+} from '../store';
 import { Type } from '../store/display';
 
 interface Props extends RouteComponentProps {
@@ -26,6 +34,7 @@ const PresetDetail = ({ name }: Props): JSX.Element => {
   const navigate = useNavigate();
 
   const { data, isLoading } = useGetPresetQuery(name);
+  const [updatePreset] = useUpdatePresetMutation();
   const [deletePreset, { isLoading: isDeleteLoading }] = useRemovePresetMutation();
 
   // Track the state of the modals
@@ -69,34 +78,28 @@ const PresetDetail = ({ name }: Props): JSX.Element => {
     );
   }
 
+  const rightContent = (
+    <Button style="primary" onClick={() => dispatch(applyPreset(data.id))} disabled={isApplied}>
+      <PaperAirplaneIcon className="-ml-1 mr-2 h-5 w-5" />
+      {isApplied ? 'Applied' : 'Apply'}
+    </Button>
+  );
+
   return (
     <>
-      <div className="flex items-center justify-between">
-        <Button onClick={() => dispatch(applyPreset(data.name))}>
-          <PaperAirplaneIcon className="-ml-1 mr-2 h-5 w-5" />
-          Apply
-        </Button>
-        <Button style="secondary">
-          <PencilIcon className="-ml-1 mr-2 h-5 w-5" />
-          Edit
-        </Button>
-      </div>
-      <div className="mt-5 border-t border-b border-gray-300">
-        <dl className="sm:divide-y sm:divide-gray-300">
-          <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
-            <dt className="text-sm font-medium text-gray-500">Name</dt>
-            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{data.name}</dd>
-          </div>
-          <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
-            <dt className="text-sm font-medium text-gray-500">Brightness</dt>
-            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{data.brightness}%</dd>
-          </div>
-          <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
-            <dt className="text-sm font-medium text-gray-500">Status</dt>
-            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{isApplied ? 'In Use' : 'Ready'}</dd>
-          </div>
-        </dl>
-      </div>
+      <DescriptionList
+        name={data.name}
+        description="Preset configuration and details."
+        onSave={(name) => updatePreset({ id: data.id, name })}
+        rightContent={rightContent}
+      >
+        <DescriptionList.Field
+          name="Brightness"
+          value={data.brightness}
+          onSave={(brightness) => updatePreset({ id: data.id, brightness })}
+          input={DescriptionList.SliderInput}
+        />
+      </DescriptionList>
       <div className="flex items-center justify-between">
         {backButton}
         <Button
