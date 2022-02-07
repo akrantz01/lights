@@ -50,6 +50,8 @@ func update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	l.Info("fields", zap.Any("f", updatedFields))
+
 	// Update the name, time, and repetition days
 	if updatedFields.Name != nil {
 		if len(*updatedFields.Name) == 0 {
@@ -76,7 +78,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 
 	// Validate and update the type
 	if updatedFields.Type != nil {
-		switch schedule.Type {
+		switch *updatedFields.Type {
 		case database.ScheduleTypeFill:
 			schedule.Preset = nil
 			schedule.Animation = nil
@@ -90,6 +92,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 			handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("unknown schedule type"))
 			return
 		}
+		schedule.Type = *updatedFields.Type
 	}
 
 	// Set fields based on the type
