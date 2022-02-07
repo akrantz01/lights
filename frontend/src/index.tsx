@@ -8,7 +8,7 @@ import Layout from './components/Layout';
 import Dashboard from './dashboard';
 import NotFound from './NotFound';
 import { Presets, PresetDetail } from './presets';
-import { Schedules, ScheduleDetail } from './schedules';
+import { NewSchedule, Schedules, ScheduleDetail } from './schedules';
 import { connect, store } from './store';
 
 import 'flatpickr/dist/flatpickr.min.css';
@@ -24,11 +24,16 @@ ReactDOM.render(
         <Layout>
           <Router>
             <Dashboard path="/" />
+
             <Animations path="/animations" />
+
             <Presets path="/presets" />
             <PresetDetail path="/presets/:name" />
+
             <Schedules path="/schedules" />
             <ScheduleDetail path="/schedules/:name" />
+            <NewSchedule path="/new/schedule" />
+
             <NotFound default />
           </Router>
         </Layout>

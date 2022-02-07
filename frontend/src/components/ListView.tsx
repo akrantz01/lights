@@ -1,5 +1,6 @@
-import React, { ComponentType, useState } from 'react';
+import React from 'react';
 import { PlusIcon, RefreshIcon } from '@heroicons/react/outline';
+import { Link } from '@reach/router';
 import classNames from 'classnames';
 
 import Button from './Button';
@@ -17,28 +18,17 @@ interface Props<T> {
   refetch: () => void;
   icon: React.ComponentType<React.ComponentProps<'svg'>>;
   typeName: string;
-  modal?: ComponentType<CreateModalProps>;
 }
 
-const ListView = <T,>({
-  children,
-  items,
-  isFetching,
-  isLoading,
-  refetch,
-  icon: Icon,
-  typeName,
-  modal: Modal,
-}: Props<T>) => {
-  // Set up the create modal
-  const [createIsOpen, setCreateOpen] = useState(false);
-  const modal = Modal !== undefined && <Modal open={createIsOpen} close={() => setCreateOpen(false)} />;
-
+const ListView = <T,>({ children, items, isFetching, isLoading, refetch, icon: Icon, typeName }: Props<T>) => {
   const createButton = (
-    <Button onClick={() => setCreateOpen(true)}>
+    <Link
+      to={'/new/' + typeName}
+      className="px-4 py-2 text-sm rounded-md text-white bg-indigo-600 disabled:bg-indigo-600 hover:bg-indigo-700 inline-flex items-center border border-transparent font-medium shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-75"
+    >
       <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
       New {typeName}
-    </Button>
+    </Link>
   );
   const header = (
     <div className="flex items-center justify-between">
@@ -73,7 +63,6 @@ const ListView = <T,>({
           <p className="mt-1 text-sm text-gray-500">Get started by creating a new {typeName}.</p>
           <div className="mt-6">{createButton}</div>
         </div>
-        {modal}
       </>
     );
   }
@@ -86,7 +75,6 @@ const ListView = <T,>({
           {items.map((item) => children(item))}
         </ul>
       </div>
-      {modal}
     </>
   );
 };

@@ -6,7 +6,6 @@ import { Link, RouteComponentProps } from '@reach/router';
 import { Toggle } from '../components/form';
 import ListView from '../components/ListView';
 import { useListSchedulesQuery, useToggleScheduleMutation } from '../store';
-import CreateModal from './CreateModal';
 
 const Schedules: React.FC<RouteComponentProps> = () => {
   const [toggleSchedule] = useToggleScheduleMutation();
@@ -20,7 +19,6 @@ const Schedules: React.FC<RouteComponentProps> = () => {
       refetch={refetch}
       icon={ClockIcon}
       typeName="schedule"
-      modal={CreateModal}
     >
       {(item) => (
         <li key={item.id}>

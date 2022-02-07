@@ -6,11 +6,18 @@ import classNames from 'classnames';
 
 import StatusIndicator from './StatusIndicator';
 
-const navigation = [
+interface NavItem {
+  name: string;
+  href: string;
+  hidden?: boolean;
+}
+
+const navigation: NavItem[] = [
   { name: 'Dashboard', href: '/' },
   { name: 'Animations', href: '/animations' },
   { name: 'Presets', href: '/presets' },
   { name: 'Schedules', href: '/schedules' },
+  { name: 'New Schedule', href: '/new/schedule', hidden: true },
 ];
 
 const Navigation = (): JSX.Element => {
@@ -45,11 +52,13 @@ const Navigation = (): JSX.Element => {
                     </div>
                     <div className="hidden md:block">
                       <div className="ml-10 flex items-baseline space-x-4">
-                        {navigation.map((item) => (
-                          <Link key={item.name} to={item.href} getProps={isActive}>
-                            {item.name}
-                          </Link>
-                        ))}
+                        {navigation
+                          .filter((item) => !item.hidden)
+                          .map((item) => (
+                            <Link key={item.name} to={item.href} getProps={isActive}>
+                              {item.name}
+                            </Link>
+                          ))}
                       </div>
                     </div>
                   </div>
@@ -78,11 +87,13 @@ const Navigation = (): JSX.Element => {
             >
               <Disclosure.Panel className="border-b border-gray-700 md:hidden">
                 <div className="px-2 py-3 space-y-1 sm:px-3">
-                  {navigation.map((item) => (
-                    <Disclosure.Button key={item.name} as={Link} to={item.href} getProps={isActive}>
-                      {item.name}
-                    </Disclosure.Button>
-                  ))}
+                  {navigation
+                    .filter((item) => !item.hidden)
+                    .map((item) => (
+                      <Disclosure.Button key={item.name} as={Link} to={item.href} getProps={isActive}>
+                        {item.name}
+                      </Disclosure.Button>
+                    ))}
                 </div>
               </Disclosure.Panel>
             </Transition>
