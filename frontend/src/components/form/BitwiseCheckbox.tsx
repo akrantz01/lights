@@ -44,10 +44,10 @@ interface Props extends BaseBitwiseCheckboxProps {
 }
 
 const BitwiseCheckbox = ({ label, description, options, value, onChange }: Props): JSX.Element => (
-  <div className="space-y-6 sm:space-y-5 divide-y divide-gray-200">
+  <div className="space-y-6 sm:space-y-5 divide-y divide-gray-300">
     <div className="pt-2 sm:pt-5">
       <div role="group" aria-labelledby="bwcb-label">
-        <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-baseline">
+        <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-baseline sm:border-t sm:border-gray-300 sm:pt-5">
           <div>
             <div className="font-medium text-gray-900 text-sm sm:text-gray-700" id="bwcb-label">
               {label}

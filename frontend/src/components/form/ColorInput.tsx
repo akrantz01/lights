@@ -14,7 +14,7 @@ interface Props extends BaseProps<RGBColor> {
 
 const ColorInput = ({ label, description, value, onChange }: Props): JSX.Element => {
   return (
-    <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+    <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-300 sm:pt-5">
       <label className="block text-sm font-medium text-gray-700 sm:mt-px pt-2">{label}</label>
       <div className="mt-1 sm:mt-0 sm:col-span-2">
         <BaseColorInput value={value} onChange={onChange} />

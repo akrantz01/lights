@@ -28,7 +28,7 @@ interface Props extends BaseDropdownProps {
 }
 
 const Dropdown = ({ label, description, options, value, onChange }: Props): JSX.Element => (
-  <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+  <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-300 sm:pt-5">
     <label htmlFor={`dropdown-${label}`} className="block text-sm font-medium text-gray-700 sm:mt-px pt-2">
       {label}
     </label>
