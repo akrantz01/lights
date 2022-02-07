@@ -4,19 +4,10 @@ import (
 	"strings"
 
 	"github.com/dgraph-io/badger/v3"
-	gonanoid "github.com/matoous/go-nanoid"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 const animationPrefix = "animation-"
-
-// NewAnimation creates a new animation with the given name
-func NewAnimation(name string) Animation {
-	return Animation{
-		Id:   gonanoid.MustID(idLength),
-		Name: name,
-	}
-}
 
 // ListAnimations retrieves a list of all known animations from the database
 func (d *Database) ListAnimations() ([]Animation, error) {

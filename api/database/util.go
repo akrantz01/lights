@@ -2,13 +2,18 @@ package database
 
 import (
 	"fmt"
-	"regexp"
-	"strings"
+	"reflect"
 
+	gonanoid "github.com/matoous/go-nanoid"
 	"go.uber.org/zap"
 )
 
-const idLength = 8
+// GenerateId sets the id field on an object using reflection
+func GenerateId(object interface{}) {
+	v := reflect.ValueOf(object).Elem()
+	id := v.FieldByName("Id")
+	id.SetString(gonanoid.MustID(8))
+}
 
 type loggerShim struct{}
 
@@ -36,13 +41,4 @@ func (l loggerShim) Debugf(template string, args ...interface{}) {
 func buildKey(base, name string) []byte {
 	key := []byte(base)
 	return append(key, []byte(name)...)
-}
-
-var urlSafe = regexp.MustCompile(`[^a-z0-9-]`)
-
-// Slugify converts an arbitrary key to a URL-safe string consisting of the characters a-z, 0-9 and -
-func Slugify(key string) string {
-	lower := strings.ToLower(key)
-	noSpaces := strings.ReplaceAll(lower, " ", "-")
-	return urlSafe.ReplaceAllLiteralString(noSpaces, "")
 }

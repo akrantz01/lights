@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/dgraph-io/badger/v3"
-	gonanoid "github.com/matoous/go-nanoid"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -46,8 +45,6 @@ func (d *Database) ListSchedules() ([]PartialSchedule, error) {
 
 // AddSchedule inserts a new schedule into the database
 func (d *Database) AddSchedule(schedule Schedule) error {
-	schedule.Id = gonanoid.MustID(idLength)
-
 	// Encode the schedule
 	encoded, err := bson.Marshal(schedule)
 	if err != nil {

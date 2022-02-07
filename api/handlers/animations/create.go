@@ -43,7 +43,10 @@ func create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	animation := database.NewAnimation(name)
+	animation := database.Animation{
+		Name: name,
+	}
+	database.GenerateId(&animation)
 
 	// Trigger the create action and wait for response
 	method, success := rpc.NewAddAnimation(animation.Id, wasm)

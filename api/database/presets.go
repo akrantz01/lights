@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/dgraph-io/badger/v3"
-	gonanoid "github.com/matoous/go-nanoid"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -47,8 +46,6 @@ func (d *Database) ListPresets() ([]PartialPreset, error) {
 
 // AddPreset inserts a new preset into the database
 func (d *Database) AddPreset(preset Preset) error {
-	preset.Id = gonanoid.MustID(idLength)
-
 	// Encode the preset
 	encoded, err := bson.Marshal(preset)
 	if err != nil {
