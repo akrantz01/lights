@@ -26,6 +26,10 @@ func create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate the time
+	if len(schedule.Name) == 0 {
+		handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("name must be present"))
+		return
+	}
 	if _, err := time.Parse("15:04", schedule.At); err != nil {
 		handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("time format must match 'hh:mm'"))
 		return

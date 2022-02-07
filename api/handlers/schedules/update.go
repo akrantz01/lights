@@ -3,6 +3,7 @@ package schedules
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
@@ -15,6 +16,7 @@ import (
 
 // The body containing the fields that are allowed to be updated
 type scheduleUpdate struct {
+	Name      *string                   `json:"name"`
 	At        *string                   `json:"at"`
 	Repeats   *database.ScheduleRepeats `json:"repeats"`
 	Type      *database.ScheduleType    `json:"type"`
@@ -47,9 +49,22 @@ func update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Update the time and repetition days
+	// Update the name, time, and repetition days
+	if updatedFields.Name != nil {
+		if len(*updatedFields.Name) == 0 {
+			handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("name length must be greater than 0"))
+			return
+		} else {
+			schedule.Name = *updatedFields.Name
+		}
+	}
 	if updatedFields.At != nil {
-		schedule.At = *updatedFields.At
+		if _, err := time.Parse("15:04", *updatedFields.At); err == nil {
+			schedule.At = *updatedFields.At
+		} else {
+			handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("time format must match 'hh:mm'"))
+			return
+		}
 	}
 	if updatedFields.Repeats != nil {
 		schedule.Repeats = *updatedFields.Repeats

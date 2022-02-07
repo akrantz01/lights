@@ -14,6 +14,7 @@ import (
 
 // The body containing the fields that are allowed to be updated
 type presetUpdate struct {
+	Name       *string          `json:"name"`
 	Brightness *uint8           `json:"brightness"`
 	Pixels     []database.Color `json:"pixels"`
 }
@@ -43,6 +44,14 @@ func update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate and update the fields
+	if updatedFields.Name != nil {
+		if len(*updatedFields.Name) == 0 {
+			handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("name length must be greater than 0"))
+			return
+		} else {
+			preset.Name = *updatedFields.Name
+		}
+	}
 	if pixels := len(updatedFields.Pixels); pixels != 0 {
 		if pixels == int(length) {
 			preset.Pixels = updatedFields.Pixels
