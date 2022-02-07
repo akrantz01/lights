@@ -25,7 +25,8 @@ export type Dispatch = typeof store.dispatch;
 // Re-export stuff
 export {
   useListAnimationsQuery,
-  useUpsertAnimationMutation,
+  useCreateAnimationMutation,
+  useUpdateAnimationMutation,
   useRemoveAnimationMutation,
   useListPresetsQuery,
   useGetPresetQuery,

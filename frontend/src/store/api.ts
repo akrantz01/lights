@@ -11,12 +11,14 @@ enum Tag {
 }
 
 /**
- * The arguments taken when creating/updating an animation
+ * The arguments taken when creating an animation
  */
-interface UpsertAnimationArgs {
-  name: string;
-  wasm: File;
-}
+type CreateAnimationArgs = Pick<Animation, 'name'> & { wasm: File };
+
+/**
+ * The arguments taken when updating an animation
+ */
+type UpdateAnimationArgs = Pick<Animation, 'id'> & Partial<CreateAnimationArgs>;
 
 /**
  * The arguments taken when updating a preset
@@ -45,20 +47,38 @@ const api = createApi({
     listAnimations: builder.query<Animation[], void>({
       query: () => '/animations',
       transformResponse: (response: Response<Animation[]>) => response.data,
-      providesTags: [Tag.Animation],
+      providesTags: (result: Animation[] = []) => [
+        Tag.Animation,
+        ...result.map((a) => ({ type: Tag.Animation, id: a.id })),
+      ],
     }),
-    upsertAnimation: builder.mutation<void, UpsertAnimationArgs>({
+    createAnimation: builder.mutation<void, CreateAnimationArgs>({
       query: ({ name, wasm }) => {
         const body = new FormData();
+        body.set('name', name);
         body.set('wasm', wasm);
 
         return {
-          url: `/animations/${name}`,
-          method: 'PUT',
-          body: body,
+          url: `/animations`,
+          method: 'POST',
+          body,
         };
       },
       invalidatesTags: [Tag.Animation],
+    }),
+    updateAnimation: builder.mutation<void, UpdateAnimationArgs>({
+      query: ({ id, name, wasm }) => {
+        const body = new FormData();
+        if (name) body.set('name', name);
+        if (wasm) body.set('wasm', wasm);
+
+        return {
+          url: `/animations/${id}`,
+          method: 'PATCH',
+          body,
+        };
+      },
+      invalidatesTags: (result, error, arg) => [Tag.Animation, { type: Tag.Animation, id: arg.id }],
     }),
     removeAnimation: builder.mutation<void, string>({
       query: (name) => ({
@@ -93,10 +113,10 @@ const api = createApi({
     updatePreset: builder.mutation<void, UpdatePresetArgs>({
       query: (preset) => ({
         url: `/presets/${preset.id}`,
-        method: 'PUT',
+        method: 'PATCH',
         body: preset,
       }),
-      invalidatesTags: (result, error, arg) => [{ type: Tag.Preset, id: arg.id }],
+      invalidatesTags: (result, error, arg) => [Tag.Preset, { type: Tag.Preset, id: arg.id }],
     }),
     removePreset: builder.mutation<void, string>({
       query: (id) => ({
@@ -132,10 +152,10 @@ const api = createApi({
     updateSchedule: builder.mutation<void, UpdateScheduleArgs>({
       query: (schedule) => ({
         url: `/schedules/${schedule.id}`,
-        method: 'PUT',
+        method: 'PATCH',
         body: schedule,
       }),
-      invalidatesTags: (result, error, arg) => [{ type: Tag.Schedule, id: arg.id }],
+      invalidatesTags: (result, error, arg) => [Tag.Schedule, { type: Tag.Schedule, id: arg.id }],
     }),
     toggleSchedule: builder.mutation<void, string>({
       query: (id) => ({
@@ -158,7 +178,8 @@ export default api;
 // Independently export the hooks
 export const {
   useListAnimationsQuery,
-  useUpsertAnimationMutation,
+  useCreateAnimationMutation,
+  useUpdateAnimationMutation,
   useRemoveAnimationMutation,
   useListPresetsQuery,
   useGetPresetQuery,
