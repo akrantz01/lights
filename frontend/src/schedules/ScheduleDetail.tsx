@@ -4,7 +4,8 @@ import { Link, RouteComponentProps, useNavigate } from '@reach/router';
 
 import Button from '../components/Button';
 import DeleteConfirmation from '../components/DeleteConfirmation';
-import { useGetScheduleQuery, useRemoveScheduleMutation } from '../store';
+import { Toggle } from '../components/form';
+import { useGetScheduleQuery, useRemoveScheduleMutation, useToggleScheduleMutation } from '../store';
 import { ScheduleRepeats, ScheduleType } from '../types';
 
 // Decode the "repeats" field from a number to a list of days
@@ -37,6 +38,7 @@ const ScheduleDetail = ({ name }: Props): JSX.Element => {
 
   const { data, isLoading } = useGetScheduleQuery(name);
   const [deleteSchedule, { isLoading: isDeleteLoading }] = useRemoveScheduleMutation();
+  const [toggleSchedule] = useToggleScheduleMutation();
 
   // Track state of modals
   const [alertOpen, setAlertOpen] = useState(false);
@@ -98,6 +100,12 @@ const ScheduleDetail = ({ name }: Props): JSX.Element => {
           <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
             <dt className="text-sm font-medium text-gray-500">Name</dt>
             <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{data.name}</dd>
+          </div>
+          <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
+            <dt className="text-sm font-medium text-gray-500">Status</dt>
+            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <Toggle enabled={data.enabled} onChange={() => toggleSchedule(data.id)} />
+            </dd>
           </div>
           <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
             <dt className="text-sm font-medium text-gray-500">Runs At</dt>

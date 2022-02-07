@@ -20,6 +20,8 @@ func Router(r chi.Router) {
 	r.Get("/{id}", read)
 	r.Patch("/{id}", update)
 	r.Delete("/{id}", remove)
+
+	r.Put("/{id}/toggle", toggle)
 }
 
 // Get a list of all schedules

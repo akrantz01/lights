@@ -40,6 +40,7 @@ export enum ScheduleRepeats {
 export interface PartialSchedule {
   id: string;
   name: string;
+  enabled: boolean;
   at: string;
   repeats: ScheduleRepeats;
 }
@@ -47,6 +48,7 @@ export interface PartialSchedule {
 export interface Schedule {
   id: string;
   name: string;
+  enabled: boolean;
   at: string;
   repeats: ScheduleRepeats;
   type: ScheduleType;

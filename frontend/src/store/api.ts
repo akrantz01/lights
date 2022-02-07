@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { Animation, Preset, PartialPreset, Schedule } from '../types';
+import { Animation, Preset, PartialPreset, Schedule, PartialSchedule } from '../types';
 
 /**
  * The tags used for caching elements
@@ -107,10 +107,10 @@ const api = createApi({
     }),
 
     // Schedules API
-    listSchedules: builder.query<Schedule[], void>({
+    listSchedules: builder.query<PartialSchedule[], void>({
       query: () => '/schedules',
-      transformResponse: (response: Response<Schedule[]>) => response.data,
-      providesTags: (result: Schedule[] = []) => [
+      transformResponse: (response: Response<PartialSchedule[]>) => response.data,
+      providesTags: (result: PartialSchedule[] = []) => [
         Tag.Schedule,
         ...result.map((schedule) => ({ type: Tag.Schedule, id: schedule.id })),
       ],
@@ -137,6 +137,13 @@ const api = createApi({
       }),
       invalidatesTags: (result, error, arg) => [{ type: Tag.Schedule, id: arg.id }],
     }),
+    toggleSchedule: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/schedules/${id}/toggle`,
+        method: 'PUT',
+      }),
+      invalidatesTags: (result, error, arg) => [Tag.Schedule, { type: Tag.Schedule, id: arg }],
+    }),
     removeSchedule: builder.mutation<void, string>({
       query: (id) => ({
         url: `/schedules/${id}`,
@@ -162,5 +169,6 @@ export const {
   useGetScheduleQuery,
   useCreateScheduleMutation,
   useUpdateScheduleMutation,
+  useToggleScheduleMutation,
   useRemoveScheduleMutation,
 } = api;

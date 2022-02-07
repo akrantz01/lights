@@ -90,7 +90,14 @@ func (s *Scheduler) Add(id, at string, repeats database.ScheduleRepeats) error {
 func (s *Scheduler) Remove(id string) {
 	if job, ok := s.jobs[id]; ok {
 		s.RemoveByReference(job)
+		delete(s.jobs, id)
 	}
+}
+
+// IsScheduled gets whether a job is scheduled to run by its id
+func (s *Scheduler) IsScheduled(id string) bool {
+	_, ok := s.jobs[id]
+	return ok
 }
 
 // LoadFromDatabase fetches all the current schedules from the database and starts them
@@ -103,6 +110,11 @@ func (s *Scheduler) LoadFromDatabase() error {
 
 	// Add all the schedules
 	for _, schedule := range schedules {
+		// Skip all disabled schedules
+		if !schedule.Enabled {
+			continue
+		}
+
 		if err := s.Add(schedule.Id, schedule.At, schedule.Repeats); err != nil {
 			return err
 		}

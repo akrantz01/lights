@@ -37,6 +37,7 @@ const CreateModal = ({ open, close }: CreateModalProps): JSX.Element => {
     createSchedule({
       name,
       at,
+      enabled: true,
       repeats,
       type,
       color,

@@ -36,6 +36,7 @@ export {
   useGetScheduleQuery,
   useCreateScheduleMutation,
   useUpdateScheduleMutation,
+  useToggleScheduleMutation,
   useRemoveScheduleMutation,
 } from './api';
 export { useDispatch, useSelector } from './hooks';

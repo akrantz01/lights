@@ -26,6 +26,7 @@ type PartialPreset struct {
 type PartialSchedule struct {
 	Id      string          `json:"id"`
 	Name    string          `json:"name"`
+	Enabled bool            `json:"enabled"`
 	At      string          `json:"at"`
 	Repeats ScheduleRepeats `json:"repeats"`
 }
@@ -33,6 +34,7 @@ type PartialSchedule struct {
 type Schedule struct {
 	Id        string          `json:"id"`
 	Name      string          `json:"name"`
+	Enabled   bool            `json:"enabled"`
 	At        string          `json:"at"`
 	Repeats   ScheduleRepeats `json:"repeats"`
 	Type      ScheduleType    `json:"type"`

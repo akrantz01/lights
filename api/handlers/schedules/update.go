@@ -18,6 +18,7 @@ import (
 type scheduleUpdate struct {
 	Name      *string                   `json:"name"`
 	At        *string                   `json:"at"`
+	Enabled   *bool                     `json:"enabled"`
 	Repeats   *database.ScheduleRepeats `json:"repeats"`
 	Type      *database.ScheduleType    `json:"type"`
 	Color     *database.Color           `json:"color"`
@@ -57,6 +58,9 @@ func update(w http.ResponseWriter, r *http.Request) {
 		} else {
 			schedule.Name = *updatedFields.Name
 		}
+	}
+	if updatedFields.Enabled != nil {
+		schedule.Enabled = *updatedFields.Enabled
 	}
 	if updatedFields.At != nil {
 		if _, err := time.Parse("15:04", *updatedFields.At); err == nil {
@@ -133,14 +137,25 @@ func update(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Update the schedule job if the repeated days or at changes
-	if updatedFields.At != nil || updatedFields.Repeats != nil {
+	// Update the schedule job if the enabled status, repeated days, or run at changes
+	if schedule.Enabled && (updatedFields.At != nil || updatedFields.Repeats != nil) {
 		s.Remove(schedule.Id)
 		if err := s.Add(schedule.Id, schedule.At, schedule.Repeats); err != nil {
 			handlers.Respond(w, handlers.AsFatal())
 			l.Error("failed to update job", zap.Error(err))
 			return
 		}
+	} else if schedule.Enabled {
+		// Don't enable if already enabled
+		if !s.IsScheduled(id) {
+			if err := s.Add(id, schedule.At, schedule.Repeats); err != nil {
+				handlers.Respond(w, handlers.AsFatal())
+				l.Error("failed to schedule job", zap.Error(err))
+				return
+			}
+		}
+	} else {
+		s.Remove(id)
 	}
 
 	// Save the changes
