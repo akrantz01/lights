@@ -1,8 +1,9 @@
-import BitwiseCheckbox from './BitwiseCheckbox';
-import ColorInput from './ColorInput';
-import Dropdown from './Dropdown';
-import Input from './Input';
-import TimeInput from './TimeInput';
 import Toggle from './Toggle';
 
-export { BitwiseCheckbox, ColorInput, Dropdown, Input, TimeInput, Toggle };
+export { BaseBitwiseCheckbox, BitwiseCheckbox } from './BitwiseCheckbox';
+export { BaseColorInput, ColorInput } from './ColorInput';
+export { BaseDropdown, Dropdown } from './Dropdown';
+export { BaseInput, Input } from './Input';
+export { BaseTimeInput, TimeInput } from './TimeInput';
+
+export { Toggle };

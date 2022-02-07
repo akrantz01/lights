@@ -84,8 +84,11 @@ const CreateModal = ({ open, close }: CreateModalProps): JSX.Element => {
                   />
                   <Dropdown
                     label="Type"
-                    options={['Fill', 'Preset', 'Animation']}
-                    values={[ScheduleType.Fill, ScheduleType.Preset, ScheduleType.Animation]}
+                    options={{
+                      Fill: ScheduleType.Fill,
+                      Preset: ScheduleType.Preset,
+                      Animation: ScheduleType.Animation,
+                    }}
                     value={type}
                     onChange={(v) => setType(parseInt(v))}
                     description="Choose what gets displayed when the schedule runs."
@@ -94,8 +97,7 @@ const CreateModal = ({ open, close }: CreateModalProps): JSX.Element => {
                   {type === ScheduleType.Preset && (
                     <Dropdown
                       label="Preset"
-                      options={(presets || []).map((p) => p.name)}
-                      values={(presets || []).map((p) => p.id)}
+                      options={(presets || []).reduce((o, p) => ({ ...o, [p.name]: p.id }), {})}
                       value={preset}
                       onChange={setPreset}
                     />
@@ -103,8 +105,7 @@ const CreateModal = ({ open, close }: CreateModalProps): JSX.Element => {
                   {type === ScheduleType.Animation && (
                     <Dropdown
                       label="Animation"
-                      options={(animations || []).map((a) => a.name) || []}
-                      values={(animations || []).map((a) => a.id) || []}
+                      options={(animations || []).reduce((o, a) => ({ ...o, [a.name]: a.id }), {})}
                       value={animation}
                       onChange={setAnimation}
                     />

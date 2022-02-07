@@ -1,17 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import flatpickr from 'flatpickr';
+import React from 'react';
+import FlatPicker from 'react-flatpickr';
 
-interface Props {
-  label: string;
-  description?: string;
-  onChange: (v: string) => void;
-}
+import { BaseProps } from './props';
 
-const TimeInput = ({ label, description, onChange }: Props): JSX.Element => {
-  const [input, setInput] = useState<HTMLInputElement | null>(null);
-  useEffect(() => {
-    if (input === null) return;
-    const fp = flatpickr(input as HTMLInputElement, {
+type TimeBaseProps = Omit<BaseProps<string>, 'value'> & Partial<Pick<BaseProps<string>, 'value'>>;
+
+const BaseTimeInput = ({ id, name, value, onChange }: TimeBaseProps): JSX.Element => (
+  <FlatPicker
+    value={value}
+    options={{
       enableTime: true,
       noCalendar: true,
       altInput: true,
@@ -19,28 +16,29 @@ const TimeInput = ({ label, description, onChange }: Props): JSX.Element => {
       dateFormat: 'H:i',
       ariaDateFormat: 'h:i K',
       static: true,
-      onChange: (selected, time) => onChange(time),
-    });
-    return () => fp.destroy();
-  }, [input]);
+    }}
+    id={id}
+    name={name}
+    className="max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md"
+    onChange={(date, time) => onChange(time)}
+  />
+);
 
-  return (
-    <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-      <label htmlFor={`timepicker-${label}`} className="block text-sm font-medium text-gray-700 sm:mt-px pt-2">
-        {label}
-      </label>
-      <div className="mt-1 sm:mt-0 sm:col-span-2">
-        <input
-          type="text"
-          name={`timepicker-${label}`}
-          id={`timepicker-${label}`}
-          className="max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md"
-          ref={(r) => setInput(r)}
-        />
-        {description && <p className="text-sm text-gray-500 mt-3">{description}</p>}
-      </div>
+interface Props extends TimeBaseProps {
+  label: string;
+  description?: string;
+}
+
+const TimeInput = ({ label, description, value, onChange }: Props): JSX.Element => (
+  <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+    <label htmlFor={`timepicker-${label}`} className="block text-sm font-medium text-gray-700 sm:mt-px pt-2">
+      {label}
+    </label>
+    <div className="mt-1 sm:mt-0 sm:col-span-2">
+      <BaseTimeInput onChange={onChange} value={value} />
+      {description && <p className="text-sm text-gray-500 mt-3">{description}</p>}
     </div>
-  );
-};
+  </div>
+);
 
-export default TimeInput;
+export { BaseTimeInput, TimeInput };
