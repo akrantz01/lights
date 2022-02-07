@@ -52,6 +52,12 @@ const api = createApi({
         ...result.map((a) => ({ type: Tag.Animation, id: a.id })),
       ],
     }),
+    getAnimation: builder.query<Animation, string>({
+      query: (id) => `/animations/${id}`,
+      transformResponse: (response: Response<Animation>) => response.data,
+      providesTags: (result: Animation | undefined) =>
+        result === undefined ? [] : [{ type: Tag.Animation, id: result.id }],
+    }),
     createAnimation: builder.mutation<void, CreateAnimationArgs>({
       query: ({ name, wasm }) => {
         const body = new FormData();
@@ -178,6 +184,7 @@ export default api;
 // Independently export the hooks
 export const {
   useListAnimationsQuery,
+  useGetAnimationQuery,
   useCreateAnimationMutation,
   useUpdateAnimationMutation,
   useRemoveAnimationMutation,

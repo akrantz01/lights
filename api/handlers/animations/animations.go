@@ -17,6 +17,7 @@ func Router(r chi.Router) {
 	r.Get("/", list)
 	r.Post("/", create)
 
+	r.Get("/{id}", read)
 	r.Patch("/{id}", update)
 	r.Delete("/{id}", remove)
 }
@@ -34,6 +35,23 @@ func list(w http.ResponseWriter, r *http.Request) {
 		handlers.Respond(w, handlers.WithData([]string{}))
 	} else {
 		handlers.Respond(w, handlers.WithData(animations))
+	}
+}
+
+// Get extra details about an animation
+func read(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	db := database.GetDatabase(r.Context())
+	l := logging.GetLogger(r.Context(), "animations:read").With(zap.String("id", id))
+
+	animation, err := db.GetAnimation(id)
+	if err == database.ErrNotFound {
+		handlers.Respond(w, handlers.WithStatus(404), handlers.WithError("not found"))
+	} else if err != nil {
+		handlers.Respond(w, handlers.AsFatal())
+		l.Error("failed to read animation", zap.Error(err))
+	} else {
+		handlers.Respond(w, handlers.WithData(animation))
 	}
 }
 
