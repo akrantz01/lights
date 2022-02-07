@@ -80,6 +80,11 @@ const ScheduleDetail = ({ name }: Props): JSX.Element => {
     );
   }
 
+  // Convert the run at time from 24hr to 12hr
+  const [hours24, minutes] = data.at.split(':').map((s) => parseInt(s));
+  const pm = hours24 > 12;
+  const hours = pm ? hours24 - 12 : hours24 === 0 ? 12 : hours24;
+
   return (
     <>
       <div className="flex items-center justify-end">
@@ -96,7 +101,9 @@ const ScheduleDetail = ({ name }: Props): JSX.Element => {
           </div>
           <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
             <dt className="text-sm font-medium text-gray-500">Runs At</dt>
-            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{data.at}</dd>
+            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              {hours}:{minutes} {pm ? 'PM' : 'AM'}
+            </dd>
           </div>
           <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
             <dt className="text-sm font-medium text-gray-500">Repeats</dt>
