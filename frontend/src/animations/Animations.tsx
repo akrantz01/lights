@@ -3,6 +3,7 @@ import { FilmIcon, PlayIcon, TrashIcon } from '@heroicons/react/outline';
 import { RouteComponentProps } from '@reach/router';
 
 import Button from '../components/Button';
+import DeleteConfirmation from '../components/DeleteConfirmation';
 import ListView from '../components/ListView';
 import {
   startAnimation,
@@ -13,7 +14,6 @@ import {
   useSelector,
 } from '../store';
 import { Type } from '../store/display';
-import DeleteConfirmation from '../components/DeleteConfirmation';
 
 const Animations: React.FC<RouteComponentProps> = () => {
   const dispatch = useDispatch();
@@ -26,9 +26,9 @@ const Animations: React.FC<RouteComponentProps> = () => {
     (state) => state.display.type === Type.Animation && state.display.animation?.running,
   );
 
-  const apply = (name: string) => (event: React.MouseEvent<HTMLButtonElement>) => {
+  const apply = (id: string) => (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
-    dispatch(startAnimation(name));
+    dispatch(startAnimation(id));
   };
   const onDeleteCallback = () => {
     removeAnimation(deleteSelection);
