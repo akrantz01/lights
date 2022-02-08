@@ -14,7 +14,7 @@ const BrightnessSlider = (props: Props): JSX.Element => {
 
   return (
     <div className={classNames('flex items-center justify-between', props.className)}>
-      <label className="text-2xl" htmlFor="dashboard-brightness-slider">
+      <label className="text-xl text-gray-800" htmlFor="dashboard-brightness-slider">
         Brightness
       </label>
       <div className="w-3/6 relative">

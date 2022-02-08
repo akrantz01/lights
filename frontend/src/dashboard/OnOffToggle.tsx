@@ -13,7 +13,7 @@ const OnOffToggle = (): JSX.Element => {
   return (
     <Switch.Group>
       <div className="flex items-center justify-between">
-        <Switch.Label className="text-2xl">Lights</Switch.Label>
+        <Switch.Label className="text-xl text-gray-800">Lights</Switch.Label>
         <Toggle enabled={on} onChange={onChange} large />
       </div>
     </Switch.Group>
