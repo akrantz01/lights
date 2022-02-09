@@ -5,6 +5,7 @@ import classNames from 'classnames';
 import { useSelector } from '../store';
 import { Type } from '../store/display';
 import BrightnessSlider from './BrightnessSlider';
+import Fill from './Fill';
 import Pixels from './Pixels';
 import OnOffToggle from './OnOffToggle';
 
@@ -41,7 +42,8 @@ const Dashboard: React.FC<RouteComponentProps> = () => {
         </div>
       </div>
       <div className="pt-10 sm:pt-6">
-        <Pixels />
+        {displayMode === Type.Fill && <Fill />}
+        {displayMode === Type.Pixels && <Pixels />}
       </div>
     </>
   );
