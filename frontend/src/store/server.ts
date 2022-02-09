@@ -13,7 +13,7 @@ interface SetPixelRangePayload {
 }
 
 interface SetArbitraryPixelsPayload {
-  indexes: number;
+  indexes: number[];
   color: Color;
 }
 
