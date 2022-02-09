@@ -52,14 +52,14 @@ const Animations: React.FC<RouteComponentProps> = () => {
                 <p className="text-sm font-medium text-indigo-600 truncate">{item.name}</p>
                 <div className="mt-4 flex-shrink-0 sm:mt-0 sm:ml-5">
                   <Button onClick={apply(item.id)} style="secondary" className="has-tooltip">
-                    <span className="hidden md:inline tooltip rounded shadow-lg p-1 bg-gray-100 text-gray-900">
+                    <span className="hidden md:inline tooltip rounded shadow-lg p-1 bg-gray-100 text-gray-900 -ml-3 -mt-10">
                       Start
                     </span>
                     <PlayIcon className="md:inline hidden -mx-1 h-5 w-5" />
                     <span className="md:hidden">Start</span>
                   </Button>
                   <Button onClick={() => setDeleteSelection(item.id)} style="danger" className="ml-3 has-tooltip">
-                    <span className="hidden md:inline tooltip rounded shadow-lg p-1 bg-gray-100 text-gray-900">
+                    <span className="hidden md:inline tooltip rounded shadow-lg p-1 bg-gray-100 text-gray-900 -ml-4 -mt-10">
                       Delete
                     </span>
                     <TrashIcon className="md:inline hidden -mx-1 h-5 w-5" />
