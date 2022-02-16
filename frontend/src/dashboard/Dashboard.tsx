@@ -2,6 +2,7 @@ import React from 'react';
 import { RouteComponentProps } from '@reach/router';
 import classNames from 'classnames';
 
+import Card from '../components/Card';
 import { useSelector } from '../store';
 import { Type } from '../store/display';
 import BrightnessSlider from './BrightnessSlider';
@@ -19,7 +20,7 @@ const Dashboard: React.FC<RouteComponentProps> = () => {
   const displayMode = useSelector((state) => state.display.type);
 
   return (
-    <>
+    <Card>
       <div className="space-y-8 divide-y">
         <OnOffToggle />
         <BrightnessSlider className="border-t border-gray-300 pt-6" />
@@ -44,7 +45,7 @@ const Dashboard: React.FC<RouteComponentProps> = () => {
         {displayMode === Type.Fill && <Fill />}
         {displayMode === Type.Pixels && <Pixels />}
       </div>
-    </>
+    </Card>
   );
 };
 

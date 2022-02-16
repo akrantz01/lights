@@ -3,6 +3,7 @@ import { FilmIcon, PlayIcon, TrashIcon } from '@heroicons/react/outline';
 import { RouteComponentProps } from '@reach/router';
 
 import Button from '../components/Button';
+import Card from '../components/Card';
 import DeleteConfirmation from '../components/DeleteConfirmation';
 import ListView from '../components/ListView';
 import {
@@ -36,7 +37,7 @@ const Animations: React.FC<RouteComponentProps> = () => {
   };
 
   return (
-    <>
+    <Card>
       <ListView
         isLoading={isLoading}
         isFetching={isFetching}
@@ -85,7 +86,7 @@ const Animations: React.FC<RouteComponentProps> = () => {
         title="Delete animation"
         description="Are you sure you want to delete this animation? All of the associated data will be permanently removed from the server forver. If the animation is currently running, it will keep running until it is stopped."
       />
-    </>
+    </Card>
   );
 };
 

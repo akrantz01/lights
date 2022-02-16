@@ -3,6 +3,7 @@ import { ArrowSmLeftIcon, ClockIcon, RefreshIcon, TrashIcon } from '@heroicons/r
 import { RouteComponentProps, useNavigate } from '@reach/router';
 
 import Button from '../components/Button';
+import Card from '../components/Card';
 import DeleteConfirmation from '../components/DeleteConfirmation';
 import DescriptionList from '../components/DescriptionList';
 import { useGetScheduleQuery, useRemoveScheduleMutation, useUpdateScheduleMutation } from '../store';
@@ -73,21 +74,25 @@ const ScheduleDetail = ({ name }: Props): JSX.Element => {
   // Display loading spinner
   if (isLoading) {
     return (
-      <div className="mt-3 pt-12 pb-6 text-center">
-        <RefreshIcon className="mx-auto h-12 w-12 text-gray-400 animate-spin" />
-      </div>
+      <Card>
+        <div className="mt-3 pt-12 pb-6 text-center">
+          <RefreshIcon className="mx-auto h-12 w-12 text-gray-400 animate-spin" />
+        </div>
+      </Card>
     );
   }
 
   // Display not found
   if (data === undefined) {
     return (
-      <div className="mt-3 border-2 border-gray-300 border-dashed rounded-lg p-12 text-center">
-        <ClockIcon className="mx-auto h-12 w-12 text-gray-400" />
-        <h3 className="mt-2 text-sm font-medium text-gray-900">{name} not found</h3>
-        <p className="mt-1 text-sm text-gray-500">The schedule you are looking for could&apos;t be found.</p>
-        {backButton}
-      </div>
+      <Card>
+        <div className="mt-3 border-2 border-gray-300 border-dashed rounded-lg p-12 text-center">
+          <ClockIcon className="mx-auto h-12 w-12 text-gray-400" />
+          <h3 className="mt-2 text-sm font-medium text-gray-900">{name} not found</h3>
+          <p className="mt-1 text-sm text-gray-500">The schedule you are looking for could&apos;t be found.</p>
+          {backButton}
+        </div>
+      </Card>
     );
   }
 
@@ -106,7 +111,7 @@ const ScheduleDetail = ({ name }: Props): JSX.Element => {
   };
 
   return (
-    <>
+    <Card>
       <DescriptionList
         name={data.name}
         description="Schedule details and information."
@@ -161,7 +166,7 @@ const ScheduleDetail = ({ name }: Props): JSX.Element => {
         title="Delete schedule"
         description="Are you sure you want to delete this schedule? All of the associated data will be permanently removed from the server forever."
       />
-    </>
+    </Card>
   );
 };
 
