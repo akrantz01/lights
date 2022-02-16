@@ -186,14 +186,21 @@ func NewCurrentPixels(pixels []database.Color) CurrentPixels {
 
 // PresetUsed is used to broadcast the name of the preset that was applied
 type PresetUsed struct {
-	Type    MessageType `json:"type"`
-	Payload string      `json:"payload"`
+	Type    MessageType       `json:"type"`
+	Payload PresetUsedPayload `json:"payload"`
+}
+type PresetUsedPayload struct {
+	Id     string           `json:"id"`
+	Pixels []database.Color `json:"pixels"`
 }
 
-func NewPresetUsed(id string) PresetUsed {
+func NewPresetUsed(preset database.Preset) PresetUsed {
 	return PresetUsed{
-		Type:    MessagePresetUsed,
-		Payload: id,
+		Type: MessagePresetUsed,
+		Payload: PresetUsedPayload{
+			Id:     preset.Id,
+			Pixels: preset.Pixels,
+		},
 	}
 }
 

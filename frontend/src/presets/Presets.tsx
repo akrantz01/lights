@@ -6,14 +6,11 @@ import { Link, RouteComponentProps } from '@reach/router';
 import Button from '../components/Button';
 import ListView from '../components/ListView';
 import { applyPreset, useDispatch, useListPresetsQuery, useSelector } from '../store';
-import { Type } from '../store/display';
 
 const Presets: React.FC<RouteComponentProps> = () => {
   const dispatch = useDispatch();
   const { data: presets, isLoading, isFetching, refetch } = useListPresetsQuery();
-  const currentPreset = useSelector((state) =>
-    state.display.type === Type.Preset ? (state.display.preset as string) : '',
-  );
+  const currentPreset = useSelector((state) => state.display.preset || '');
 
   const apply = (name: string) => (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();

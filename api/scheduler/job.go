@@ -28,8 +28,18 @@ func handler(name string, db *database.Database, actions chan rpc.Callable, broa
 		actions <- rpc.NewColorChange(*schedule.Color)
 		broadcast <- ws.NewCurrentColor(*schedule.Color)
 	case database.ScheduleTypePreset:
-		actions <- rpc.NewApplyPreset(*schedule.Preset)
-		broadcast <- ws.NewPresetUsed(*schedule.Preset)
+		preset, err := db.GetPreset(*schedule.Preset)
+		if err == database.ErrNotFound {
+			logger.Warn("preset no longer exists", zap.String("preset", *schedule.Preset))
+			return
+		} else if err != nil {
+			logger.Error("failed to get preset from database", zap.Error(err), zap.String("preset", *schedule.Preset))
+			return
+		}
+
+		actions <- rpc.NewApplyPreset(preset)
+		broadcast <- ws.NewPresetUsed(preset)
+		broadcast <- ws.NewCurrentBrightness(preset.Brightness)
 	case database.ScheduleTypeAnimation:
 		actions <- rpc.NewStartAnimation(*schedule.Animation)
 		broadcast <- ws.NewAnimationStarted(*schedule.Animation)

@@ -12,7 +12,6 @@ import OnOffToggle from './OnOffToggle';
 const modes = {
   Fill: Type.Fill,
   Pixels: Type.Pixels,
-  Preset: Type.Preset,
   Animation: Type.Animation,
 };
 

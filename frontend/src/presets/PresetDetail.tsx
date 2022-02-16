@@ -42,7 +42,7 @@ const PresetDetail = ({ name }: Props): JSX.Element => {
   // TODO: add edit modal
 
   // Determine if the preset is applied to the lights
-  const isApplied = useSelector((state) => state.display.type === Type.Preset && state.display.preset === name);
+  const isApplied = useSelector((state) => state.display.preset === name);
 
   const backButton = (
     <Button className="mt-3" onClick={() => navigate('/presets')} style={data === undefined ? 'secondary' : 'primary'}>

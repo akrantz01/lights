@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
 
+	"github.com/akrantz01/lights/lights-web/database"
 	"github.com/akrantz01/lights/lights-web/rpc"
 	"github.com/akrantz01/lights/lights-web/util"
 )
@@ -41,7 +42,7 @@ func (c *Client) register() {
 }
 
 // reader processes all incoming messages from the client
-func (c *Client) reader(actions chan rpc.Callable) {
+func (c *Client) reader(actions chan rpc.Callable, db *database.Database) {
 	defer func() {
 		c.hub.unregister <- c
 		c.conn.Close()
@@ -166,8 +167,19 @@ func (c *Client) reader(actions chan rpc.Callable) {
 				continue
 			}
 
-			actions <- rpc.NewApplyPreset(applyPreset.Id)
-			c.hub.broadcast <- NewPresetUsed(applyPreset.Id)
+			// Fetch the preset
+			preset, err := db.GetPreset(applyPreset.Id)
+			if err == database.ErrNotFound {
+				// TODO: properly handle error
+				continue
+			} else if err != nil {
+				c.logger.Error("failed to find preset", zap.Error(err), zap.String("id", applyPreset.Id))
+				continue
+			}
+
+			actions <- rpc.NewApplyPreset(preset)
+			c.hub.broadcast <- NewPresetUsed(preset)
+			c.hub.broadcast <- NewCurrentBrightness(preset.Brightness)
 
 		// Start an animation by name on the strip
 		case MessageStartAnimation:

@@ -11,10 +11,15 @@ interface AnimationState {
   running: boolean;
 }
 
+interface SetPresetPayload {
+  id: string;
+  brightness: number;
+  pixels: Color[];
+}
+
 export enum Type {
   Fill,
   Pixels,
-  Preset,
   Animation,
 }
 
@@ -53,9 +58,10 @@ export const displaySlice = createSlice({
         for (const index of action.payload.indexes) state.pixels[index] = action.payload.color;
       }
     },
-    setPreset: (state, action: PayloadAction<string>) => {
-      state.type = Type.Preset;
-      state.preset = action.payload;
+    setPreset: (state, action: PayloadAction<SetPresetPayload>) => {
+      state.type = Type.Pixels;
+      state.preset = action.payload.id;
+      state.pixels = action.payload.pixels;
     },
     startAnimation: (state, action: PayloadAction<string>) => {
       state.type = Type.Animation;

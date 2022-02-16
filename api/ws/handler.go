@@ -40,7 +40,7 @@ func Handler(hub *Hub) func(w http.ResponseWriter, r *http.Request) {
 		client.register()
 
 		// Start reader and writer routines
-		go client.reader(actions)
+		go client.reader(actions, db)
 		go client.writer()
 
 		// Send configuration information
