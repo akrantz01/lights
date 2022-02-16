@@ -1,7 +1,7 @@
-import React from 'react';
 import { PlusIcon, RefreshIcon } from '@heroicons/react/outline';
 import { Link } from '@reach/router';
 import classNames from 'classnames';
+import React from 'react';
 
 import Button from './Button';
 

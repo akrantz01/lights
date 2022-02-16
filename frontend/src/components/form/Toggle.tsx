@@ -1,7 +1,7 @@
-import React from 'react';
 import { Switch } from '@headlessui/react';
 import { CheckIcon, XIcon } from '@heroicons/react/outline';
 import classNames from 'classnames';
+import React from 'react';
 
 interface Props {
   enabled: boolean;

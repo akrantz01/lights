@@ -1,4 +1,5 @@
 import { createAction } from '@reduxjs/toolkit';
+
 import { Color } from '../types';
 
 interface SetPixelPayload {

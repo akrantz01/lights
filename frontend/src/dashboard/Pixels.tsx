@@ -1,10 +1,10 @@
-import React, { MouseEvent, useState } from 'react';
 import { CheckIcon } from '@heroicons/react/outline';
+import React, { MouseEvent, useState } from 'react';
 
-import { BaseColorInput } from '../components/form';
-import { setColor, setArbitraryPixels, useSelector, useDispatch } from '../store';
-import { Color } from '../types';
 import Button from '../components/Button';
+import { BaseColorInput } from '../components/form';
+import { setArbitraryPixels, setColor, useDispatch, useSelector } from '../store';
+import { Color } from '../types';
 
 const hash = (c: Color, i: number) => {
   let h = 23;

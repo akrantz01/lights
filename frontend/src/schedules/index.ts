@@ -1,5 +1,5 @@
 import NewSchedule from './NewSchedule';
-import Schedules from './Schedules';
 import ScheduleDetail from './ScheduleDetail';
+import Schedules from './Schedules';
 
 export { NewSchedule, Schedules, ScheduleDetail };

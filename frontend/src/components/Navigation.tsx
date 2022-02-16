@@ -1,8 +1,8 @@
-import React from 'react';
 import { Disclosure, Transition } from '@headlessui/react';
 import { LightBulbIcon, MenuIcon, XIcon } from '@heroicons/react/outline';
 import { Link, LinkGetProps, useLocation } from '@reach/router';
 import classNames from 'classnames';
+import React from 'react';
 
 import StatusIndicator from './StatusIndicator';
 

@@ -1,7 +1,7 @@
-import React from 'react';
 import { ClockIcon } from '@heroicons/react/outline';
 import { ChevronRightIcon } from '@heroicons/react/solid';
 import { Link, RouteComponentProps } from '@reach/router';
+import React from 'react';
 
 import Card from '../components/Card';
 import { Toggle } from '../components/form';

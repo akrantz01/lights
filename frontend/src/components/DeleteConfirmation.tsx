@@ -1,6 +1,6 @@
-import React, { Fragment, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { ExclamationIcon } from '@heroicons/react/outline';
+import React, { Fragment, useRef } from 'react';
 
 import Button from './Button';
 

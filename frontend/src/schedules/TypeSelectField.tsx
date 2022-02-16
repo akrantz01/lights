@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
 import { RefreshIcon } from '@heroicons/react/outline';
 import { Link } from '@reach/router';
+import React, { useEffect, useState } from 'react';
 import { RGBColor } from 'react-color';
 
 import { BaseColorInput, BaseDropdown } from '../components/form';

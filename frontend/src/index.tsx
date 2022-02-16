@@ -1,14 +1,14 @@
+import { LocationProvider, Router } from '@reach/router';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, LocationProvider } from '@reach/router';
 import { Provider } from 'react-redux';
 
 import { Animations } from './animations';
 import Layout from './components/Layout';
 import Dashboard from './dashboard';
 import NotFound from './NotFound';
-import { Presets, PresetDetail } from './presets';
-import { NewSchedule, Schedules, ScheduleDetail } from './schedules';
+import { PresetDetail, Presets } from './presets';
+import { NewSchedule, ScheduleDetail, Schedules } from './schedules';
 import { connect, store } from './store';
 
 import 'flatpickr/dist/flatpickr.min.css';

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
 import { ArrowSmLeftIcon, ClockIcon, RefreshIcon, TrashIcon } from '@heroicons/react/outline';
 import { RouteComponentProps, useNavigate } from '@reach/router';
+import React, { useState } from 'react';
 
 import Button from '../components/Button';
 import Card from '../components/Card';

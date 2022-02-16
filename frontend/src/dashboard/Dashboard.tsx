@@ -1,14 +1,14 @@
-import React from 'react';
 import { RouteComponentProps } from '@reach/router';
 import classNames from 'classnames';
+import React from 'react';
 
 import Card from '../components/Card';
 import { useSelector } from '../store';
 import { Type } from '../store/display';
 import BrightnessSlider from './BrightnessSlider';
 import Fill from './Fill';
-import Pixels from './Pixels';
 import OnOffToggle from './OnOffToggle';
+import Pixels from './Pixels';
 
 const modes = {
   Fill: Type.Fill,

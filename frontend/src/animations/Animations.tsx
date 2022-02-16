@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
 import { FilmIcon, PlayIcon, TrashIcon } from '@heroicons/react/outline';
 import { RouteComponentProps } from '@reach/router';
+import React, { useState } from 'react';
 
 import Button from '../components/Button';
 import Card from '../components/Card';

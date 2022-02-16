@@ -1,6 +1,6 @@
 import { Action, Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
 
-import { beginReconnect, attemptReconnect, reconnected, broken, closed, error, opened } from './actions';
+import { attemptReconnect, beginReconnect, broken, closed, error, opened, reconnected } from './actions';
 
 export default class Socket {
   private ws: WebSocket | null = null;

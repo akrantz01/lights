@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { Animation, Preset, PartialPreset, Schedule, PartialSchedule } from '../types';
+
+import { Animation, PartialPreset, PartialSchedule, Preset, Schedule } from '../types';
 
 /**
  * The tags used for caching elements

@@ -1,6 +1,7 @@
 import { Action, Middleware, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
-import Socket from './socket';
+
 import { connect, disconnect, error, send } from './actions';
+import Socket from './socket';
 
 export default (): Middleware => {
   // Create the socket

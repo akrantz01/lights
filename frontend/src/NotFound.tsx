@@ -1,6 +1,6 @@
-import React from 'react';
-import { Link, RouteComponentProps } from '@reach/router';
 import { ArrowSmLeftIcon, QuestionMarkCircleIcon } from '@heroicons/react/outline';
+import { Link, RouteComponentProps } from '@reach/router';
+import React from 'react';
 
 import Card from './components/Card';
 

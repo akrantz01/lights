@@ -1,8 +1,8 @@
-import React, { ComponentType, ReactNode, useState } from 'react';
 import { PencilAltIcon, SaveIcon, XIcon } from '@heroicons/react/outline';
+import React, { ComponentType, ReactNode, useState } from 'react';
 
-import { BaseBitwiseCheckbox, BaseColorInput, BaseDropdown, BaseInput, BaseTimeInput, Slider, Toggle } from './form';
 import { Color } from '../types';
+import { BaseBitwiseCheckbox, BaseColorInput, BaseDropdown, BaseInput, BaseTimeInput, Slider, Toggle } from './form';
 
 interface UpdateInputProps<T> {
   value: T;

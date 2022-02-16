@@ -1,6 +1,6 @@
-import React from 'react';
 import { StatusOfflineIcon, StatusOnlineIcon } from '@heroicons/react/outline';
 import classNames from 'classnames';
+import React from 'react';
 
 import { useSelector } from '../store';
 

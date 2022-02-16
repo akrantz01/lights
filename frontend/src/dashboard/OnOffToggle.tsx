@@ -1,5 +1,5 @@
-import React from 'react';
 import { Switch } from '@headlessui/react';
+import React from 'react';
 
 import { Toggle } from '../components/form';
 import { turnOff, turnOn, useDispatch, useSelector } from '../store';

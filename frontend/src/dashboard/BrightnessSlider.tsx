@@ -1,5 +1,5 @@
-import React from 'react';
 import classNames from 'classnames';
+import React from 'react';
 
 import { Slider } from '../components/form';
 import { setBrightness, useDispatch, useSelector } from '../store';
