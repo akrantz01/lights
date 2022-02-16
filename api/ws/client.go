@@ -180,6 +180,7 @@ func (c *Client) reader(actions chan rpc.Callable, db *database.Database) {
 			actions <- rpc.NewApplyPreset(preset)
 			c.hub.broadcast <- NewPresetUsed(preset)
 			c.hub.broadcast <- NewCurrentBrightness(preset.Brightness)
+			c.hub.broadcast <- NewStripStatus(true)
 
 		// Start an animation by name on the strip
 		case MessageStartAnimation:

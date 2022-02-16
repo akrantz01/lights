@@ -97,5 +97,10 @@ func (ap ApplyPreset) Execute(ctx context.Context, db *database.Database, contro
 	<-instantResult.Done()
 	free()
 
+	// Mark the strip as being on
+	if err := db.SetState(true); err != nil {
+		return err
+	}
+
 	return nil
 }
