@@ -1,5 +1,6 @@
 import { FilmIcon, PlayIcon, TrashIcon } from '@heroicons/react/outline';
 import { RouteComponentProps } from '@reach/router';
+import classNames from 'classnames';
 import React, { useState } from 'react';
 
 import Button from '../components/Button';
@@ -26,6 +27,7 @@ const Animations: React.FC<RouteComponentProps> = () => {
   const isAnimationRunning = useSelector(
     (state) => state.display.type === Type.Animation && state.display.animation?.running,
   );
+  const runningAnimation = useSelector((state) => state.display.animation?.name);
 
   const apply = (id: string) => (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -52,8 +54,18 @@ const Animations: React.FC<RouteComponentProps> = () => {
               <div className="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between">
                 <p className="text-sm font-medium text-indigo-600 truncate">{item.name}</p>
                 <div className="mt-4 flex-shrink-0 sm:mt-0 sm:ml-5">
-                  <Button onClick={apply(item.id)} style="secondary" className="has-tooltip">
-                    <span className="hidden md:inline tooltip rounded shadow-lg p-1 bg-gray-100 text-gray-900 -ml-3 -mt-10">
+                  <Button
+                    onClick={apply(item.id)}
+                    style="secondary"
+                    className="has-tooltip"
+                    disabled={runningAnimation === item.id}
+                  >
+                    <span
+                      className={classNames(
+                        runningAnimation === item.id ? '' : 'md:inline',
+                        'hidden tooltip rounded shadow-lg p-1 bg-gray-100 text-gray-900 -ml-3 -mt-10',
+                      )}
+                    >
                       Start
                     </span>
                     <PlayIcon className="md:inline hidden -mx-1 h-5 w-5" />
