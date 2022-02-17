@@ -8,7 +8,7 @@ interface SetPixelsByIndexPayload {
 }
 
 interface AnimationState {
-  name?: string;
+  id?: string;
   running: boolean;
 }
 
@@ -68,7 +68,7 @@ export const displaySlice = createSlice({
       state.type = Type.Animation;
       state.animation = {
         running: true,
-        name: action.payload,
+        id: action.payload,
       };
     },
     stopAnimation: (state) => {

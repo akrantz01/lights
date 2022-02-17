@@ -27,7 +27,7 @@ const Animations: React.FC<RouteComponentProps> = () => {
   const isAnimationRunning = useSelector(
     (state) => state.display.type === Type.Animation && state.display.animation?.running,
   );
-  const runningAnimation = useSelector((state) => state.display.animation?.name);
+  const runningAnimation = useSelector((state) => state.display.animation?.id);
 
   const apply = (id: string) => (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
