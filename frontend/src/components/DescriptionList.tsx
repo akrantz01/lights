@@ -114,7 +114,7 @@ const Field = <T,>({
 interface ListProps {
   name: string;
   description?: string;
-  onSave: (v: string) => void;
+  onSave?: (v: string) => void;
   rightContent?: ReactNode;
   children: ReactNode;
 }
@@ -130,6 +130,8 @@ const DescriptionList = ({
   const [name, setName] = useState(initialName);
 
   const toggleUpdating = () => {
+    if (onSave === undefined) return;
+
     if (isUpdating) onSave(name);
     setUpdating(!isUpdating);
   };
@@ -153,14 +155,16 @@ const DescriptionList = ({
               </>
             )}
 
-            <button
-              type="button"
-              className="ml-1 text-sm text-indigo-400 hover:text-indigo-600"
-              onClick={toggleUpdating}
-            >
-              {isUpdating && <SaveIcon className="w-4 h-4" />}
-              {!isUpdating && <PencilAltIcon className="w-4 h-4" />}
-            </button>
+            {onSave !== undefined && (
+              <button
+                type="button"
+                className="ml-1 text-sm text-indigo-400 hover:text-indigo-600"
+                onClick={toggleUpdating}
+              >
+                {isUpdating && <SaveIcon className="w-4 h-4" />}
+                {!isUpdating && <PencilAltIcon className="w-4 h-4" />}
+              </button>
+            )}
           </h3>
           {description && <p className="mt-1 max-w-2xl text-sm text-gray-500">{description}</p>}
         </div>
