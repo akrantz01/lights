@@ -1,5 +1,5 @@
 from queue import Empty, SimpleQueue
-from threading import Thread
+from threading import Event, Thread
 from typing import Optional
 
 from . import pixels
@@ -14,7 +14,7 @@ class Animator(Thread):
         self.daemon = False
 
         self.running = True
-        self.animating = False
+        self.stopped = Event()
         self.item: Optional[Animation] = None
 
     def run(self) -> None:
@@ -24,8 +24,11 @@ class Animator(Thread):
                 try:
                     name = _queue.get(block=False, timeout=10)
                     self.load(name)
+
+                    # Reset the stopped state when we load a new animation
+                    self.stopped.clear()
                 except Empty:
-                    pass
+                    self.stopped.set()
             else:
                 try:
                     # Execute an animation frame
@@ -34,7 +37,9 @@ class Animator(Thread):
                     # Attempt to fetch a newer animation w/o blocking
                     name = _queue.get(block=False)
                     self.load(name)
-                except (AttributeError, Empty):
+                except AttributeError:
+                    self.stopped.set()
+                except Empty:
                     pass
 
     @staticmethod
@@ -63,6 +68,10 @@ class Animator(Thread):
         Stop the currently running animation
         """
         self.item = None
+
+        # Wait for the animation to stop and then switch back to instant mode
+        # just in case the mode was changed in the animation
+        self.stopped.wait()
         pixels.mode(True)
 
     def stop(self):
