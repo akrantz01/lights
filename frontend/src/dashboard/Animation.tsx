@@ -7,9 +7,7 @@ import { stopAnimation, useDispatch, useGetAnimationQuery, useSelector } from '.
 const Animation = (): JSX.Element => {
   const dispatch = useDispatch();
   const animation = useSelector((state) => state.display.animation);
-  const { data, isLoading } = useGetAnimationQuery(
-    animation !== undefined && animation.id !== undefined ? animation.id : '',
-  );
+  const { data, isLoading } = useGetAnimationQuery(animation.id !== undefined ? animation.id : '');
 
   if (isLoading || data === undefined) {
     return (
@@ -36,9 +34,9 @@ const Animation = (): JSX.Element => {
           <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
             <dt className="text-sm font-medium text-gray-500">Running</dt>
             <dd className="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              <span className="flex-grow">{animation !== undefined && animation.running ? 'Yes' : 'No'}</span>
+              <span className="flex-grow">{animation.running ? 'Yes' : 'No'}</span>
               <span className="ml-4 flex-shrink-0">
-                {animation !== undefined && animation.running && (
+                {animation.running && (
                   <button
                     type="button"
                     onClick={() => dispatch(stopAnimation())}
@@ -53,7 +51,7 @@ const Animation = (): JSX.Element => {
           <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
             <dt className="text-sm font-medium text-gray-500">Name</dt>
             <dd className="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              {animation !== undefined && animation.id !== undefined ? data.name : 'No animation running'}
+              {animation.id !== undefined ? data.name : 'No animation running'}
             </dd>
           </div>
         </dl>

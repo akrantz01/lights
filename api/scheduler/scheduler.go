@@ -15,24 +15,26 @@ type Scheduler struct {
 	jobs map[string]*gocron.Job
 
 	// dependencies
-	db        *database.Database
-	actions   chan rpc.Callable
-	broadcast chan interface{}
+	db          *database.Database
+	actions     chan rpc.Callable
+	broadcast   chan interface{}
+	stripLength uint16
 }
 
 // New creates and starts a new scheduler using the given timezone
-func New(timezoneName string, db *database.Database, actions chan rpc.Callable, broadcast chan interface{}) (*Scheduler, error) {
+func New(timezoneName string, length uint16, db *database.Database, actions chan rpc.Callable, broadcast chan interface{}) (*Scheduler, error) {
 	// Load the timezone and create the scheduler
 	tz, err := time.LoadLocation(timezoneName)
 	if err != nil {
 		return nil, err
 	}
 	scheduler := &Scheduler{
-		Scheduler: gocron.NewScheduler(tz),
-		jobs:      make(map[string]*gocron.Job),
-		db:        db,
-		actions:   actions,
-		broadcast: broadcast,
+		Scheduler:   gocron.NewScheduler(tz),
+		jobs:        make(map[string]*gocron.Job),
+		db:          db,
+		actions:     actions,
+		broadcast:   broadcast,
+		stripLength: length,
 	}
 
 	// Start the scheduler

@@ -42,7 +42,7 @@ func (c *Client) register() {
 }
 
 // reader processes all incoming messages from the client
-func (c *Client) reader(actions chan rpc.Callable, db *database.Database) {
+func (c *Client) reader(actions chan rpc.Callable, db *database.Database, stripLength uint16) {
 	defer func() {
 		c.hub.unregister <- c
 		c.conn.Close()
@@ -90,7 +90,7 @@ func (c *Client) reader(actions chan rpc.Callable, db *database.Database) {
 			}
 
 			actions <- rpc.NewColorChange(setColor.Color)
-			c.hub.broadcast <- NewCurrentColor(setColor.Color)
+			c.hub.broadcast <- NewFilledPixels(setColor.Color, stripLength)
 
 		// Turn the entire strip on
 		case MessageStateOn:

@@ -2,11 +2,12 @@ import React from 'react';
 
 import { BaseColorInput } from '../components/form';
 import { setColor, useDispatch, useSelector } from '../store';
-import { Color } from '../types';
 
 const Fill = (): JSX.Element => {
   const dispatch = useDispatch();
-  const color = useSelector((state) => state.display.fill as Color);
+  const color = useSelector((state) =>
+    state.display.pixels.length > 0 ? state.display.pixels[0] : { r: 0, g: 0, b: 0 },
+  );
 
   return (
     <div className="grid gap-4 md:grid-cols-2">

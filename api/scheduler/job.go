@@ -26,7 +26,7 @@ func handler(name string, db *database.Database, actions chan rpc.Callable, broa
 	switch schedule.Type {
 	case database.ScheduleTypeFill:
 		actions <- rpc.NewColorChange(*schedule.Color)
-		broadcast <- ws.NewCurrentColor(*schedule.Color)
+		broadcast <- ws.NewFilledPixels(*schedule.Color, 8)
 	case database.ScheduleTypePreset:
 		preset, err := db.GetPreset(*schedule.Preset)
 		if err == database.ErrNotFound {

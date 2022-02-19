@@ -7,9 +7,6 @@ type MessageType string
 const (
 	// MessageConfiguration tells the client basic information about the current setup
 	MessageConfiguration MessageType = "strip/setLength"
-	// MessageCurrentColor notifies clients of the current fill color. Once received by the client, the client shall
-	// automatically switch to fill mode.
-	MessageCurrentColor = "display/setFill"
 	// MessageSetColor changes the fill color of the entire strip
 	MessageSetColor = "server/display/setColor"
 	// MessageStripState notifies clients of the current color and state of the strip
@@ -64,19 +61,6 @@ func NewConfiguration(length uint16) Configuration {
 	return Configuration{
 		Type:    MessageConfiguration,
 		Payload: length,
-	}
-}
-
-// CurrentColor is broadcast when the color of the strip changes
-type CurrentColor struct {
-	Type    MessageType    `json:"type"`
-	Payload database.Color `json:"payload"`
-}
-
-func NewCurrentColor(color database.Color) CurrentColor {
-	return CurrentColor{
-		Type:    MessageCurrentColor,
-		Payload: color,
 	}
 }
 
@@ -173,14 +157,36 @@ type SetArbitraryPixels struct {
 
 // CurrentPixels is used to broadcast the status of all pixels
 type CurrentPixels struct {
-	Type    MessageType      `json:"type"`
-	Payload []database.Color `json:"payload"`
+	Type    MessageType          `json:"type"`
+	Payload CurrentPixelsPayload `json:"payload"`
+}
+type CurrentPixelsPayload struct {
+	Fill   bool             `json:"fill"`
+	Pixels []database.Color `json:"pixels"`
 }
 
 func NewCurrentPixels(pixels []database.Color) CurrentPixels {
 	return CurrentPixels{
-		Type:    MessageCurrentPixels,
-		Payload: pixels,
+		Type: MessageCurrentPixels,
+		Payload: CurrentPixelsPayload{
+			Fill:   false,
+			Pixels: pixels,
+		},
+	}
+}
+
+func NewFilledPixels(color database.Color, length uint16) CurrentPixels {
+	pixels := make([]database.Color, length)
+	for i := range pixels {
+		pixels[i] = color
+	}
+
+	return CurrentPixels{
+		Type: MessageCurrentPixels,
+		Payload: CurrentPixelsPayload{
+			Fill:   true,
+			Pixels: pixels,
+		},
 	}
 }
 

@@ -18,6 +18,11 @@ interface SetPresetPayload {
   pixels: Color[];
 }
 
+interface SetAllPixels {
+  fill: boolean;
+  pixels: Color[];
+}
+
 export enum Type {
   Fill,
   Pixels,
@@ -25,35 +30,43 @@ export enum Type {
 }
 
 interface DisplayState {
-  animation?: AnimationState;
-  fill?: Color;
-  pixels?: Color[];
+  animation: AnimationState;
+  fill: boolean;
+  pixels: Color[];
   preset?: string;
   type: Type;
 }
 
 const initialState: DisplayState = {
   type: Type.Fill,
-  fill: {
-    r: 0,
-    g: 0,
-    b: 0,
+  animation: {
+    running: false,
   },
+  fill: true,
+  pixels: [
+    {
+      r: 0,
+      g: 0,
+      b: 0,
+    },
+  ],
 };
 
 export const displaySlice = createSlice({
   name: 'display',
   initialState,
   reducers: {
-    setFill: (state, action: PayloadAction<Color>) => {
-      state.type = Type.Fill;
-      state.fill = action.payload;
-    },
-    setAllPixels: (state, action: PayloadAction<Color[]>) => {
-      state.type = Type.Pixels;
-      state.pixels = action.payload;
+    setAllPixels: (state, action: PayloadAction<SetAllPixels>) => {
+      state.preset = undefined;
+
+      state.type = action.payload.fill ? Type.Fill : Type.Pixels;
+      state.fill = action.payload.fill;
+      state.pixels = action.payload.pixels;
     },
     setPixelsByIndex: (state, action: PayloadAction<SetPixelsByIndexPayload>) => {
+      state.preset = undefined;
+      state.fill = false;
+
       state.type = Type.Pixels;
       if (state.pixels) {
         for (const index of action.payload.indexes) state.pixels[index] = action.payload.color;
@@ -65,6 +78,8 @@ export const displaySlice = createSlice({
       state.pixels = action.payload.pixels;
     },
     startAnimation: (state, action: PayloadAction<string>) => {
+      state.preset = undefined;
+
       state.type = Type.Animation;
       state.animation = {
         running: true,
@@ -72,6 +87,8 @@ export const displaySlice = createSlice({
       };
     },
     stopAnimation: (state) => {
+      state.preset = undefined;
+
       state.type = Type.Animation;
       state.animation = {
         running: false,

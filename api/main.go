@@ -57,7 +57,7 @@ func main() {
 	hub := ws.NewHub()
 
 	// Start the schedule processor
-	s, err := scheduler.New(config.Timezone, db, actions, hub.Broadcast())
+	s, err := scheduler.New(config.Timezone, config.StripLength, db, actions, hub.Broadcast())
 	if err != nil {
 		logger.Fatal("failed to setup scheduler", zap.Error(err))
 	}

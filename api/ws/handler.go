@@ -34,17 +34,17 @@ func Handler(hub *Hub) func(w http.ResponseWriter, r *http.Request) {
 
 		actions := rpc.GetActions(r.Context())
 		db := database.GetDatabase(r.Context())
+		length := handlers.GetStripLength(r.Context())
 
 		// Create the client
 		client := newClient(conn, hub, logger)
 		client.register()
 
 		// Start reader and writer routines
-		go client.reader(actions, db)
+		go client.reader(actions, db, length)
 		go client.writer()
 
 		// Send configuration information
-		length := handlers.GetStripLength(r.Context())
 		client.send <- NewConfiguration(length)
 
 		// Get the current status for state and brightness
@@ -68,7 +68,7 @@ func Handler(hub *Hub) func(w http.ResponseWriter, r *http.Request) {
 				logger.Error("failed to get color", zap.Error(err))
 			}
 
-			client.send <- NewCurrentColor(color)
+			client.send <- NewFilledPixels(color, length)
 		} else if mode == database.PixelModeIndividual {
 			pixels, err := db.GetPixels()
 			if err != nil {

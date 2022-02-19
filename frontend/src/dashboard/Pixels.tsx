@@ -3,7 +3,7 @@ import React, { MouseEvent, useState } from 'react';
 
 import Button from '../components/Button';
 import { BaseColorInput } from '../components/form';
-import { setArbitraryPixels, setColor, useDispatch, useSelector } from '../store';
+import { setArbitraryPixels, useDispatch, useSelector } from '../store';
 import { Color } from '../types';
 
 const hash = (c: Color, i: number) => {
@@ -71,9 +71,6 @@ const Pixels = (): JSX.Element => {
             }
           >
             Set Selected Pixels
-          </Button>
-          <Button className="ml-3" onClick={() => dispatch(setColor(pixelColor))}>
-            Fill
           </Button>
         </div>
       </div>
