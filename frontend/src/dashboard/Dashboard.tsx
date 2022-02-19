@@ -5,6 +5,7 @@ import Card from '../components/Card';
 import DescriptionList from '../components/DescriptionList';
 import { useSelector } from '../store';
 import { Type } from '../store/display';
+import Animation from './Animation';
 import BrightnessSlider from './BrightnessSlider';
 import Fill from './Fill';
 import OnOffToggle from './OnOffToggle';
@@ -27,10 +28,9 @@ const Dashboard: React.FC<RouteComponentProps> = () => {
       </Card>
       <Tabs selected={editMode} onChange={setEditMode} className="max-w-7xl mx-auto pb-12 px-4 sm:px-6 lg:px-8" />
       <Card>
-        <div className="pt-10 sm:pt-6">
-          {editMode === Type.Fill && <Fill />}
-          {editMode === Type.Pixels && <Pixels />}
-        </div>
+        {editMode === Type.Fill && <Fill />}
+        {editMode === Type.Pixels && <Pixels />}
+        {editMode === Type.Animation && <Animation />}
       </Card>
     </>
   );
