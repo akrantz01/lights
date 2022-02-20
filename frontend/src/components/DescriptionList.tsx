@@ -2,7 +2,15 @@ import { PencilAltIcon, SaveIcon, XIcon } from '@heroicons/react/outline';
 import React, { ComponentType, ReactNode, useState } from 'react';
 
 import { Color } from '../types';
-import { BaseBitwiseCheckbox, BaseColorInput, BaseDropdown, BaseInput, BaseTimeInput, Slider, Toggle } from './form';
+import {
+  BaseBitwiseCheckbox,
+  BaseColorInput,
+  BaseDropdown,
+  BaseInput,
+  BaseSlider,
+  BaseTimeInput,
+  Toggle,
+} from './form';
 
 interface UpdateInputProps<T> {
   value: T;
@@ -30,7 +38,7 @@ const DropdownInput =
     <BaseDropdown options={options} value={value} onChange={onChange} />;
 
 const SliderInput = ({ value, onChange }: UpdateInputProps<number>): JSX.Element => (
-  <Slider value={value} onChange={onChange} />
+  <BaseSlider value={value} onChange={onChange} />
 );
 
 const StringInput = ({ value, onChange }: UpdateInputProps<string>): JSX.Element => (
@@ -79,8 +87,7 @@ const Field = <T,>({
       <dd className="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
         <span className="flex-grow">
           {isUpdating && InputComponent !== undefined && <InputComponent value={value} onChange={setValue} />}
-          {!isUpdating && DisplayComponent !== undefined && <DisplayComponent value={value} />}
-          {!isUpdating && DisplayComponent === undefined && displayFn(value)}
+          {!isUpdating && DisplayComponent !== undefined ? <DisplayComponent value={value} /> : displayFn(value)}
         </span>
         <span className="ml-4 flex-shrink-0">
           {isUpdating && (
@@ -102,8 +109,7 @@ const Field = <T,>({
             className="bg-gray-200 rounded-md font-bold text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             onClick={onToggleUpdate}
           >
-            {isUpdating && 'Save'}
-            {!isUpdating && 'Update'}
+            {isUpdating ? 'Save' : 'Update'}
           </button>
         </span>
       </dd>

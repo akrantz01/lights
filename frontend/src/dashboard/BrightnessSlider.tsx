@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import React from 'react';
 
-import { Slider } from '../components/form';
+import { BaseSlider } from '../components/form';
 import { setBrightness, useDispatch, useSelector } from '../store';
 
 interface Props {
@@ -18,7 +18,7 @@ const BrightnessSlider = (props: Props): JSX.Element => {
         Brightness
       </label>
       <div className="w-3/6 relative">
-        <Slider value={brightness} onChange={(b) => dispatch(setBrightness(b))} id="dashboard-brightness-slider" />
+        <BaseSlider value={brightness} onChange={(b) => dispatch(setBrightness(b))} id="dashboard-brightness-slider" />
       </div>
     </div>
   );

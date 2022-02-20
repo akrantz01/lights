@@ -7,7 +7,7 @@ import { Animations } from './animations';
 import Layout from './components/Layout';
 import Dashboard from './dashboard';
 import NotFound from './NotFound';
-import { PresetDetail, Presets } from './presets';
+import { NewPreset, PresetDetail, Presets } from './presets';
 import { NewSchedule, ScheduleDetail, Schedules } from './schedules';
 import { connect, store } from './store';
 
@@ -29,6 +29,7 @@ ReactDOM.render(
 
             <Presets path="/presets" />
             <PresetDetail path="/presets/:name" />
+            <NewPreset path="/new/preset" />
 
             <Schedules path="/schedules" />
             <ScheduleDetail path="/schedules/:name" />

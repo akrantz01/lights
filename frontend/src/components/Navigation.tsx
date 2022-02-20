@@ -18,6 +18,7 @@ const navigation: NavItem[] = [
   { name: 'Presets', href: '/presets' },
   { name: 'Schedules', href: '/schedules' },
   { name: 'New Schedule', href: '/new/schedule', hidden: true },
+  { name: 'New Preset', href: '/new/preset', hidden: true },
 ];
 
 const Navigation = (): JSX.Element => {
