@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
 import { Animations } from './animations';
+import NewAnimation from './animations/NewAnimation';
 import Layout from './components/Layout';
 import Dashboard from './dashboard';
 import NotFound from './NotFound';
@@ -26,6 +27,7 @@ ReactDOM.render(
             <Dashboard path="/" />
 
             <Animations path="/animations" />
+            <NewAnimation path="/new/animation" />
 
             <Presets path="/presets" />
             <PresetDetail path="/presets/:name" />
