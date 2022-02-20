@@ -101,7 +101,7 @@ const Label = ({ editable = true, light = false }: LabelProps): JSX.Element => (
       Pixels
     </label>
     {editable && (
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-gray-500 py-3">
         Click on a pixel to select it and change its color. To select multiple non-consecutive pixels, control + left
         click. To select multiple consecutive pixels, shift + left click. The strip is laid out horizontally where the
         neighboring pixels are on the left and right.
@@ -182,11 +182,11 @@ const UpdatablePixels = ({ values: initialValues, onSave }: UpdatablePixelsProps
     <div className="pb-5">
       <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-300 sm:pt-5">
         <Label editable={isUpdating} light={true} />
-        <div className="flex sm:col-span-2">
+        <div className="flex sm:col-span-2 flex-wrap">
           <span className="flex flex-grow justify-center">
-            {isUpdating ? <BaseColorInput value={color} onChange={onColorChange} /> : '​'}
+            {isUpdating ? <BaseColorInput value={color} onChange={onColorChange} /> : '​' /* <- zero width space*/}
           </span>
-          <span className="ml-4 flex-shrink-0">
+          <span className="ml-4 flex-shrink-0 sm:pt-0 pt-3">
             {isUpdating && (
               <>
                 <button
