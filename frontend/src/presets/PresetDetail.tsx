@@ -6,6 +6,7 @@ import Button from '../components/Button';
 import Card from '../components/Card';
 import DeleteConfirmation from '../components/DeleteConfirmation';
 import DescriptionList from '../components/DescriptionList';
+import { UpdatablePixels } from '../components/form';
 import {
   applyPreset,
   useDispatch,
@@ -32,7 +33,6 @@ const PresetDetail = ({ name }: Props): JSX.Element => {
 
   // Track the state of the modals
   const [alertOpen, setAlertOpen] = useState(false);
-  // TODO: add edit modal
 
   // Determine if the preset is applied to the lights
   const isApplied = useSelector((state) => state.display.preset === name);
@@ -96,6 +96,7 @@ const PresetDetail = ({ name }: Props): JSX.Element => {
           onSave={(brightness) => updatePreset({ id: data.id, brightness })}
           input={DescriptionList.SliderInput}
         />
+        <UpdatablePixels values={data.pixels} onSave={(pixels) => updatePreset({ id: data.id, pixels })} />
       </DescriptionList>
       <div className="flex items-center justify-between">
         {backButton}
