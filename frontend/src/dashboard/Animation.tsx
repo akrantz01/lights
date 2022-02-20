@@ -20,8 +20,7 @@ const Animation = (): JSX.Element => {
   return (
     <>
       <div>
-        <h3 className="text-lg leading-6 font-medium text-gray-900">Animation</h3>
-        <p className="mt-1 max-w-2xl text-sm text-gray-500">
+        <p className="max-w-2xl text-sm text-gray-600">
           Manage the details from the{' '}
           <Link to="/animations" className="text-blue-500 hover:underline">
             animations
