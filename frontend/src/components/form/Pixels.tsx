@@ -216,4 +216,4 @@ const UpdatablePixels = ({ values: initialValues, onSave }: UpdatablePixelsProps
   );
 };
 
-export { Pixels, UpdatablePixels };
+export { Display, Pixels, UpdatablePixels };
