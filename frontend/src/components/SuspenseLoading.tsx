@@ -1,7 +1,7 @@
 import { RefreshIcon } from '@heroicons/react/outline';
 import React from 'react';
 
-import Card from './components/Card';
+import Card from './Card';
 
 const SuspenseLoading = (): JSX.Element => (
   <Card>

@@ -7,8 +7,8 @@ import { Provider } from 'react-redux';
 
 import AuthHandler from './components/AuthHandler';
 import Layout from './components/Layout';
+import SuspenseLoading from './components/SuspenseLoading';
 import { Scope, connect, store } from './store';
-import SuspenseLoading from './SuspenseLoading';
 
 import 'flatpickr/dist/flatpickr.min.css';
 import './index.css';
