@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/akrantz01/lights/lights-web/database"
+	"github.com/akrantz01/lights/lights-web/events"
 	"github.com/akrantz01/lights/lights-web/handlers"
 	"github.com/akrantz01/lights/lights-web/logging"
 	"github.com/akrantz01/lights/lights-web/rpc"
@@ -17,9 +18,11 @@ func Router(r chi.Router) {
 	r.Get("/", list)
 	r.Post("/", create)
 
-	r.Get("/{id}", read)
-	r.Patch("/{id}", update)
-	r.Delete("/{id}", remove)
+	r.Route("/{id}", func(r chi.Router) {
+		r.Get("/", read)
+		r.Patch("/", update)
+		r.Delete("/", remove)
+	})
 }
 
 // Get a list of all animations
@@ -59,7 +62,9 @@ func read(w http.ResponseWriter, r *http.Request) {
 func remove(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	actions := rpc.GetActions(r.Context())
+	emitter := events.GetEmitter(r.Context())
 
 	actions <- rpc.NewRemoveAnimation(id)
+	emitter.PublishAnimationRemoveEvent(id)
 	handlers.Respond(w)
 }

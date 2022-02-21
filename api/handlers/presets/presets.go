@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/akrantz01/lights/lights-web/database"
+	"github.com/akrantz01/lights/lights-web/events"
 	"github.com/akrantz01/lights/lights-web/handlers"
 	"github.com/akrantz01/lights/lights-web/logging"
 )
@@ -16,9 +17,11 @@ func Router(r chi.Router) {
 	r.Get("/", list)
 	r.Post("/", create)
 
-	r.Get("/{id}", read)
-	r.Patch("/{id}", update)
-	r.Delete("/{id}", remove)
+	r.Route("/{id}", func(r chi.Router) {
+		r.Get("/", read)
+		r.Patch("/", update)
+		r.Delete("/", remove)
+	})
 }
 
 // Get a list of all presets
@@ -58,12 +61,14 @@ func read(w http.ResponseWriter, r *http.Request) {
 func remove(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	db := database.GetDatabase(r.Context())
+	emitter := events.GetEmitter(r.Context())
 	l := logging.GetLogger(r.Context(), "presets:remove").With(zap.String("id", id))
 
 	if err := db.RemovePreset(id); err != nil {
 		handlers.Respond(w, handlers.AsFatal())
 		l.Error("failed to delete preset", zap.Error(err))
 	} else {
+		emitter.PublishPresetRemoveEvent(id)
 		handlers.Respond(w)
 	}
 }

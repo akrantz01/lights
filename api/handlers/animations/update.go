@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/akrantz01/lights/lights-web/database"
+	"github.com/akrantz01/lights/lights-web/events"
 	"github.com/akrantz01/lights/lights-web/handlers"
 	"github.com/akrantz01/lights/lights-web/logging"
 	"github.com/akrantz01/lights/lights-web/rpc"
@@ -18,6 +19,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	actions := rpc.GetActions(r.Context())
 	db := database.GetDatabase(r.Context())
+	emitter := events.GetEmitter(r.Context())
 	l := logging.GetLogger(r.Context(), "animations:update").With(zap.String("id", id))
 
 	// Get the animation
@@ -31,9 +33,13 @@ func update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Track the fields that were updated
+	fields := make(map[string]interface{})
+
 	// Update the name if exists
 	if name := r.FormValue("name"); name != "" {
 		animation.Name = name
+		fields["name"] = name
 	}
 
 	// Open the WASM file
@@ -69,5 +75,6 @@ func update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	emitter.PublishAnimationUpdateEvent(animation.Id, fields)
 	handlers.Respond(w)
 }

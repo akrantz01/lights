@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/akrantz01/lights/lights-web/database"
+	"github.com/akrantz01/lights/lights-web/events"
 	"github.com/akrantz01/lights/lights-web/handlers"
 	"github.com/akrantz01/lights/lights-web/logging"
 	"github.com/akrantz01/lights/lights-web/scheduler"
@@ -17,6 +18,7 @@ import (
 func toggle(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	db := database.GetDatabase(r.Context())
+	emitter := events.GetEmitter(r.Context())
 	l := logging.GetLogger(r.Context(), "schedules:enabled").With(zap.String("id", id))
 	s := scheduler.GetScheduler(r.Context())
 
@@ -49,6 +51,7 @@ func toggle(w http.ResponseWriter, r *http.Request) {
 		handlers.Respond(w, handlers.AsFatal())
 		l.Error("failed to update schedule", zap.Error(err))
 	} else {
+		emitter.PublishScheduleUpdateEvent(id, map[string]interface{}{"enabled": schedule.Enabled})
 		handlers.Respond(w)
 	}
 }

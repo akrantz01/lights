@@ -11,6 +11,7 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/joho/godotenv v1.4.0
 	github.com/matoous/go-nanoid v1.5.0
+	github.com/r3labs/sse/v2 v2.7.4
 	go.mongodb.org/mongo-driver v1.8.2
 	go.uber.org/zap v1.20.0
 )
@@ -36,4 +37,5 @@ require (
 	golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20210510120138-977fb7262007 // indirect
+	gopkg.in/cenkalti/backoff.v1 v1.1.0 // indirect
 )

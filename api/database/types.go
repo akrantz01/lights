@@ -18,6 +18,14 @@ type Preset struct {
 	Brightness uint8   `json:"brightness"`
 }
 
+// AsPartial converts a full preset into its partial representation
+func (p Preset) AsPartial() PartialPreset {
+	return PartialPreset{
+		Id:   p.Id,
+		Name: p.Name,
+	}
+}
+
 type PartialPreset struct {
 	Id   string `json:"id"`
 	Name string `json:"name"`
@@ -41,6 +49,17 @@ type Schedule struct {
 	Color     *Color          `json:"color"`
 	Preset    *string         `json:"preset"`
 	Animation *string         `json:"animation"`
+}
+
+// AsPartial converts a full schedule into its partial representation
+func (s Schedule) AsPartial() PartialSchedule {
+	return PartialSchedule{
+		Id:      s.Id,
+		Name:    s.Name,
+		Enabled: s.Enabled,
+		At:      s.At,
+		Repeats: s.Repeats,
+	}
 }
 
 type ScheduleType uint8

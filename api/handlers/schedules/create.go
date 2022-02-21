@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/akrantz01/lights/lights-web/database"
+	"github.com/akrantz01/lights/lights-web/events"
 	"github.com/akrantz01/lights/lights-web/handlers"
 	"github.com/akrantz01/lights/lights-web/logging"
 	"github.com/akrantz01/lights/lights-web/scheduler"
@@ -16,6 +17,7 @@ import (
 // Create a new schedule in the database
 func create(w http.ResponseWriter, r *http.Request) {
 	db := database.GetDatabase(r.Context())
+	emitter := events.GetEmitter(r.Context())
 	l := logging.GetLogger(r.Context(), "schedules:create")
 	s := scheduler.GetScheduler(r.Context())
 
@@ -93,6 +95,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		handlers.Respond(w, handlers.AsFatal())
 		l.Error("failed to insert into database", zap.Error(err))
 	} else {
+		emitter.PublishScheduleCreatedEvent(schedule)
 		handlers.Respond(w)
 	}
 }

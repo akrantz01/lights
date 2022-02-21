@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/akrantz01/lights/lights-web/database"
+	"github.com/akrantz01/lights/lights-web/events"
 	"github.com/akrantz01/lights/lights-web/handlers"
 	"github.com/akrantz01/lights/lights-web/logging"
 	"github.com/akrantz01/lights/lights-web/rpc"
@@ -16,6 +17,7 @@ import (
 func create(w http.ResponseWriter, r *http.Request) {
 	actions := rpc.GetActions(r.Context())
 	db := database.GetDatabase(r.Context())
+	emitter := events.GetEmitter(r.Context())
 	l := logging.GetLogger(r.Context(), "animations:create")
 
 	// Get the name and file
@@ -63,5 +65,6 @@ func create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	emitter.PublishAnimationCreatedEvent(animation)
 	handlers.Respond(w)
 }

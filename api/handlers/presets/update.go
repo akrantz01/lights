@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/akrantz01/lights/lights-web/database"
+	"github.com/akrantz01/lights/lights-web/events"
 	"github.com/akrantz01/lights/lights-web/handlers"
 	"github.com/akrantz01/lights/lights-web/logging"
 )
@@ -23,6 +24,7 @@ type presetUpdate struct {
 func update(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	db := database.GetDatabase(r.Context())
+	emitter := events.GetEmitter(r.Context())
 	length := handlers.GetStripLength(r.Context())
 	l := logging.GetLogger(r.Context(), "presets:update").With(zap.String("id", id))
 
@@ -43,6 +45,9 @@ func update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Track the updated fields for the cache update
+	fields := make(map[string]interface{})
+
 	// Validate and update the fields
 	if updatedFields.Name != nil {
 		if len(*updatedFields.Name) == 0 {
@@ -50,11 +55,13 @@ func update(w http.ResponseWriter, r *http.Request) {
 			return
 		} else {
 			preset.Name = *updatedFields.Name
+			fields["name"] = *updatedFields.Name
 		}
 	}
 	if pixels := len(updatedFields.Pixels); pixels != 0 {
 		if pixels == int(length) {
 			preset.Pixels = updatedFields.Pixels
+			fields["pixels"] = updatedFields.Pixels
 		} else {
 			handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("mismatch pixel length"))
 			return
@@ -63,6 +70,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 	if updatedFields.Brightness != nil {
 		if *updatedFields.Brightness <= 100 {
 			preset.Brightness = *updatedFields.Brightness
+			fields["brightness"] = *updatedFields.Brightness
 		} else {
 			handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("brightness cannot exceed 100"))
 			return
@@ -74,6 +82,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 		handlers.Respond(w, handlers.AsFatal())
 		l.Error("failed to update preset", zap.Error(err))
 	} else {
+		emitter.PublishPresetUpdateEvent(id, fields)
 		handlers.Respond(w)
 	}
 }

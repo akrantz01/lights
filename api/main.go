@@ -15,6 +15,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/akrantz01/lights/lights-web/database"
+	"github.com/akrantz01/lights/lights-web/events"
 	"github.com/akrantz01/lights/lights-web/handlers"
 	"github.com/akrantz01/lights/lights-web/handlers/animations"
 	"github.com/akrantz01/lights/lights-web/handlers/presets"
@@ -67,6 +68,9 @@ func main() {
 		logger.Fatal("failed to load existing schedules", zap.Error(err))
 	}
 
+	// Create the event emitter
+	emitter := events.New()
+
 	r := chi.NewRouter()
 
 	// Register middleware
@@ -80,12 +84,14 @@ func main() {
 	r.Use(rpc.WithActions(actions))
 	r.Use(scheduler.WithScheduler(s))
 	r.Use(handlers.WithRequestContext(config.StripLength))
+	r.Use(events.WithEmitter(emitter))
 
 	// Register routes
 	r.Route("/animations", animations.Router)
 	r.Route("/presets", presets.Router)
 	r.Route("/schedules", schedules.Router)
 	r.Get("/ws", ws.Handler(hub))
+	r.Get("/events", emitter.Handler)
 
 	serverCtx, serverStopCtx := context.WithCancel(context.Background())
 	server := &http.Server{
@@ -130,6 +136,7 @@ func main() {
 
 	s.Stop()
 	hub.Stop()
+	emitter.Close()
 
 	if err := db.Close(); err != nil {
 		logger.Fatal("failed to close the database")

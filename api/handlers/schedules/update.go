@@ -9,6 +9,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/akrantz01/lights/lights-web/database"
+	"github.com/akrantz01/lights/lights-web/events"
 	"github.com/akrantz01/lights/lights-web/handlers"
 	"github.com/akrantz01/lights/lights-web/logging"
 	"github.com/akrantz01/lights/lights-web/scheduler"
@@ -30,6 +31,7 @@ type scheduleUpdate struct {
 func update(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	db := database.GetDatabase(r.Context())
+	emitter := events.GetEmitter(r.Context())
 	l := logging.GetLogger(r.Context(), "schedules:update").With(zap.String("id", id))
 	s := scheduler.GetScheduler(r.Context())
 
@@ -50,7 +52,8 @@ func update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	l.Info("fields", zap.Any("f", updatedFields))
+	// Track the updated fields for the cache
+	fields := make(map[string]interface{})
 
 	// Update the name, time, and repetition days
 	if updatedFields.Name != nil {
@@ -59,14 +62,17 @@ func update(w http.ResponseWriter, r *http.Request) {
 			return
 		} else {
 			schedule.Name = *updatedFields.Name
+			fields["name"] = *updatedFields.Name
 		}
 	}
 	if updatedFields.Enabled != nil {
 		schedule.Enabled = *updatedFields.Enabled
+		fields["enabled"] = *updatedFields.Enabled
 	}
 	if updatedFields.At != nil {
 		if _, err := time.Parse("15:04", *updatedFields.At); err == nil {
 			schedule.At = *updatedFields.At
+			fields["at"] = *updatedFields.At
 		} else {
 			handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("time format must match 'hh:mm'"))
 			return
@@ -74,6 +80,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 	}
 	if updatedFields.Repeats != nil {
 		schedule.Repeats = *updatedFields.Repeats
+		fields["repeats"] = *updatedFields.Repeats
 	}
 
 	// Validate and update the type
@@ -93,6 +100,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		schedule.Type = *updatedFields.Type
+		fields["type"] = *updatedFields.Type
 	}
 
 	// Set fields based on the type
@@ -100,6 +108,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 	case database.ScheduleTypeFill:
 		if updatedFields.Color != nil {
 			schedule.Color = updatedFields.Color
+			fields["color"] = updatedFields.Color
 		} else if schedule.Color == nil {
 			handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("missing required field 'color'"))
 			return
@@ -107,6 +116,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 	case database.ScheduleTypePreset:
 		if updatedFields.Preset != nil {
 			schedule.Preset = updatedFields.Preset
+			fields["preset"] = updatedFields.Preset
 
 			// Check the preset exists
 			if _, err := db.GetPreset(*schedule.Preset); err == database.ErrNotFound {
@@ -124,6 +134,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 	case database.ScheduleTypeAnimation:
 		if updatedFields.Animation != nil {
 			schedule.Animation = updatedFields.Animation
+			fields["animation"] = updatedFields.Animation
 
 			// Check that the animation exists
 			if _, err := db.GetAnimation(*schedule.Animation); err == database.ErrNotFound {
@@ -166,6 +177,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 		handlers.Respond(w, handlers.AsFatal())
 		l.Error("failed to update schedule", zap.Error(err))
 	} else {
+		emitter.PublishScheduleUpdateEvent(id, fields)
 		handlers.Respond(w)
 	}
 }

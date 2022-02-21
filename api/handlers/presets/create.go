@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/akrantz01/lights/lights-web/database"
+	"github.com/akrantz01/lights/lights-web/events"
 	"github.com/akrantz01/lights/lights-web/handlers"
 	"github.com/akrantz01/lights/lights-web/logging"
 )
@@ -14,6 +15,7 @@ import (
 // Create a new preset in the database
 func create(w http.ResponseWriter, r *http.Request) {
 	db := database.GetDatabase(r.Context())
+	emitter := events.GetEmitter(r.Context())
 	length := handlers.GetStripLength(r.Context())
 	l := logging.GetLogger(r.Context(), "presets:create")
 
@@ -43,6 +45,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		handlers.Respond(w, handlers.AsFatal())
 		l.Error("failed to insert into database", zap.Error(err), zap.String("name", preset.Name))
 	} else {
+		emitter.PublishPresetCreatedEvent(preset)
 		handlers.Respond(w)
 	}
 }
