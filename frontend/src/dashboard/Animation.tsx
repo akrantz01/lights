@@ -1,10 +1,15 @@
 import { RefreshIcon } from '@heroicons/react/outline';
 import { Link } from '@reach/router';
+import classNames from 'classnames';
 import React from 'react';
 
 import { stopAnimation, useDispatch, useGetAnimationQuery, useSelector } from '../store';
 
-const Animation = (): JSX.Element => {
+interface Props {
+  disabled?: boolean;
+}
+
+const Animation = ({ disabled }: Props): JSX.Element => {
   const dispatch = useDispatch();
   const animation = useSelector((state) => state.display.animation);
   const { data, isLoading } = useGetAnimationQuery(animation.id !== undefined ? animation.id : '');
@@ -39,7 +44,11 @@ const Animation = (): JSX.Element => {
                   <button
                     type="button"
                     onClick={() => dispatch(stopAnimation())}
-                    className="mr-3 bg-gray-200 rounded-md font-bold text-red-600 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                    className={classNames(
+                      disabled ? 'text-red-400' : 'text-red-600 hover:text-red-500',
+                      'mr-3 bg-gray-200 rounded-md font-bold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500',
+                    )}
+                    disabled={disabled}
                   >
                     Stop
                   </button>

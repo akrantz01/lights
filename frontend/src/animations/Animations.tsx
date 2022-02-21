@@ -8,6 +8,8 @@ import Card from '../components/Card';
 import DeleteConfirmation from '../components/DeleteConfirmation';
 import ListView from '../components/ListView';
 import {
+  Scope,
+  hasPermission,
   startAnimation,
   stopAnimation,
   useDispatch,
@@ -20,6 +22,9 @@ import { Type } from '../store/display';
 const Animations: React.FC<RouteComponentProps> = () => {
   const dispatch = useDispatch();
   const [deleteSelection, setDeleteSelection] = useState('');
+
+  const canStart = useSelector(hasPermission(Scope.CONTROL_LIGHTS));
+  const canEdit = useSelector(hasPermission(Scope.EDIT_ANIMATIONS));
 
   const { data: animations, isLoading, isFetching, refetch } = useListAnimationsQuery();
   const [removeAnimation] = useRemoveAnimationMutation();
@@ -47,6 +52,7 @@ const Animations: React.FC<RouteComponentProps> = () => {
         items={animations}
         icon={FilmIcon}
         typeName="animation"
+        canCreate={canEdit}
       >
         {(item) => (
           <li key={item.id}>
@@ -58,7 +64,7 @@ const Animations: React.FC<RouteComponentProps> = () => {
                     onClick={apply(item.id)}
                     style="secondary"
                     className="has-tooltip"
-                    disabled={runningAnimation === item.id}
+                    disabled={!canStart || runningAnimation === item.id}
                   >
                     <span
                       className={classNames(
@@ -71,7 +77,12 @@ const Animations: React.FC<RouteComponentProps> = () => {
                     <PlayIcon className="md:inline hidden -mx-1 h-5 w-5" />
                     <span className="md:hidden">Start</span>
                   </Button>
-                  <Button onClick={() => setDeleteSelection(item.id)} style="danger" className="ml-3 has-tooltip">
+                  <Button
+                    onClick={() => setDeleteSelection(item.id)}
+                    style="danger"
+                    className="ml-3 has-tooltip"
+                    disabled={!canEdit}
+                  >
                     <span className="hidden md:inline tooltip rounded shadow-lg p-1 bg-gray-100 text-gray-900 -ml-4 -mt-10">
                       Delete
                     </span>
@@ -86,7 +97,7 @@ const Animations: React.FC<RouteComponentProps> = () => {
       </ListView>
       <Button
         className="mt-3 text-white bg-red-400 disabled:bg-red-300 hover:bg-red-300"
-        disabled={!isAnimationRunning}
+        disabled={!canStart || !isAnimationRunning}
         onClick={() => dispatch(stopAnimation())}
       >
         Stop current animation

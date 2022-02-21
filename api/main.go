@@ -14,6 +14,7 @@ import (
 	"github.com/go-chi/cors"
 	"go.uber.org/zap"
 
+	"github.com/akrantz01/lights/lights-web/auth"
 	"github.com/akrantz01/lights/lights-web/database"
 	"github.com/akrantz01/lights/lights-web/events"
 	"github.com/akrantz01/lights/lights-web/handlers"
@@ -71,6 +72,12 @@ func main() {
 	// Create the event emitter
 	emitter := events.New()
 
+	// Setup JWT validation
+	validator, err := auth.NewValidator(config.IssuerUrl)
+	if err != nil {
+		logger.Fatal("failed to initialize JWT validator", zap.Error(err))
+	}
+
 	r := chi.NewRouter()
 
 	// Register middleware
@@ -87,10 +94,10 @@ func main() {
 	r.Use(events.WithEmitter(emitter))
 
 	// Register routes
-	r.Route("/animations", animations.Router)
-	r.Route("/presets", presets.Router)
-	r.Route("/schedules", schedules.Router)
-	r.Get("/ws", ws.Handler(hub))
+	r.Route("/animations", animations.Router(validator))
+	r.Route("/presets", presets.Router(validator))
+	r.Route("/schedules", schedules.Router(validator))
+	r.Get("/ws", ws.Handler(hub, validator))
 	r.Get("/events", emitter.Handler)
 
 	serverCtx, serverStopCtx := context.WithCancel(context.Background())

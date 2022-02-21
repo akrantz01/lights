@@ -1,12 +1,15 @@
 package ws
 
 import (
+	"context"
 	"encoding/json"
 	"time"
 
+	"github.com/auth0/go-jwt-middleware/v2/validator"
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
 
+	"github.com/akrantz01/lights/lights-web/auth"
 	"github.com/akrantz01/lights/lights-web/database"
 	"github.com/akrantz01/lights/lights-web/rpc"
 	"github.com/akrantz01/lights/lights-web/util"
@@ -16,7 +19,7 @@ const (
 	writeWait      = 10 * time.Second
 	pongWait       = 60 * time.Second
 	pingPeriod     = (pongWait * 9) / 10
-	maxMessageSize = 512
+	maxMessageSize = 1 << 11
 )
 
 type Client struct {
@@ -42,7 +45,7 @@ func (c *Client) register() {
 }
 
 // reader processes all incoming messages from the client
-func (c *Client) reader(actions chan rpc.Callable, db *database.Database, stripLength uint16) {
+func (c *Client) reader(actions chan rpc.Callable, db *database.Database, stripLength uint16, v *validator.Validator) {
 	defer func() {
 		c.hub.unregister <- c
 		c.conn.Close()
@@ -56,6 +59,9 @@ func (c *Client) reader(actions chan rpc.Callable, db *database.Database, stripL
 		c.conn.SetReadDeadline(time.Now().Add(pongWait))
 		return nil
 	})
+
+	// Store the user's permissions
+	permissions := new(auth.Permissions)
 
 	for {
 		// Read message from connection
@@ -78,8 +84,38 @@ func (c *Client) reader(actions chan rpc.Callable, db *database.Database, stripL
 			continue
 		}
 
+		// Prevent any actions if the user does not have permissions to control the lights
+		if msg.Type != MessageLogin && msg.Type != MessageLogout && !permissions.Has(auth.PermissionControlLights) {
+			// TODO: notify invalid permissions
+			continue
+		}
+
 		// Re-parse the message and do stuff
 		switch msg.Type {
+
+		// Attempt to log the user in
+		case MessageLogin:
+			var login Login
+			if err := json.Unmarshal(message, &login); err != nil {
+				c.logger.Error("failed to parse login message")
+				continue
+			}
+
+			// Check that the token is valid and notify the client of their permissions
+			validatedClaims, err := v.ValidateToken(context.Background(), login.Token)
+			if err != nil {
+				c.logger.Warn("invalid authentication token", zap.Error(err))
+				c.send <- NewAuthenticationStatus([]string{})
+			} else {
+				claims := validatedClaims.(*validator.ValidatedClaims).CustomClaims.(*auth.CustomClaims)
+				permissions = auth.NewPermissions(claims.Permissions)
+				c.send <- NewAuthenticationStatus(claims.Permissions)
+			}
+
+		// Logout the user
+		case MessageLogout:
+			permissions = nil
+			c.send <- NewAuthenticationStatus([]string{})
 
 		// Set the color of the entire light strip
 		case MessageSetColor:

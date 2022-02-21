@@ -6,13 +6,15 @@ import { toast } from 'react-hot-toast';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import { Input, Pixels, Slider } from '../components/form';
-import { useCreatePresetMutation, useSelector } from '../store';
+import { Scope, hasPermission, useCreatePresetMutation, useSelector } from '../store';
 import { Color } from '../types';
 
 const NewPreset: React.FC<RouteComponentProps> = () => {
   const navigate = useNavigate();
   const length = useSelector((state) => state.strip.length);
   const [createPreset, { isLoading, isUninitialized, isError }] = useCreatePresetMutation();
+
+  const canCreate = useSelector(hasPermission(Scope.EDIT_PRESETS));
 
   // Track form state
   const [name, setName] = useState('');
@@ -53,7 +55,7 @@ const NewPreset: React.FC<RouteComponentProps> = () => {
             <Button
               style="primary"
               className="ml-2"
-              disabled={isLoading}
+              disabled={!canCreate || isLoading}
               onClick={() => createPreset({ name, brightness, pixels })}
             >
               {!isLoading && 'Create'}

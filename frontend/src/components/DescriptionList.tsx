@@ -52,6 +52,7 @@ const TimeInput = ({ value, onChange }: UpdateInputProps<string>): JSX.Element =
 interface FieldProps<T> {
   name: string;
   value: T;
+  editable?: boolean;
   input: ComponentType<UpdateInputProps<T>>;
   onSave: (value: T) => void;
   displayFn?: (value: T) => string;
@@ -65,6 +66,7 @@ const Field = <T,>({
   name,
   onSave,
   value: initialValue,
+  editable = true,
 }: FieldProps<T>): JSX.Element => {
   const [isUpdating, setUpdating] = useState(false);
   const [value, setValue] = useState(initialValue);
@@ -107,13 +109,15 @@ const Field = <T,>({
               </span>
             </>
           )}
-          <button
-            type="button"
-            className="bg-gray-200 rounded-md font-bold text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            onClick={onToggleUpdate}
-          >
-            {isUpdating ? 'Save' : 'Update'}
-          </button>
+          {editable && (
+            <button
+              type="button"
+              className="bg-gray-200 rounded-md font-bold text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              onClick={onToggleUpdate}
+            >
+              {isUpdating ? 'Save' : 'Update'}
+            </button>
+          )}
         </span>
       </dd>
     </div>
@@ -123,6 +127,7 @@ const Field = <T,>({
 interface ListProps {
   name: string;
   description?: string;
+  editable?: boolean;
   onSave?: (v: string) => void;
   rightContent?: ReactNode;
   children: ReactNode;
@@ -131,6 +136,7 @@ interface ListProps {
 const DescriptionList = ({
   name: initialName,
   description,
+  editable = true,
   onSave,
   rightContent,
   children,
@@ -164,7 +170,7 @@ const DescriptionList = ({
               </>
             )}
 
-            {onSave !== undefined && (
+            {onSave !== undefined && editable && (
               <button
                 type="button"
                 className="ml-1 text-sm text-indigo-400 hover:text-indigo-600"

@@ -6,16 +6,14 @@ interface Props {
   children: ReactNode;
 }
 
-const Layout = ({ children }: Props): JSX.Element => {
-  return (
-    <>
-      <div className="min-h-full">
-        <Navigation />
+const Layout = ({ children }: Props): JSX.Element => (
+  <>
+    <div className="min-h-full">
+      <Navigation />
 
-        <main className="-mt-32">{children}</main>
-      </div>
-    </>
-  );
-};
+      <main className="-mt-32">{children}</main>
+    </div>
+  </>
+);
 
 export default Layout;

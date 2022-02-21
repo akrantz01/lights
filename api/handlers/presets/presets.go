@@ -3,9 +3,11 @@ package presets
 import (
 	"net/http"
 
+	"github.com/auth0/go-jwt-middleware/v2/validator"
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
 
+	"github.com/akrantz01/lights/lights-web/auth"
 	"github.com/akrantz01/lights/lights-web/database"
 	"github.com/akrantz01/lights/lights-web/events"
 	"github.com/akrantz01/lights/lights-web/handlers"
@@ -13,15 +15,17 @@ import (
 )
 
 // Router registers all the methods for handling presets
-func Router(r chi.Router) {
-	r.Get("/", list)
-	r.Post("/", create)
+func Router(v *validator.Validator) func(r chi.Router) {
+	return func(r chi.Router) {
+		r.Get("/", list)
+		r.With(auth.Middleware(v)).Post("/", create)
 
-	r.Route("/{id}", func(r chi.Router) {
-		r.Get("/", read)
-		r.Patch("/", update)
-		r.Delete("/", remove)
-	})
+		r.Route("/{id}", func(r chi.Router) {
+			r.Get("/", read)
+			r.With(auth.Middleware(v)).Patch("/", update)
+			r.With(auth.Middleware(v)).Delete("/", remove)
+		})
+	}
 }
 
 // Get a list of all presets

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 
 import Card from '../components/Card';
 import DescriptionList from '../components/DescriptionList';
-import { useSelector } from '../store';
+import { Scope, hasPermission, useSelector } from '../store';
 import { Type } from '../store/display';
 import Animation from './Animation';
 import BrightnessSlider from './BrightnessSlider';
@@ -16,21 +16,28 @@ const Dashboard: React.FC<RouteComponentProps> = () => {
   const displayMode = useSelector((state) => state.display.type);
   const [editMode, setEditMode] = useState(displayMode);
 
+  const editable = useSelector(hasPermission(Scope.CONTROL_LIGHTS));
+
   useEffect(() => setEditMode(displayMode), [displayMode]);
 
   return (
     <>
       <Card>
         <DescriptionList name="Controls" description="The basic controls for the lights">
-          <OnOffToggle className="py-6" />
-          <BrightnessSlider className="py-6" />
+          <OnOffToggle className="py-6" disabled={!editable} />
+          <BrightnessSlider className="py-6" disabled={!editable} />
         </DescriptionList>
       </Card>
-      <Tabs selected={editMode} onChange={setEditMode} className="max-w-7xl mx-auto pb-12 px-4 sm:px-6 lg:px-8" />
+      <Tabs
+        selected={editMode}
+        onChange={setEditMode}
+        className="max-w-7xl mx-auto pb-12 px-4 sm:px-6 lg:px-8"
+        disabled={!editable}
+      />
       <Card>
-        {editMode === Type.Fill && <Fill />}
-        {editMode === Type.Pixels && <Pixels />}
-        {editMode === Type.Animation && <Animation />}
+        {editMode === Type.Fill && <Fill disabled={!editable} />}
+        {editMode === Type.Pixels && <Pixels disabled={!editable} />}
+        {editMode === Type.Animation && <Animation disabled={!editable} />}
       </Card>
     </>
   );

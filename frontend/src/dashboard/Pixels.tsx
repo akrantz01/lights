@@ -5,7 +5,11 @@ import { Display } from '../components/form/Pixels';
 import { setArbitraryPixels, useDispatch, useSelector } from '../store';
 import { Color } from '../types';
 
-const Pixels = (): JSX.Element => {
+interface Props {
+  disabled?: boolean;
+}
+
+const Pixels = ({ disabled }: Props): JSX.Element => {
   const dispatch = useDispatch();
   const pixels = useSelector((state) => state.display.pixels || []);
 
@@ -19,10 +23,12 @@ const Pixels = (): JSX.Element => {
 
   return (
     <>
-      <div className="flex justify-center">
-        <BaseColorInput value={pixelColor} onChange={onChange} />
-      </div>
-      <Display values={pixels} selected={selected} setSelected={setSelected} />
+      {!disabled && (
+        <div className="flex justify-center">
+          <BaseColorInput value={pixelColor} onChange={onChange} />
+        </div>
+      )}
+      <Display values={pixels} selected={selected} setSelected={setSelected} disabled={disabled} />
     </>
   );
 };

@@ -5,8 +5,14 @@ import "github.com/akrantz01/lights/lights-web/database"
 type MessageType string
 
 const (
+	// MessageAuthenticationStatus tells the client whether they are currently authenticated
+	MessageAuthenticationStatus MessageType = "authentication/setPermissions"
+	// MessageLogin attempts to authenticate the current user and assign their permissions
+	MessageLogin = "server/authentication/login"
+	// MessageLogout clears the permissions for the current session
+	MessageLogout = "server/authentication/logout"
 	// MessageConfiguration tells the client basic information about the current setup
-	MessageConfiguration MessageType = "strip/setLength"
+	MessageConfiguration = "strip/setLength"
 	// MessageSetColor changes the fill color of the entire strip
 	MessageSetColor = "server/display/setColor"
 	// MessageStripState notifies clients of the current color and state of the strip
@@ -49,6 +55,24 @@ const (
 // TODO: Once Go 1.18 is released, this can be made generic and the *Payload variants can be removed
 type Message struct {
 	Type MessageType `json:"type"`
+}
+
+// AuthenticationStatus notifies the user of their allowed permissions
+type AuthenticationStatus struct {
+	Type        MessageType `json:"type"`
+	Permissions []string    `json:"payload"`
+}
+
+func NewAuthenticationStatus(permissions []string) AuthenticationStatus {
+	return AuthenticationStatus{
+		Type:        MessageAuthenticationStatus,
+		Permissions: permissions,
+	}
+}
+
+// Login is received when the user is trying to login and elevate their permissions
+type Login struct {
+	Token string `json:"payload"`
 }
 
 // Configuration describes basic information about the server

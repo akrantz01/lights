@@ -8,7 +8,9 @@ import DeleteConfirmation from '../components/DeleteConfirmation';
 import DescriptionList from '../components/DescriptionList';
 import { UpdatablePixels } from '../components/form';
 import {
+  Scope,
   applyPreset,
+  hasPermission,
   useDispatch,
   useGetPresetQuery,
   useRemovePresetMutation,
@@ -30,6 +32,9 @@ const PresetDetail = ({ name }: Props): JSX.Element => {
   const { data, isLoading } = useGetPresetQuery(name);
   const [updatePreset] = useUpdatePresetMutation();
   const [deletePreset, { isLoading: isDeleteLoading }] = useRemovePresetMutation();
+
+  const canApply = useSelector(hasPermission(Scope.CONTROL_LIGHTS));
+  const canEdit = useSelector(hasPermission(Scope.EDIT_PRESETS));
 
   // Track the state of the modals
   const [alertOpen, setAlertOpen] = useState(false);
@@ -88,26 +93,34 @@ const PresetDetail = ({ name }: Props): JSX.Element => {
         name={data.name}
         description="Preset configuration and details."
         onSave={(name) => updatePreset({ id: data.id, name })}
-        rightContent={rightContent}
+        rightContent={canApply ? rightContent : null}
+        editable={canEdit}
       >
         <DescriptionList.Field
           name="Brightness"
           value={data.brightness}
           onSave={(brightness) => updatePreset({ id: data.id, brightness })}
           input={DescriptionList.SliderInput}
+          editable={canEdit}
         />
-        <UpdatablePixels values={data.pixels} onSave={(pixels) => updatePreset({ id: data.id, pixels })} />
+        <UpdatablePixels
+          values={data.pixels}
+          onSave={(pixels) => updatePreset({ id: data.id, pixels })}
+          editable={canEdit}
+        />
       </DescriptionList>
       <div className="flex items-center justify-between">
         {backButton}
-        <Button
-          className="mt-3 text-red-600 bg-red-200 hover:bg-red-300"
-          onClick={() => setAlertOpen(true)}
-          disabled={isDeleteLoading}
-        >
-          <TrashIcon className="-ml-1 mr-2 h-5 w-5" />
-          Delete
-        </Button>
+        {canEdit && (
+          <Button
+            className="mt-3 text-red-600 bg-red-200 hover:bg-red-300"
+            onClick={() => setAlertOpen(true)}
+            disabled={isDeleteLoading}
+          >
+            <TrashIcon className="-ml-1 mr-2 h-5 w-5" />
+            Delete
+          </Button>
+        )}
       </div>
       <DeleteConfirmation
         open={alertOpen}

@@ -62,9 +62,10 @@ interface Props {
   value: string | RGBColor;
   type: ScheduleType;
   onSave: (type: ScheduleType, value: string | RGBColor) => void;
+  editable?: boolean;
 }
 
-const TypeSelectField = ({ onSave, value: initialValue, type: initialType }: Props) => {
+const TypeSelectField = ({ onSave, value: initialValue, type: initialType, editable }: Props) => {
   const [isUpdating, setUpdating] = useState(false);
   const [type, setType] = useState(initialType);
   const [value, setValue] = useState(initialValue);
@@ -133,14 +134,16 @@ const TypeSelectField = ({ onSave, value: initialValue, type: initialType }: Pro
               </span>
             </>
           )}
-          <button
-            type="button"
-            className="bg-gray-200 rounded-md font-bold text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            onClick={onToggleUpdate}
-          >
-            {isUpdating && 'Save'}
-            {!isUpdating && 'Update'}
-          </button>
+          {editable && (
+            <button
+              type="button"
+              className="bg-gray-200 rounded-md font-bold text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              onClick={onToggleUpdate}
+            >
+              {isUpdating && 'Save'}
+              {!isUpdating && 'Update'}
+            </button>
+          )}
         </span>
       </dd>
     </div>

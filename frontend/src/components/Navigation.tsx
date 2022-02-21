@@ -1,10 +1,11 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
-import { LightBulbIcon, MenuIcon, UserIcon, XIcon } from '@heroicons/react/outline';
+import { LightBulbIcon, MenuIcon, RefreshIcon, UserIcon, XIcon } from '@heroicons/react/outline';
 import { Link, LinkGetProps, useLocation } from '@reach/router';
 import classNames from 'classnames';
 import React, { Fragment } from 'react';
 
+import { logout, useDispatch } from '../store';
 import StatusIndicator from './StatusIndicator';
 
 interface NavItem {
@@ -23,8 +24,18 @@ const navigation: NavItem[] = [
   { name: 'New Animation', href: '/new/animation', hidden: true },
 ];
 
+const ProfilePicture = (): JSX.Element => {
+  const { isAuthenticated, user, isLoading } = useAuth0();
+
+  if (isLoading) return <RefreshIcon className="h-8 w-8 rounded-full text-gray-500 animate-spin" />;
+  else if (isAuthenticated && user?.picture)
+    return <img className="h-8 w-8 rounded-full" src={user?.picture} alt="user profile picture" />;
+  else return <UserIcon className="h-8 w-8 rounded-full text-gray-500" />;
+};
+
 const Navigation = (): JSX.Element => {
-  const { loginWithRedirect, logout, user, isLoading, isAuthenticated } = useAuth0();
+  const { loginWithRedirect, logout: auth0Logout, user, isAuthenticated } = useAuth0();
+  const dispatch = useDispatch();
   const { pathname } = useLocation();
 
   // Get the page name
@@ -42,14 +53,12 @@ const Navigation = (): JSX.Element => {
     ),
   });
 
-  const profilePicture =
-    isAuthenticated && user?.picture ? (
-      <img className="h-8 w-8 rounded-full" src={user?.picture} alt="user profile picture" />
-    ) : (
-      <UserIcon className="h-8 w-8 rounded-full text-gray-500" />
-    );
-
-  const authAction = () => (isAuthenticated ? logout({ returnTo: window.location.origin }) : loginWithRedirect());
+  const authAction = async () => {
+    if (isAuthenticated) {
+      dispatch(logout);
+      auth0Logout({ returnTo: window.location.origin });
+    } else await loginWithRedirect();
+  };
 
   return (
     <div className="bg-gray-800 pb-32">
@@ -83,7 +92,7 @@ const Navigation = (): JSX.Element => {
                         <div>
                           <Menu.Button className="max-w-xs bg-gray-800 rounded-full flex items-center text-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
                             <span className="sr-only">Open user menu</span>
-                            {profilePicture}
+                            <ProfilePicture />
                           </Menu.Button>
                         </div>
                         <Transition
@@ -152,7 +161,9 @@ const Navigation = (): JSX.Element => {
                 </div>
                 <div className="pt-4 pb-3 border-t border-gray-700">
                   <div className="flex items-center px-5">
-                    <div className="flex-shrink-0">{profilePicture}</div>
+                    <div className="flex-shrink-0">
+                      <ProfilePicture />
+                    </div>
                     <div className="ml-3">
                       <div className="text-base font-medium text-white">{user?.name}</div>
                       <div className="text-sm font-medium text-gray-400">{user?.email}</div>

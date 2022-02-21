@@ -7,13 +7,13 @@ import { Provider } from 'react-redux';
 
 import { Animations } from './animations';
 import NewAnimation from './animations/NewAnimation';
+import AuthHandler from './components/AuthHandler';
 import Layout from './components/Layout';
 import Dashboard from './dashboard';
 import NotFound from './NotFound';
 import { NewPreset, PresetDetail, Presets } from './presets';
 import { NewSchedule, ScheduleDetail, Schedules } from './schedules';
-import { connect, store } from './store';
-
+import { Scope, connect, store } from './store';
 import 'flatpickr/dist/flatpickr.min.css';
 import './index.css';
 
@@ -26,7 +26,16 @@ store.dispatch(connect());
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
-      <Auth0Provider domain={AUTH0_DOMAIN} clientId={AUTH0_CLIENT_ID} redirectUri={window.location.origin}>
+      <Auth0Provider
+        domain={AUTH0_DOMAIN}
+        clientId={AUTH0_CLIENT_ID}
+        redirectUri={window.location.origin}
+        cacheLocation="localstorage"
+        audience="https://lights.krantz.dev"
+        scope={Object.values(Scope).join(' ')}
+        useRefreshTokens
+      >
+        <AuthHandler />
         <LocationProvider>
           <Toaster position="top-right" toastOptions={{ duration: 2500 }} />
           <Layout>

@@ -6,6 +6,7 @@ import { setBrightness, useDispatch, useSelector } from '../store';
 
 interface Props {
   className?: string;
+  disabled?: boolean;
 }
 
 const BrightnessSlider = (props: Props): JSX.Element => {
@@ -18,7 +19,12 @@ const BrightnessSlider = (props: Props): JSX.Element => {
         Brightness
       </label>
       <div className="w-3/6 relative">
-        <BaseSlider value={brightness} onChange={(b) => dispatch(setBrightness(b))} id="dashboard-brightness-slider" />
+        <BaseSlider
+          value={brightness}
+          onChange={(b) => dispatch(setBrightness(b))}
+          id="dashboard-brightness-slider"
+          disabled={props.disabled}
+        />
       </div>
     </div>
   );

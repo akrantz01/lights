@@ -24,9 +24,10 @@ interface DisplayProps extends Editable {
   values: Color[];
   selected: Record<number, null>;
   setSelected: (s: Record<number, null>) => void;
+  disabled?: boolean;
 }
 
-const Display = ({ values, editable = true, selected, setSelected }: DisplayProps) => {
+const Display = ({ values, editable = true, selected, setSelected, disabled }: DisplayProps) => {
   const [lastSelected, setLastSelected] = useState(0);
 
   // Handle selecting/deselecting pixels
@@ -79,7 +80,7 @@ const Display = ({ values, editable = true, selected, setSelected }: DisplayProp
           className="w-8 h-8 block rounded-md flex justify-center items-center"
           style={{ backgroundColor: `rgba(${c.r}, ${c.g}, ${c.b}, ${selected[i] === null ? 0.5 : 1})` }}
           onClick={onClick(i)}
-          disabled={!editable}
+          disabled={!editable || disabled}
         >
           {selected[i] === null && <CheckIcon className="w-5 h-5" />}
         </button>
@@ -144,9 +145,10 @@ const Pixels = ({ values, onChange = noop, editable = true }: PixelsProps): JSX.
 interface UpdatablePixelsProps {
   values: Color[];
   onSave: (v: Color[]) => void;
+  editable?: boolean;
 }
 
-const UpdatablePixels = ({ values: initialValues, onSave }: UpdatablePixelsProps): JSX.Element => {
+const UpdatablePixels = ({ values: initialValues, onSave, editable = true }: UpdatablePixelsProps): JSX.Element => {
   const [isUpdating, setUpdating] = useState(false);
   const [values, setValues] = useState(initialValues);
 
@@ -204,13 +206,15 @@ const UpdatablePixels = ({ values: initialValues, onSave }: UpdatablePixelsProps
                 </span>
               </>
             )}
-            <button
-              type="button"
-              onClick={onToggleUpdate}
-              className="bg-gray-200 rounded-md text-sm font-bold text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              {isUpdating ? 'Save' : 'Update'}
-            </button>
+            {editable && (
+              <button
+                type="button"
+                onClick={onToggleUpdate}
+                className="bg-gray-200 rounded-md text-sm font-bold text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                {isUpdating ? 'Save' : 'Update'}
+              </button>
+            )}
           </span>
         </div>
       </div>

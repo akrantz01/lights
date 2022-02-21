@@ -2,6 +2,7 @@ package main
 
 import (
 	"net"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -21,6 +22,8 @@ type Config struct {
 	Development bool
 
 	StripLength uint16
+
+	IssuerUrl *url.URL
 }
 
 // ReadConfig extracts all the configuration options from the environment variables
@@ -49,6 +52,11 @@ func ReadConfig() (*Config, error) {
 		return nil, err
 	}
 
+	issuerUrl, err := url.Parse(getEnvOrDefault("LIGHTS_JWT_ISSUER", "https://some-domain.us.auth0.com"))
+	if err != nil {
+		return nil, err
+	}
+
 	return &Config{
 		ListenAddr:     listenAddress,
 		ControllerAddr: controllerAddress,
@@ -57,6 +65,7 @@ func ReadConfig() (*Config, error) {
 		LogLevel:       getEnvOrDefault("LIGHTS_LOG_LEVEL", "info"),
 		Development:    development,
 		StripLength:    uint16(stripDensity * stripLength),
+		IssuerUrl:      issuerUrl,
 	}, nil
 }
 

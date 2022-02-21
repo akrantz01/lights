@@ -14,6 +14,7 @@ const BaseSlider = ({ value, onChange, ...props }: BaseProps<number>) => {
         max="100"
         value={value}
         onChange={(event) => onChange(parseInt((event.target as HTMLInputElement).value))}
+        disabled={props.disabled}
       />
       <span
         className="text-sm mt-6 px-1 py-0.5 absolute rounded translate-x-2/4 bg-indigo-300"

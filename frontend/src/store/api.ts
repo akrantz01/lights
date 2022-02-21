@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { Draft, nothing } from 'immer';
 
 import { Animation, PartialPreset, PartialSchedule, Preset, Schedule } from '../types';
+import type { RootState } from './index';
 
 /**
  * The tags used for caching elements
@@ -53,7 +54,18 @@ const BASE_URL = process.env.REACT_APP_API_URL || '/';
 
 const api = createApi({
   reducerPath: 'api',
-  baseQuery: fetchBaseQuery({ baseUrl: BASE_URL }),
+  baseQuery: fetchBaseQuery({
+    baseUrl: BASE_URL,
+    prepareHeaders(headers, { getState, type }) {
+      const state = getState() as RootState;
+
+      // Only add the token on mutations and if it exists
+      if (type === 'mutation' && state.authentication.token)
+        headers.set('Authorization', `Bearer ${state.authentication.token}`);
+
+      return headers;
+    },
+  }),
   tagTypes: Object.values(Tag),
   endpoints: (builder) => ({
     // Animations API

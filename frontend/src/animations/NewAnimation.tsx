@@ -6,11 +6,13 @@ import { toast } from 'react-hot-toast';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import { FileInput, Input } from '../components/form';
-import { useCreateAnimationMutation } from '../store';
+import { Scope, hasPermission, useCreateAnimationMutation, useSelector } from '../store';
 
 const NewAnimation: React.FC<RouteComponentProps> = (): JSX.Element => {
   const navigate = useNavigate();
   const [createAnimation, { isLoading, isUninitialized, isError }] = useCreateAnimationMutation();
+
+  const canCreate = useSelector(hasPermission(Scope.EDIT_ANIMATIONS));
 
   // Track form state
   const [name, setName] = useState('');
@@ -49,7 +51,7 @@ const NewAnimation: React.FC<RouteComponentProps> = (): JSX.Element => {
             <Button
               style="primary"
               className="ml-2"
-              disabled={isLoading}
+              disabled={!canCreate || isLoading}
               onClick={() => createAnimation({ name, wasm: file as File })}
             >
               {!isLoading && 'Create'}

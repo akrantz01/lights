@@ -18,9 +18,19 @@ interface Props<T> {
   refetch: () => void;
   icon: React.ComponentType<React.ComponentProps<'svg'>>;
   typeName: string;
+  canCreate?: boolean;
 }
 
-const ListView = <T,>({ children, items, isFetching, isLoading, refetch, icon: Icon, typeName }: Props<T>) => {
+const ListView = <T,>({
+  children,
+  items,
+  isFetching,
+  isLoading,
+  refetch,
+  icon: Icon,
+  typeName,
+  canCreate = true,
+}: Props<T>) => {
   const createButton = (
     <Link
       to={'/new/' + typeName}
@@ -32,7 +42,7 @@ const ListView = <T,>({ children, items, isFetching, isLoading, refetch, icon: I
   );
   const header = (
     <div className="flex items-center justify-between">
-      {createButton}
+      {canCreate ? createButton : '​' /* <- zero-width space for consistent formatting */}
       <Button onClick={refetch} style="secondary" disabled={isFetching}>
         <RefreshIcon
           className={classNames('-ml-1 mr-2 h-5 w-5', { 'animate-spin': isFetching || isLoading })}

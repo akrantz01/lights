@@ -18,6 +18,10 @@ interface SetArbitraryPixelsPayload {
   color: Color;
 }
 
+// Authentication actions
+export const login = createAction<string>('server/authentication/login');
+export const logout = createAction('server/authentication/logout');
+
 // Strip actions
 export const setBrightness = createAction<number>('server/strip/setBrightness');
 export const turnOff = createAction('server/strip/off');

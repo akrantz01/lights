@@ -6,7 +6,14 @@ import Button from '../components/Button';
 import Card from '../components/Card';
 import DeleteConfirmation from '../components/DeleteConfirmation';
 import DescriptionList from '../components/DescriptionList';
-import { useGetScheduleQuery, useRemoveScheduleMutation, useUpdateScheduleMutation } from '../store';
+import {
+  Scope,
+  hasPermission,
+  useGetScheduleQuery,
+  useRemoveScheduleMutation,
+  useSelector,
+  useUpdateScheduleMutation,
+} from '../store';
 import { Color, ScheduleRepeats, ScheduleType } from '../types';
 import TypeSelectField from './TypeSelectField';
 
@@ -46,6 +53,8 @@ const ScheduleDetail = ({ name }: Props): JSX.Element => {
   if (name === undefined) throw Error("a schedule 'name' must be provided");
 
   const navigate = useNavigate();
+
+  const canEdit = useSelector(hasPermission(Scope.EDIT_SCHEDULES));
 
   const { data, isLoading } = useGetScheduleQuery(name);
   const [updateSchedule] = useUpdateScheduleMutation();
@@ -116,6 +125,7 @@ const ScheduleDetail = ({ name }: Props): JSX.Element => {
         name={data.name}
         description="Schedule details and information."
         onSave={(v) => updateSchedule({ id: data.id, name: v })}
+        editable={canEdit}
       >
         <DescriptionList.Field
           name="Status"
@@ -123,6 +133,7 @@ const ScheduleDetail = ({ name }: Props): JSX.Element => {
           onSave={(v) => updateSchedule({ id: data.id, enabled: v })}
           input={DescriptionList.BooleanInput}
           displayFn={(v) => (v ? 'Enabled' : 'Disabled')}
+          editable={canEdit}
         />
         <DescriptionList.Field
           name="Runs At"
@@ -130,6 +141,7 @@ const ScheduleDetail = ({ name }: Props): JSX.Element => {
           onSave={(v) => updateSchedule({ id: data.id, at: v })}
           input={DescriptionList.TimeInput}
           displayFn={formatTime}
+          editable={canEdit}
         />
         <DescriptionList.Field
           name="Repeats"
@@ -145,19 +157,22 @@ const ScheduleDetail = ({ name }: Props): JSX.Element => {
             Saturday: ScheduleRepeats.Saturday,
           })}
           displayFn={decodeRepeats}
+          editable={canEdit}
         />
-        <TypeSelectField value={value} type={data.type} onSave={onScheduleTypeSave} />
+        <TypeSelectField value={value} type={data.type} onSave={onScheduleTypeSave} editable={canEdit} />
       </DescriptionList>
       <div className="flex items-center justify-between">
         {backButton}
-        <Button
-          className="mt-3 text-red-600 bg-red-200 hover:bg-red-300"
-          onClick={() => setAlertOpen(true)}
-          disabled={isDeleteLoading}
-        >
-          <TrashIcon className="-ml-1 mr-2 h-5 w-5" />
-          Delete
-        </Button>
+        {canEdit && (
+          <Button
+            className="mt-3 text-red-600 bg-red-200 hover:bg-red-300"
+            onClick={() => setAlertOpen(true)}
+            disabled={isDeleteLoading}
+          >
+            <TrashIcon className="-ml-1 mr-2 h-5 w-5" />
+            Delete
+          </Button>
+        )}
       </div>
       <DeleteConfirmation
         open={alertOpen}

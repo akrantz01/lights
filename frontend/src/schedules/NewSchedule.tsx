@@ -6,7 +6,14 @@ import { toast } from 'react-hot-toast';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import { BitwiseCheckbox, ColorInput, Dropdown, Input, TimeInput } from '../components/form';
-import { useCreateScheduleMutation, useListAnimationsQuery, useListPresetsQuery } from '../store';
+import {
+  Scope,
+  hasPermission,
+  useCreateScheduleMutation,
+  useListAnimationsQuery,
+  useListPresetsQuery,
+  useSelector,
+} from '../store';
 import { Color, ScheduleRepeats, ScheduleType } from '../types';
 
 const NewSchedule: React.FC<RouteComponentProps> = (): JSX.Element => {
@@ -16,6 +23,8 @@ const NewSchedule: React.FC<RouteComponentProps> = (): JSX.Element => {
   // Get lists of all presets and animations
   const { data: animations, isLoading: isAnimationsLoading } = useListAnimationsQuery();
   const { data: presets, isLoading: isPresetsLoading } = useListPresetsQuery();
+
+  const canCreate = useSelector(hasPermission(Scope.EDIT_SCHEDULES));
 
   // Track form state
   const [name, setName] = useState('');
@@ -135,7 +144,7 @@ const NewSchedule: React.FC<RouteComponentProps> = (): JSX.Element => {
             >
               Cancel
             </Link>
-            <Button style="primary" className="ml-2" onClick={onSubmit} disabled={isLoading}>
+            <Button style="primary" className="ml-2" onClick={onSubmit} disabled={!canCreate || isLoading}>
               {!isLoading && 'Create'}
               {isLoading && <RefreshIcon className="w-5 h-5 animate-spin" />}
             </Button>
