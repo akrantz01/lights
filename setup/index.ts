@@ -73,7 +73,7 @@ const urls = [
   "http://localhost:3000",
   `https://${domain}`,
 ];
-new Client("lights", {
+const client = new Client("lights", {
   name: "Lights",
   description: "Control a light strip remotely",
   logoUri: logo,
@@ -83,3 +83,6 @@ new Client("lights", {
   allowedLogoutUrls: urls,
   webOrigins: urls,
 });
+
+export const clientId = client.clientId;
+export const clientSecret = client.clientSecret;
