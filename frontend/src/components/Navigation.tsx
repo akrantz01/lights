@@ -1,8 +1,9 @@
-import { Disclosure, Transition } from '@headlessui/react';
-import { LightBulbIcon, MenuIcon, XIcon } from '@heroicons/react/outline';
+import { useAuth0 } from '@auth0/auth0-react';
+import { Disclosure, Menu, Transition } from '@headlessui/react';
+import { LightBulbIcon, MenuIcon, UserIcon, XIcon } from '@heroicons/react/outline';
 import { Link, LinkGetProps, useLocation } from '@reach/router';
 import classNames from 'classnames';
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import StatusIndicator from './StatusIndicator';
 
@@ -23,6 +24,7 @@ const navigation: NavItem[] = [
 ];
 
 const Navigation = (): JSX.Element => {
+  const { loginWithRedirect, logout, user, isLoading, isAuthenticated } = useAuth0();
   const { pathname } = useLocation();
 
   // Get the page name
@@ -36,9 +38,18 @@ const Navigation = (): JSX.Element => {
     'aria-current': isCurrent ? 'page' : undefined,
     className: classNames(
       isCurrent ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-      'px-3 py-2 rounded-md text-sm font-medium',
+      'block px-3 py-2 rounded-md text-sm font-medium',
     ),
   });
+
+  const profilePicture =
+    isAuthenticated && user?.picture ? (
+      <img className="h-8 w-8 rounded-full" src={user?.picture} alt="user profile picture" />
+    ) : (
+      <UserIcon className="h-8 w-8 rounded-full text-gray-500" />
+    );
+
+  const authAction = () => (isAuthenticated ? logout({ returnTo: window.location.origin }) : loginWithRedirect());
 
   return (
     <div className="bg-gray-800 pb-32">
@@ -64,7 +75,49 @@ const Navigation = (): JSX.Element => {
                       </div>
                     </div>
                   </div>
-                  <div className="-mr-2 flex">
+                  <div className="hidden md:block">
+                    <div className="ml-4 flex items-center md:ml-6">
+                      <StatusIndicator />
+
+                      <Menu as="div" className="ml-3 relative">
+                        <div>
+                          <Menu.Button className="max-w-xs bg-gray-800 rounded-full flex items-center text-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+                            <span className="sr-only">Open user menu</span>
+                            {profilePicture}
+                          </Menu.Button>
+                        </div>
+                        <Transition
+                          as={Fragment}
+                          enter="transition ease-out duration-100"
+                          enterFrom="transform opacity-0 scale-95"
+                          enterTo="transform opacity-100 scale-100"
+                          leave="transition ease-in duration-75"
+                          leaveFrom="transform opacity-100 scale-100"
+                          leaveTo="transform opacity-0 scale-95"
+                        >
+                          <Menu.Items className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+                            {isAuthenticated && (
+                              <Menu.Item>
+                                <span className="block px-4 py-2 text-sm text-gray-700 w-full text-left">
+                                  {user?.name}
+                                </span>
+                              </Menu.Item>
+                            )}
+                            <Menu.Item>
+                              <button
+                                type="button"
+                                onClick={authAction}
+                                className="block px-4 py-2 text-sm text-gray-700 w-full text-left hover:bg-gray-200"
+                              >
+                                Sign {isAuthenticated ? 'out' : 'in'}
+                              </button>
+                            </Menu.Item>
+                          </Menu.Items>
+                        </Transition>
+                      </Menu>
+                    </div>
+                  </div>
+                  <div className="md:hidden -mr-2 flex">
                     <StatusIndicator />
                     <Disclosure.Button className="md:hidden bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
                       <span className="sr-only">Open main menu</span>
@@ -96,6 +149,25 @@ const Navigation = (): JSX.Element => {
                         {item.name}
                       </Disclosure.Button>
                     ))}
+                </div>
+                <div className="pt-4 pb-3 border-t border-gray-700">
+                  <div className="flex items-center px-5">
+                    <div className="flex-shrink-0">{profilePicture}</div>
+                    <div className="ml-3">
+                      <div className="text-base font-medium text-white">{user?.name}</div>
+                      <div className="text-sm font-medium text-gray-400">{user?.email}</div>
+                    </div>
+                  </div>
+                  <div className="mt-3 px-2 space-y-1">
+                    <Disclosure.Button
+                      as="button"
+                      type="button"
+                      onClick={authAction}
+                      className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700"
+                    >
+                      Sign {isAuthenticated ? 'out' : 'in'}
+                    </Disclosure.Button>
+                  </div>
                 </div>
               </Disclosure.Panel>
             </Transition>
