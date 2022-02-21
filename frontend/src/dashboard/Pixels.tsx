@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import { BaseColorInput } from '../components/form';
-import { Display } from '../components/form/Pixels';
+import { Description, Display } from '../components/form/Pixels';
 import { setArbitraryPixels, useDispatch, useSelector } from '../store';
 import { Color } from '../types';
 
@@ -23,9 +23,16 @@ const Pixels = ({ disabled }: Props): JSX.Element => {
 
   return (
     <>
-      {!disabled && (
-        <div className="flex justify-center">
-          <BaseColorInput value={pixelColor} onChange={onChange} />
+      {disabled ? (
+        <p className="text-sm font-medium text-gray-500">
+          The strip is laid out horizontally where the neighboring pixels are on the left and right.
+        </p>
+      ) : (
+        <div className="sm:grid sm:grid-cols-2">
+          <div className="flex justify-center">
+            <BaseColorInput value={pixelColor} onChange={onChange} />
+          </div>
+          <Description />
         </div>
       )}
       <Display values={pixels} selected={selected} setSelected={setSelected} disabled={disabled} />

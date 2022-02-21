@@ -89,11 +89,19 @@ const Display = ({ values, editable = true, selected, setSelected, disabled }: D
   );
 };
 
+export const Description = (): JSX.Element => (
+  <p className="text-sm text-gray-500 py-3">
+    Click on a pixel to select it and change its color. To select multiple non-consecutive pixels, control + left click.
+    To select multiple consecutive pixels, shift + left click. The strip is laid out horizontally where the neighboring
+    pixels are on the left and right.
+  </p>
+);
+
 interface LabelProps extends Editable {
   light?: boolean;
 }
 
-const Label = ({ editable = true, light = false }: LabelProps): JSX.Element => (
+export const Label = ({ editable = true, light = false }: LabelProps): JSX.Element => (
   <div>
     <label
       htmlFor="pixels"
@@ -101,13 +109,7 @@ const Label = ({ editable = true, light = false }: LabelProps): JSX.Element => (
     >
       Pixels
     </label>
-    {editable && (
-      <p className="text-sm text-gray-500 py-3">
-        Click on a pixel to select it and change its color. To select multiple non-consecutive pixels, control + left
-        click. To select multiple consecutive pixels, shift + left click. The strip is laid out horizontally where the
-        neighboring pixels are on the left and right.
-      </p>
-    )}
+    {editable && <Description />}
   </div>
 );
 
