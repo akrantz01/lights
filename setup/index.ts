@@ -85,4 +85,3 @@ const client = new Client("lights", {
 });
 
 export const clientId = client.clientId;
-export const clientSecret = client.clientSecret;
