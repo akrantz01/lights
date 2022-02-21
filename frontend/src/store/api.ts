@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { Draft, nothing } from 'immer';
 
 import { Animation, PartialPreset, PartialSchedule, Preset, Schedule } from '../types';
 
@@ -39,9 +40,20 @@ interface Response<T> {
   data: T;
 }
 
+/**
+ * The contents of a remove server-sent event
+ */
+interface RemoveEvent {
+  id: string;
+}
+
+type MaybeDrafted<T> = T | Draft<T>;
+
+const BASE_URL = process.env.REACT_APP_API_URL || '/';
+
 const api = createApi({
   reducerPath: 'api',
-  baseQuery: fetchBaseQuery({ baseUrl: process.env.REACT_APP_API_URL || '/' }),
+  baseQuery: fetchBaseQuery({ baseUrl: BASE_URL }),
   tagTypes: Object.values(Tag),
   endpoints: (builder) => ({
     // Animations API
@@ -52,12 +64,69 @@ const api = createApi({
         Tag.Animation,
         ...result.map((a) => ({ type: Tag.Animation, id: a.id })),
       ],
+      async onCacheEntryAdded(arg, { updateCachedData, cacheDataLoaded, cacheEntryRemoved }) {
+        // Connect to the event source
+        const source = new EventSource(`${BASE_URL}/events?stream=animation`);
+
+        try {
+          // Wait for initial query
+          await cacheDataLoaded;
+
+          // Register handlers for creation, updates, and removal
+          source.addEventListener('created', (e: Event) => {
+            const data: Animation = JSON.parse((e as MessageEvent).data);
+            updateCachedData((draft) => {
+              // Only add if the preset does not already exist
+              if (draft.filter((v) => v.id !== data.id).length === draft.length) draft.push(data);
+            });
+          });
+          source.addEventListener('updated', (e) => {
+            const data: UpdateAnimationArgs = JSON.parse((e as MessageEvent).data);
+            updateCachedData((draft) => {
+              const index = draft.findIndex((v) => v.id === data.id);
+              if (index === undefined) return;
+              draft[index] = { ...draft[index], ...data };
+            });
+          });
+          source.addEventListener('removed', (e) => {
+            const { id }: RemoveEvent = JSON.parse((e as MessageEvent).data);
+            updateCachedData((draft) => draft.filter((v) => v.id !== id));
+          });
+        } catch {}
+
+        // Close the event source when no longer active
+        await cacheEntryRemoved;
+        source.close();
+      },
     }),
     getAnimation: builder.query<Animation, string>({
       query: (id) => `/animations/${id}`,
       transformResponse: (response: Response<Animation>) => response.data,
       providesTags: (result: Animation | undefined) =>
         result === undefined ? [] : [{ type: Tag.Animation, id: result.id }],
+      async onCacheEntryAdded(arg, { updateCachedData, cacheDataLoaded, cacheEntryRemoved }) {
+        // Connect to the event source
+        const source = new EventSource(`${BASE_URL}/events?stream=animation`);
+
+        try {
+          // Wait for initial query
+          await cacheDataLoaded;
+
+          // Register handlers for updates and removals
+          source.addEventListener('updated', (e: Event) => {
+            const data: UpdateAnimationArgs = JSON.parse((e as MessageEvent).data);
+            if (data.id === arg) updateCachedData((draft) => ({ ...draft, ...data }));
+          });
+          source.addEventListener('removed', (e: Event) => {
+            const { id }: RemoveEvent = JSON.parse((e as MessageEvent).data);
+            // Ugly typecast to unset the data
+            if (id === arg) updateCachedData(() => nothing as unknown as MaybeDrafted<Animation>);
+          });
+        } catch {}
+
+        await cacheEntryRemoved;
+        source.close();
+      },
     }),
     createAnimation: builder.mutation<void, CreateAnimationArgs>({
       query: ({ name, wasm }) => {
@@ -103,11 +172,68 @@ const api = createApi({
         Tag.Preset,
         ...result.map((preset) => ({ type: Tag.Preset, id: preset.id })),
       ],
+      async onCacheEntryAdded(arg, { updateCachedData, cacheDataLoaded, cacheEntryRemoved }) {
+        // Connect to the event source
+        const source = new EventSource(`${BASE_URL}/events?stream=preset`);
+
+        try {
+          // Wait for initial query
+          await cacheDataLoaded;
+
+          // Register handlers for creation, updates, and removal
+          source.addEventListener('created', (e: Event) => {
+            const data: PartialPreset = JSON.parse((e as MessageEvent).data);
+            updateCachedData((draft) => {
+              // Only add if the preset does not already exist
+              if (draft.filter((v) => v.id !== data.id).length === draft.length) draft.push(data);
+            });
+          });
+          source.addEventListener('updated', (e) => {
+            const data: UpdatePresetArgs = JSON.parse((e as MessageEvent).data);
+            updateCachedData((draft) => {
+              const index = draft.findIndex((v) => v.id === data.id);
+              if (index === undefined) return;
+              draft[index] = { ...draft[index], ...data };
+            });
+          });
+          source.addEventListener('removed', (e) => {
+            const { id }: RemoveEvent = JSON.parse((e as MessageEvent).data);
+            updateCachedData((draft) => draft.filter((v) => v.id !== id));
+          });
+        } catch {}
+
+        // Close the event source when no longer active
+        await cacheEntryRemoved;
+        source.close();
+      },
     }),
     getPreset: builder.query<Preset, string>({
       query: (id) => `/presets/${id}`,
       transformResponse: (response: Response<Preset>) => response.data,
       providesTags: (result: Preset | undefined) => (result === undefined ? [] : [{ type: Tag.Preset, id: result.id }]),
+      async onCacheEntryAdded(arg, { updateCachedData, cacheDataLoaded, cacheEntryRemoved }) {
+        // Connect to the event source
+        const source = new EventSource(`${BASE_URL}/events?stream=preset`);
+
+        try {
+          // Wait for initial query
+          await cacheDataLoaded;
+
+          // Register handlers for updates and removals
+          source.addEventListener('updated', (e: Event) => {
+            const data: UpdatePresetArgs = JSON.parse((e as MessageEvent).data);
+            if (data.id === arg) updateCachedData((draft) => ({ ...draft, ...data }));
+          });
+          source.addEventListener('removed', (e: Event) => {
+            const { id }: RemoveEvent = JSON.parse((e as MessageEvent).data);
+            // Ugly typecast to unset the data
+            if (id === arg) updateCachedData(() => nothing as unknown as MaybeDrafted<Preset>);
+          });
+        } catch {}
+
+        await cacheEntryRemoved;
+        source.close();
+      },
     }),
     createPreset: builder.mutation<void, Omit<Preset, 'id'>>({
       query: (preset) => ({
@@ -141,12 +267,69 @@ const api = createApi({
         Tag.Schedule,
         ...result.map((schedule) => ({ type: Tag.Schedule, id: schedule.id })),
       ],
+      async onCacheEntryAdded(arg, { updateCachedData, cacheDataLoaded, cacheEntryRemoved }) {
+        // Connect to the event source
+        const source = new EventSource(`${BASE_URL}/events?stream=schedule`);
+
+        try {
+          // Wait for initial query
+          await cacheDataLoaded;
+
+          // Register handlers for creation, updates, and removal
+          source.addEventListener('created', (e: Event) => {
+            const data: PartialSchedule = JSON.parse((e as MessageEvent).data);
+            updateCachedData((draft) => {
+              // Only add if the preset does not already exist
+              if (draft.filter((v) => v.id !== data.id).length === draft.length) draft.push(data);
+            });
+          });
+          source.addEventListener('updated', (e) => {
+            const data: UpdateScheduleArgs = JSON.parse((e as MessageEvent).data);
+            updateCachedData((draft) => {
+              const index = draft.findIndex((v) => v.id === data.id);
+              if (index === undefined) return;
+              draft[index] = { ...draft[index], ...data };
+            });
+          });
+          source.addEventListener('removed', (e) => {
+            const { id }: RemoveEvent = JSON.parse((e as MessageEvent).data);
+            updateCachedData((draft) => draft.filter((v) => v.id !== id));
+          });
+        } catch {}
+
+        // Close the event source when no longer active
+        await cacheEntryRemoved;
+        source.close();
+      },
     }),
     getSchedule: builder.query<Schedule, string>({
       query: (id) => `/schedules/${id}`,
       transformResponse: (response: Response<Schedule>) => response.data,
       providesTags: (result: Schedule | undefined) =>
         result === undefined ? [] : [{ type: Tag.Schedule, id: result.id }],
+      async onCacheEntryAdded(arg, { updateCachedData, cacheDataLoaded, cacheEntryRemoved }) {
+        // Connect to the event source
+        const source = new EventSource(`${BASE_URL}/events?stream=schedule`);
+
+        try {
+          // Wait for initial query
+          await cacheDataLoaded;
+
+          // Register handlers for updates and removals
+          source.addEventListener('updated', (e: Event) => {
+            const data: UpdateScheduleArgs = JSON.parse((e as MessageEvent).data);
+            if (data.id === arg) updateCachedData((draft) => ({ ...draft, ...data }));
+          });
+          source.addEventListener('removed', (e: Event) => {
+            const { id }: RemoveEvent = JSON.parse((e as MessageEvent).data);
+            // Ugly typecast to unset the data
+            if (id === arg) updateCachedData(() => nothing as unknown as MaybeDrafted<Schedule>);
+          });
+        } catch {}
+
+        await cacheEntryRemoved;
+        source.close();
+      },
     }),
     createSchedule: builder.mutation<void, Omit<Schedule, 'id'>>({
       query: (schedule) => ({

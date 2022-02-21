@@ -1,5 +1,5 @@
 import { PencilAltIcon, SaveIcon, XIcon } from '@heroicons/react/outline';
-import React, { ComponentType, ReactNode, useState } from 'react';
+import React, { ComponentType, ReactNode, useEffect, useState } from 'react';
 
 import { Color } from '../types';
 import {
@@ -69,6 +69,9 @@ const Field = <T,>({
   const [isUpdating, setUpdating] = useState(false);
   const [value, setValue] = useState(initialValue);
 
+  // If the passed value changes, update it
+  useEffect(() => setValue(initialValue), [initialValue]);
+
   // Handle toggling the updating state and saving
   const onToggleUpdate = () => {
     if (isUpdating) onSave(value);
@@ -87,7 +90,7 @@ const Field = <T,>({
       <dd className="mt-1 flex text-sm text-gray-900 sm:mt-0 sm:col-span-2">
         <span className="flex-grow">
           {isUpdating && InputComponent !== undefined && <InputComponent value={value} onChange={setValue} />}
-          {!isUpdating && DisplayComponent !== undefined ? <DisplayComponent value={value} /> : displayFn(value)}
+          {!isUpdating && (DisplayComponent !== undefined ? <DisplayComponent value={value} /> : displayFn(value))}
         </span>
         <span className="ml-4 flex-shrink-0">
           {isUpdating && (

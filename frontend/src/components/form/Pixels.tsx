@@ -1,6 +1,6 @@
 import { CheckIcon } from '@heroicons/react/outline';
 import classNames from 'classnames';
-import React, { MouseEvent, useState } from 'react';
+import React, { MouseEvent, useEffect, useState } from 'react';
 
 import { Color } from '../../types';
 import { BaseColorInput } from './ColorInput';
@@ -152,6 +152,9 @@ const UpdatablePixels = ({ values: initialValues, onSave }: UpdatablePixelsProps
 
   const [color, setColor] = useState<Color>({ r: 0, g: 0, b: 0 });
   const [selected, setSelected] = useState<Record<number, null>>({}); // Makeshift immutable set
+
+  // If the passed value changes, update it
+  useEffect(() => setValues(initialValues), [initialValues]);
 
   // Handle toggling the update state and saving
   const onToggleUpdate = () => {
