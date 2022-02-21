@@ -70,7 +70,9 @@ new Role("lights", {
 // Create the client used for authentication
 const urls = [
   "http://127.0.0.1:3000",
+  "https://127.0.0.1:3000",
   "http://localhost:3000",
+  "https://localhost:3000",
   `https://${domain}`,
 ];
 const client = new Client("lights", {
