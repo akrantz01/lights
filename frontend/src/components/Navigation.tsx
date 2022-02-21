@@ -3,7 +3,7 @@ import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { LightBulbIcon, MenuIcon, RefreshIcon, UserIcon, XIcon } from '@heroicons/react/outline';
 import { Link, LinkGetProps, useLocation } from '@reach/router';
 import classNames from 'classnames';
-import React, { Fragment } from 'react';
+import React, { Fragment, MouseEvent } from 'react';
 
 import { logout, useDispatch } from '../store';
 import StatusIndicator from './StatusIndicator';
@@ -53,7 +53,10 @@ const Navigation = (): JSX.Element => {
     ),
   });
 
-  const authAction = async () => {
+  const authAction = async (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
     if (isAuthenticated) {
       dispatch(logout);
       auth0Logout({ returnTo: window.location.origin });
@@ -170,14 +173,13 @@ const Navigation = (): JSX.Element => {
                     </div>
                   </div>
                   <div className="mt-3 px-2 space-y-1">
-                    <Disclosure.Button
-                      as="button"
+                    <button
                       type="button"
                       onClick={authAction}
                       className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700"
                     >
                       Sign {isAuthenticated ? 'out' : 'in'}
-                    </Disclosure.Button>
+                    </button>
                   </div>
                 </div>
               </Disclosure.Panel>
