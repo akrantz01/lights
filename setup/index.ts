@@ -6,10 +6,10 @@ const domain = config.require("domain");
 const logo = config.get("logo");
 
 const SCOPES = {
-  ANIMATION_EDITOR: "animations:edit",
-  PRESET_EDITOR: "presets:edit",
-  SCHEDULE_EDITOR: "schedules:edit",
-  LIGHT_CONTROL: "lights:control",
+  ANIMATION_EDITOR: "edit:animations",
+  PRESET_EDITOR: "edit:presets",
+  SCHEDULE_EDITOR: "edit:schedules",
+  LIGHT_CONTROL: "control:lights",
 };
 
 // Create the API permissions
