@@ -42,7 +42,6 @@ export default class Socket {
    */
   private onClose = (dispatch: Dispatch) => (event: CloseEvent) => {
     dispatch(closed(event));
-    toast.error('Server disconnected');
 
     if (this.canAttemptReconnect()) this.reconnect(dispatch);
   };
