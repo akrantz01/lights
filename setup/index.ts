@@ -91,7 +91,7 @@ const client = new Client("lights", {
     rotationType: "rotating",
   },
   jwtConfiguration: {
-    alg: "RSA256",
+    alg: "RS256",
     lifetimeInSeconds: 36000,
     secretEncoded: false,
   },
