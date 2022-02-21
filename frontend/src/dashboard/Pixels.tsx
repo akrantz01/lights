@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { BaseColorInput } from '../components/form';
 import { Description, Display } from '../components/form/Pixels';
-import { setArbitraryPixels, useDispatch, useSelector } from '../store';
+import { setPixels, useDispatch, useSelector } from '../store';
 import { Color } from '../types';
 
 interface Props {
@@ -18,7 +18,7 @@ const Pixels = ({ disabled }: Props): JSX.Element => {
 
   const onChange = (c: Color) => {
     setPixelColor(c);
-    dispatch(setArbitraryPixels({ color: c, indexes: Object.keys(selected).map((i) => parseInt(i)) }));
+    dispatch(setPixels({ color: c, indexes: Object.keys(selected).map((i) => parseInt(i)) }));
   };
 
   return (

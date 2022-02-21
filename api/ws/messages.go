@@ -28,12 +28,8 @@ const (
 	// MessageModifiedPixels notifies clients of changes to individual pixels on the strip. Once received by the client, the
 	// client shall automatically switch to pixel modification mode.
 	MessageModifiedPixels = "display/setPixelsByIndex"
-	// MessageSetPixel is used to set an individual light to a given color
-	MessageSetPixel = "server/display/setPixel"
-	// MessageSetRange is used to set a range of pixels to a given color
-	MessageSetRange = "server/display/setPixelRange"
-	// MessageSetArbitrary is used to set arbitrary pixels to a given color
-	MessageSetArbitrary = "server/display/setArbitraryPixels"
+	// MessageSetPixels is used to set arbitrary pixels to a given color
+	MessageSetPixels = "server/display/setPixels"
 	// MessageCurrentPixels notifies clients of the current individual pixel colors when the strip is in pixel
 	// modification mode.
 	MessageCurrentPixels = "display/setAllPixels"

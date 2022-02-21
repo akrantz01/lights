@@ -70,11 +70,9 @@ export { Scope, setToken } from './authentication';
 export { useDispatch, useSelector } from './hooks';
 export {
   applyPreset,
-  setArbitraryPixels,
+  setPixels,
   setBrightness,
   setColor,
-  setPixel,
-  setPixelRange,
   startAnimation,
   stopAnimation,
   turnOff,

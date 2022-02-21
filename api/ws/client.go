@@ -12,7 +12,6 @@ import (
 	"github.com/akrantz01/lights/lights-web/auth"
 	"github.com/akrantz01/lights/lights-web/database"
 	"github.com/akrantz01/lights/lights-web/rpc"
-	"github.com/akrantz01/lights/lights-web/util"
 )
 
 const (
@@ -154,33 +153,8 @@ func (c *Client) reader(actions chan rpc.Callable, db *database.Database, stripL
 			actions <- rpc.NewBrightnessChange(setBrightness.Brightness)
 			c.hub.broadcast <- NewCurrentBrightness(setBrightness.Brightness)
 
-		// Sets the color of an individual pixel
-		case MessageSetPixel:
-			var setPixel SetPixel
-			if err := json.Unmarshal(message, &setPixel); err != nil {
-				c.logger.Error("failed to parse set pixel message", zap.Error(err))
-				continue
-			}
-
-			actions <- rpc.NewSetPixel(setPixel.Payload.Index, setPixel.Payload.Color)
-			c.hub.broadcast <- NewSingleModifiedPixel(setPixel.Payload.Index, setPixel.Payload.Color)
-
-		// Sets the color of a range of pixels
-		case MessageSetRange:
-			var setRange SetPixelRange
-			if err := json.Unmarshal(message, &setRange); err != nil {
-				c.logger.Error("failed to parse set pixel range message", zap.Error(err))
-				continue
-			}
-
-			// Determine the range of all pixels modified
-			modified := util.RangeToIndexes(setRange.Payload.Start, setRange.Payload.End)
-
-			actions <- rpc.NewPixelRange(setRange.Payload.Start, setRange.Payload.End, setRange.Payload.Color)
-			c.hub.broadcast <- NewModifiedPixels(modified, setRange.Payload.Color)
-
 		// Sets an arbitrary set of pixels to the same color
-		case MessageSetArbitrary:
+		case MessageSetPixels:
 			var setArbitrary SetArbitraryPixels
 			if err := json.Unmarshal(message, &setArbitrary); err != nil {
 				c.logger.Error("failed to parse set arbitrary pixels message", zap.Error(err))
@@ -192,7 +166,7 @@ func (c *Client) reader(actions chan rpc.Callable, db *database.Database, stripL
 				continue
 			}
 
-			actions <- rpc.NewArbitraryPixels(setArbitrary.Payload.Indexes, setArbitrary.Payload.Color)
+			actions <- rpc.NewSetPixels(setArbitrary.Payload.Indexes, setArbitrary.Payload.Color)
 			c.hub.broadcast <- NewModifiedPixels(setArbitrary.Payload.Indexes, setArbitrary.Payload.Color)
 
 		// Apply a preset to the strip

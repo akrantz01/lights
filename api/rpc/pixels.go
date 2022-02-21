@@ -7,138 +7,33 @@ import (
 	"github.com/akrantz01/lights/lights-web/lights"
 )
 
-// SetSinglePixel changes the color of an individual pixel
-type SetSinglePixel struct {
-	Index uint16
-	Color database.Color
-}
-
-func NewSetPixel(index uint16, color database.Color) SetSinglePixel {
-	return SetSinglePixel{
-		Index: index,
-		Color: color,
-	}
-}
-
-func (sp SetSinglePixel) Type() string {
-	return "set-single-pixel"
-}
-
-func (sp SetSinglePixel) Execute(ctx context.Context, db *database.Database, controller lights.LightController) error {
-	// Set the pixel
-	result, free := controller.Set(ctx, func(params lights.LightController_set_Params) error {
-		// Set the pixel color
-		color, err := params.NewColor()
-		if err != nil {
-			return err
-		}
-		color.SetR(sp.Color.Red)
-		color.SetG(sp.Color.Green)
-		color.SetB(sp.Color.Blue)
-
-		// Set the pixel position
-		position, err := params.NewPosition()
-		if err != nil {
-			return err
-		}
-		position.SetSingle(sp.Index)
-
-		return nil
-	})
-	defer free()
-
-	// Save the color to the database
-	if err := db.SetPixel(sp.Index, sp.Color); err != nil {
-		return err
-	}
-
-	// Change the display mode to individual pixels
-	if err := db.SetPixelMode(database.PixelModeIndividual); err != nil {
-		return err
-	}
-
-	<-result.Done()
-
-	return nil
-}
-
-// SetPixelRange sets the color for a range of pixels
-type SetPixelRange struct {
-	Start uint16
-	End   uint16
-	Color database.Color
-}
-
-func NewPixelRange(start, end uint16, color database.Color) SetPixelRange {
-	return SetPixelRange{
-		Start: start,
-		End:   end,
-		Color: color,
-	}
-}
-
-func (sp SetPixelRange) Type() string {
-	return "set-pixel-range"
-}
-
-func (sp SetPixelRange) Execute(ctx context.Context, db *database.Database, controller lights.LightController) error {
-	result, free := controller.Set(ctx, func(params lights.LightController_set_Params) error {
-		// Set the desired color
-		color, err := params.NewColor()
-		if err != nil {
-			return err
-		}
-		color.SetR(sp.Color.Red)
-		color.SetG(sp.Color.Green)
-		color.SetB(sp.Color.Blue)
-
-		// Set the range
-		position, err := params.NewPosition()
-		if err != nil {
-			return err
-		}
-		position.SetRange()
-		position.Range().SetStart(sp.Start)
-		position.Range().SetEnd(sp.End)
-
-		return nil
-	})
-	defer free()
-
-	// Save the changed range
-	if err := db.SetPixelRange(sp.Start, sp.End, sp.Color); err != nil {
-		return err
-	}
-
-	// Change the display mode to individual pixels
-	if err := db.SetPixelMode(database.PixelModeIndividual); err != nil {
-		return err
-	}
-
-	<-result.Done()
-
-	return nil
-}
-
-// SetArbitraryPixels changes the color of multiple pixels at the same time
-type SetArbitraryPixels struct {
+// SetPixels changes the color of multiple pixels at the same time
+type SetPixels struct {
 	Indexes []uint16
 	Color   database.Color
 }
 
-func NewArbitraryPixels(indexes []uint16, color database.Color) SetArbitraryPixels {
-	return SetArbitraryPixels{
+func NewSetPixels(indexes []uint16, color database.Color) SetPixels {
+	return SetPixels{
 		Indexes: indexes,
 		Color:   color,
 	}
 }
 
-func (sa SetArbitraryPixels) Type() string {
+func (sa SetPixels) Type() string {
 	return "set-arbitrary-pixels"
 }
 
-func (sa SetArbitraryPixels) Execute(ctx context.Context, db *database.Database, controller lights.LightController) error {
-	result, free := controller.Set(ctx, func(params lights.LightController_set_Params) error {
+func (sa SetPixels) Execute(ctx context.Context, db *database.Database, controller lights.LightController) error {
+	// Switch to queue to set all the pixels at the same time from the viewer's perspective
+	queueResult, free := controller.Mode(ctx, func(params lights.LightController_mode_Params) error {
+		params.SetMode(lights.Mode_queue)
+		return nil
+	})
+	defer free()
+	<-queueResult.Done()
+
+	setResult, free := controller.Set(ctx, func(params lights.LightController_set_Params) error {
 		// Set desired color
 		color, err := params.NewColor()
 		if err != nil {
@@ -175,7 +70,21 @@ func (sa SetArbitraryPixels) Execute(ctx context.Context, db *database.Database,
 		return err
 	}
 
-	<-result.Done()
+	<-setResult.Done()
+
+	// "Commit" the changes to the strip
+	showResult, free := controller.Show(ctx, func(params lights.LightController_show_Params) error {
+		return nil
+	})
+	<-showResult.Done()
+
+	// Switch back to instant
+	instantResult, free := controller.Mode(ctx, func(params lights.LightController_mode_Params) error {
+		params.SetMode(lights.Mode_instant)
+		return nil
+	})
+	defer free()
+	<-instantResult.Done()
 
 	return nil
 }
