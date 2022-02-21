@@ -1,0 +1,15 @@
+[Unit]
+Description=lights controller service
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=-/etc/lights/.env
+WorkingDirectory=/etc/lights
+ExecStart=/usr/local/bin/lights-controller
+RestartSec=3
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
