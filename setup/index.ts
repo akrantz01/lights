@@ -79,6 +79,7 @@ const client = new Client("lights", {
   logoUri: logo,
   appType: "spa",
   isFirstParty: true,
+  tokenEndpointAuthMethod: "none",
   callbacks: urls,
   allowedLogoutUrls: urls,
   webOrigins: urls,
