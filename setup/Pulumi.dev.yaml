@@ -1,0 +1,6 @@
+config:
+  auth0:clientId:
+    secure: AAABALLbDGig57OuGFo19qerajmBY0OVADR9BCdhBvtYSP7v5WUATv1vKVs1AFZdekacG74ae99+pZNBQgFFYA==
+  auth0:clientSecret:
+    secure: AAABANpCd4mn6Y4NBfR9ghfJNzdDzC/GjFNaIV5KBAzD6lO+VG95GL4DBzGr/i2YH5oNIKKVwXnIhBji1QNeG0BxHvTFOm1C/eaL3NOHQsoCyToo7etby4fcdWUJaUet
+  auth0:domain: krantz-dev.us.auth0.com
