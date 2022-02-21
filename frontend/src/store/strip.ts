@@ -17,6 +17,7 @@ export const stripSlice = createSlice({
   initialState,
   reducers: {
     setBrightness: (state, action: PayloadAction<number>) => {
+      state.on = true;
       state.brightness = action.payload;
     },
     setLength: (state, action: PayloadAction<number>) => {

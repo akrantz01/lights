@@ -1,4 +1,5 @@
 import { Action, Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
+import { toast } from 'react-hot-toast';
 
 import { attemptReconnect, beginReconnect, broken, closed, error, opened, reconnected } from './actions';
 
@@ -41,6 +42,7 @@ export default class Socket {
    */
   private onClose = (dispatch: Dispatch) => (event: CloseEvent) => {
     dispatch(closed(event));
+    toast.error('Server disconnected');
 
     if (this.canAttemptReconnect()) this.reconnect(dispatch);
   };
@@ -69,6 +71,8 @@ export default class Socket {
       this.reconnectionQueue = null;
 
       dispatch(reconnected());
+
+      toast.success('Reconnected');
     }
 
     // Mark that we've opened the connection
@@ -129,6 +133,8 @@ export default class Socket {
    */
   private reconnect = (dispatch: Dispatch) => {
     this.ws = null;
+
+    toast.error('Reconnecting...', { icon: '⚠️' });
 
     // Notfiy we disconnected
     dispatch(broken());

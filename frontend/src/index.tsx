@@ -1,6 +1,7 @@
 import { LocationProvider, Router } from '@reach/router';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Toaster } from 'react-hot-toast';
 import { Provider } from 'react-redux';
 
 import { Animations } from './animations';
@@ -22,6 +23,7 @@ ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
       <LocationProvider>
+        <Toaster position="top-right" toastOptions={{ duration: 2500 }} />
         <Layout>
           <Router>
             <Dashboard path="/" />

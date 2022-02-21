@@ -1,6 +1,7 @@
 import { RefreshIcon } from '@heroicons/react/outline';
 import { Link, RouteComponentProps, useNavigate } from '@reach/router';
 import React, { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 import Button from '../components/Button';
 import Card from '../components/Card';
@@ -10,7 +11,7 @@ import { Color, ScheduleRepeats, ScheduleType } from '../types';
 
 const NewSchedule: React.FC<RouteComponentProps> = (): JSX.Element => {
   const navigate = useNavigate();
-  const [createSchedule, { isLoading, isUninitialized }] = useCreateScheduleMutation();
+  const [createSchedule, { isLoading, isUninitialized, isError }] = useCreateScheduleMutation();
 
   // Get lists of all presets and animations
   const { data: animations, isLoading: isAnimationsLoading } = useListAnimationsQuery();
@@ -34,7 +35,10 @@ const NewSchedule: React.FC<RouteComponentProps> = (): JSX.Element => {
 
   // Automatically navigate away when the action finishes
   useEffect(() => {
-    if (!isUninitialized && !isLoading) navigate('/schedules').catch(console.error);
+    if (!isUninitialized && !isLoading && !isError) {
+      toast.success(`Created schedule '${name}'`);
+      navigate('/schedules').catch(console.error);
+    }
   }, [isLoading]);
 
   const onSubmit = async () =>

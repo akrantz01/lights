@@ -1,6 +1,7 @@
 import { RefreshIcon } from '@heroicons/react/outline';
 import { Link, RouteComponentProps, useNavigate } from '@reach/router';
 import React, { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 import Button from '../components/Button';
 import Card from '../components/Card';
@@ -9,7 +10,7 @@ import { useCreateAnimationMutation } from '../store';
 
 const NewAnimation: React.FC<RouteComponentProps> = (): JSX.Element => {
   const navigate = useNavigate();
-  const [createAnimation, { isLoading, isUninitialized }] = useCreateAnimationMutation();
+  const [createAnimation, { isLoading, isUninitialized, isError }] = useCreateAnimationMutation();
 
   // Track form state
   const [name, setName] = useState('');
@@ -17,7 +18,10 @@ const NewAnimation: React.FC<RouteComponentProps> = (): JSX.Element => {
 
   // Automatically navigate away once complete
   useEffect(() => {
-    if (!isUninitialized && !isLoading) navigate('/animations').catch(console.error);
+    if (!isUninitialized && !isLoading && !isError) {
+      toast.success(`Created animation '${name}'`);
+      navigate('/animations').catch(console.error);
+    }
   }, [isLoading]);
 
   return (

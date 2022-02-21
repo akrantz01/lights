@@ -3,6 +3,7 @@ import { setupListeners } from '@reduxjs/toolkit/query';
 
 import api from './api';
 import displayReducer from './display';
+import errorLogger from './errors';
 import stripReducer from './strip';
 import ws from './ws';
 
@@ -13,7 +14,8 @@ export const store = configureStore({
     strip: stripReducer,
     ws: ws.reducer,
   },
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware).concat(ws.middleware),
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(api.middleware).concat(ws.middleware).concat(errorLogger),
 });
 
 // Trigger re-fetches upon reconnection and upon regaining focus

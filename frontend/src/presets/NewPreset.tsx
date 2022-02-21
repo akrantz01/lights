@@ -1,6 +1,7 @@
 import { RefreshIcon } from '@heroicons/react/outline';
 import { Link, RouteComponentProps, useNavigate } from '@reach/router';
 import React, { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 import Button from '../components/Button';
 import Card from '../components/Card';
@@ -11,7 +12,7 @@ import { Color } from '../types';
 const NewPreset: React.FC<RouteComponentProps> = () => {
   const navigate = useNavigate();
   const length = useSelector((state) => state.strip.length);
-  const [createPreset, { isLoading, isUninitialized }] = useCreatePresetMutation();
+  const [createPreset, { isLoading, isUninitialized, isError }] = useCreatePresetMutation();
 
   // Track form state
   const [name, setName] = useState('');
@@ -20,7 +21,10 @@ const NewPreset: React.FC<RouteComponentProps> = () => {
 
   // Automatically navigate away once complete
   useEffect(() => {
-    if (!isUninitialized && !isLoading) navigate('/presets').catch(console.error);
+    if (!isUninitialized && !isLoading && !isError) {
+      toast.success(`Created preset '${name}'`);
+      navigate('/presets').catch(console.error);
+    }
   }, [isLoading]);
 
   return (
