@@ -80,6 +80,7 @@ const client = new Client("lights", {
   appType: "spa",
   isFirstParty: true,
   tokenEndpointAuthMethod: "none",
+  grantTypes: ["implicit", "authorization_code", "refresh_token"],
   callbacks: urls,
   allowedLogoutUrls: urls,
   webOrigins: urls,
