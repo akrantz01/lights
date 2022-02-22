@@ -39,7 +39,8 @@ jobs:
         with:
           go-version: '^1.17.5'
       - run: GOARCH=${{ matrix.arch }} go build -o ./lights-api.linux-${{ matrix.arch }}
+        working-directory: api
       - uses: actions/upload-artifact@v2
         with:
           name: lights-api.linux-${{ matrix.arch }}
-          path: ${{ github.workspace }}/lights-api.linux-${{ matrix.arch }}
+          path: ${{ github.workspace }}/api/lights-api.linux-${{ matrix.arch }}
