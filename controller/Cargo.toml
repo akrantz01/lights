@@ -19,5 +19,8 @@ tonic-health = "0.5.0"
 tracing = { version = "0.1.31", features = ["attributes"] }
 tracing-subscriber = { version = "0.3.9", features = ["fmt", "parking_lot", "tracing-log"] }
 
+# Use fork pending merging of https://github.com/rpi-ws281x/rpi-ws281x-rust/pull/22
+rs_ws281x = { git = "https://github.com/akrantz01/rpi-ws281x-rust.git", branch = "update-submodule" }
+
 [build-dependencies]
 tonic-build = "0.6.2"

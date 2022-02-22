@@ -4,9 +4,12 @@ use tonic_health::server::health_reporter;
 use tracing::{info, info_span};
 
 mod config;
+mod interface;
 mod lights;
+mod pixels;
 
 use config::Config;
+use pixels::Pixels;
 
 #[tokio::main]
 async fn main() -> eyre::Result<()> {
