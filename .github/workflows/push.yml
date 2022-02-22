@@ -43,7 +43,7 @@ jobs:
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
-          key: ${{ runner.os }}-lights-api-${{ matrix.arch }}-${{ hashFiles('**/go.sum') }}-${{ github.job }}
+          key: ${{ runner.os }}-lights-api-${{ matrix.arch }}-${{ hashFiles('**/go.sum') }}-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-lights-api-${{ matrix.arch }}-${{ hashFiles('**/go.sum') }}
             ${{ runner.os }}-lights-api-${{ matrix.arch }}
