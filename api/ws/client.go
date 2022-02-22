@@ -3,6 +3,7 @@ package ws
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/auth0/go-jwt-middleware/v2/validator"
@@ -85,7 +86,7 @@ func (c *Client) reader(actions chan rpc.Callable, db *database.Database, stripL
 
 		// Prevent any actions if the user does not have permissions to control the lights
 		if msg.Type != MessageLogin && msg.Type != MessageLogout && !permissions.Has(auth.PermissionControlLights) {
-			// TODO: notify invalid permissions
+			c.send <- NewPermissionsError(auth.PermissionControlLights)
 			continue
 		}
 
@@ -180,7 +181,7 @@ func (c *Client) reader(actions chan rpc.Callable, db *database.Database, stripL
 			// Fetch the preset
 			preset, err := db.GetPreset(applyPreset.Id)
 			if err == database.ErrNotFound {
-				// TODO: properly handle error
+				c.send <- NewNotFoundError(fmt.Sprintf("preset '%s'", applyPreset.Id))
 				continue
 			} else if err != nil {
 				c.logger.Error("failed to find preset", zap.Error(err), zap.String("id", applyPreset.Id))

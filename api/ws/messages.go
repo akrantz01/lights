@@ -1,6 +1,9 @@
 package ws
 
-import "github.com/akrantz01/lights/lights-web/database"
+import (
+	"github.com/akrantz01/lights/lights-web/auth"
+	"github.com/akrantz01/lights/lights-web/database"
+)
 
 type MessageType string
 
@@ -45,6 +48,10 @@ const (
 	MessageAnimationStopped = "display/stopAnimation"
 	// MessageStopAnimation is used to stop the current animation (if it's running)
 	MessageStopAnimation = "server/display/stopAnimation"
+	// MessageNotFoundError notifies the user that the resource they were requesting no longer exists
+	MessageNotFoundError = "error/notFound"
+	// MessagePermissionsError notifies the user that they are lacking permissions for the resource
+	MessagePermissionsError = "error/permissions"
 )
 
 // Message is used to determine the type of message to decode as
@@ -261,5 +268,31 @@ type AnimationStopped struct {
 func NewAnimationStopped() AnimationStopped {
 	return AnimationStopped{
 		Type: MessageAnimationStopped,
+	}
+}
+
+// NotFoundError notifies the user that the resource they requested couldn't be found
+type NotFoundError struct {
+	Type     MessageType `json:"type"`
+	Resource string      `json:"payload"`
+}
+
+func NewNotFoundError(resource string) NotFoundError {
+	return NotFoundError{
+		Type:     MessageNotFoundError,
+		Resource: resource,
+	}
+}
+
+// PermissionsError notifies the user that they are lacking the given permission
+type PermissionsError struct {
+	Type       MessageType     `json:"type"`
+	Permission auth.Permission `json:"payload"`
+}
+
+func NewPermissionsError(permission auth.Permission) PermissionsError {
+	return PermissionsError{
+		Type:       MessagePermissionsError,
+		Permission: permission,
 	}
 }
