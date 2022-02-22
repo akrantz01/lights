@@ -30,21 +30,16 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform:
-          - linux.arm64
-          - linux.amd64
-          - windows.amd64
-          - darwin.amd64
+        arch:
+          - arm64
+          - amd64
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
         with:
           go-version: '^1.17.5'
-      - run: |
-          platform=${{ matrix.platform }}
-          platform_split=(${platform//\//})
-          GOOS=${platform_split[0]} GOARCH=${platform_split[1]} go build -o ./lights-api.${{ matrix.platform }}
+      - run: GOARCH=${{ matrix.arch }} go build -o ./lights-api.linux-${{ matrix.arch }}
       - uses: actions/upload-artifact@v2
         with:
-          name: lights-api.${{ matrix.platform }}
-          path: ${{ github.workspace }}/lights-api.${{ matrix.platform }}
+          name: lights-api.linux-${{ matrix.arch }}
+          path: ${{ github.workspace }}/lights-api.linux-${{ matrix.arch }}
