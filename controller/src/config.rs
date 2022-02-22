@@ -1,9 +1,5 @@
-use std::{
-    env,
-    net::{IpAddr, Ipv4Addr, SocketAddr},
-    path::PathBuf,
-};
-use tracing::Level;
+use std::{env, net::SocketAddr, path::PathBuf};
+use tracing::{warn, Level};
 
 #[derive(Debug)]
 pub struct Config {
@@ -14,7 +10,7 @@ pub struct Config {
     pub animations_path: PathBuf,
 
     /// The total amount of LEDs on the strip
-    pub leds: i16,
+    pub leds: u16,
 
     /// The minimum level to log at
     pub log_level: Level,
@@ -25,48 +21,39 @@ pub struct Config {
 
 impl Config {
     /// Load the configuration from the environment
-    pub fn load() -> Config {
-        dotenv::dotenv().unwrap();
+    pub fn load() -> eyre::Result<Config> {
+        if dotenv::dotenv().is_err() {
+            warn!(".env file not found");
+        }
 
         let address = env::var("LIGHTS_CONTROLLER_ADDRESS")
-            .ok()
-            .map(|s| s.parse().ok())
-            .flatten()
-            .unwrap_or(SocketAddr::new(
-                IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)),
-                30000,
-            ));
+            .unwrap_or("127.0.0.1:30000".into())
+            .parse()?;
         let animations_path = env::var("LIGHTS_CONTROLLER_ANIMATIONS_PATH")
-            .map(From::from)
-            .unwrap_or("./animations".into());
+            .unwrap_or("./animations".into())
+            .into();
         let development = env::var("LIGHTS_DEVELOPMENT")
             .map(|s| s.to_lowercase())
             .map(|d| d == "yes" || d == "y" || d == "true" || d == "t")
             .unwrap_or(false);
         let log_level = env::var("LIGHTS_LOG_LEVEL")
-            .ok()
-            .map(|s| s.parse().ok())
-            .flatten()
-            .unwrap_or(Level::INFO);
+            .unwrap_or("info".into())
+            .parse()?;
 
         // Calculate the total number of LEDs
-        let density = env::var("LIGHTS_STRIP_DENSITY")
-            .ok()
-            .map(|s| s.parse().ok())
-            .flatten()
-            .unwrap_or(30);
-        let length = env::var("LIGHTS_STRIP_LENGTH")
-            .ok()
-            .map(|s| s.parse().ok())
-            .flatten()
-            .unwrap_or(5);
+        let density: u16 = env::var("LIGHTS_STRIP_DENSITY")
+            .unwrap_or("30".into())
+            .parse()?;
+        let length: u16 = env::var("LIGHTS_STRIP_LENGTH")
+            .unwrap_or("5".into())
+            .parse()?;
 
-        Config {
+        Ok(Config {
             address,
             animations_path,
             development,
             leds: density * length,
             log_level,
-        }
+        })
     }
 }
