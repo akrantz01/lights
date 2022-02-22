@@ -38,6 +38,16 @@ jobs:
       - uses: actions/setup-go@v2
         with:
           go-version: '^1.17.5'
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-lights-api-${{ matrix.arch }}-${{ hashFiles('**/go.sum') }}-${{ github.job }}
+          restore-keys: |
+            ${{ runner.os }}-lights-api-${{ matrix.arch }}-${{ hashFiles('**/go.sum') }}
+            ${{ runner.os }}-lights-api-${{ matrix.arch }}
+            ${{ runner.os }}-lights-api
       - run: GOARCH=${{ matrix.arch }} go build -o ./lights-api.linux-${{ matrix.arch }}
         working-directory: api
       - uses: actions/upload-artifact@v2
