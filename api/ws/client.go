@@ -201,8 +201,18 @@ func (c *Client) reader(actions chan rpc.Callable, db *database.Database, stripL
 				continue
 			}
 
-			actions <- rpc.NewStartAnimation(startAnimation.Id)
-			c.hub.broadcast <- NewAnimationStarted(startAnimation.Id)
+			// Ensure the animation exists
+			animation, err := db.GetAnimation(startAnimation.Id)
+			if err == database.ErrNotFound {
+				c.send <- NewNotFoundError(fmt.Sprintf("animation '%s'", startAnimation.Id))
+				continue
+			} else if err != nil {
+				c.logger.Error("failed to find animation", zap.Error(err), zap.String("id", startAnimation.Id))
+				continue
+			}
+
+			actions <- rpc.NewStartAnimation(animation.Id)
+			c.hub.broadcast <- NewAnimationStarted(animation.Id)
 
 		// Stop the currently running animation
 		case MessageStopAnimation:
