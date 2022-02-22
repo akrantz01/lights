@@ -1,3 +1,4 @@
+use rs_ws281x::WS2811Error;
 use std::iter;
 use tracing::debug;
 
@@ -15,12 +16,12 @@ pub struct Controller {
 }
 
 impl Controller {
-    pub fn render(&mut self) -> Result<(), ()> {
+    pub fn render(&mut self) -> Result<(), WS2811Error> {
         debug!(brightness = %self.brightness, leds = ?self.leds, "current strip state");
         Ok(())
     }
 
-    pub fn wait(&mut self) -> Result<(), ()> {
+    pub fn wait(&mut self) -> Result<(), WS2811Error> {
         Ok(())
     }
 
@@ -66,7 +67,7 @@ impl ControllerBuilder {
         self
     }
 
-    pub fn build(&mut self) -> Result<Controller, ()> {
+    pub fn build(&mut self) -> Result<Controller, WS2811Error> {
         Ok(Controller {
             brightness: self.brightness,
             leds: iter::repeat::<RawColor>([0, 0, 0, 0])
