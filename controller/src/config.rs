@@ -3,6 +3,7 @@ use std::{
     net::{IpAddr, Ipv4Addr, SocketAddr},
     path::PathBuf,
 };
+use tracing::Level;
 
 #[derive(Debug)]
 pub struct Config {
@@ -14,6 +15,9 @@ pub struct Config {
 
     /// The total amount of LEDs on the strip
     pub leds: i16,
+
+    /// The minimum level to log at
+    pub log_level: Level,
 
     /// Whether to run in development mode
     pub development: bool,
@@ -39,6 +43,11 @@ impl Config {
             .map(|s| s.to_lowercase())
             .map(|d| d == "yes" || d == "y" || d == "true" || d == "t")
             .unwrap_or(false);
+        let log_level = env::var("LIGHTS_LOG_LEVEL")
+            .ok()
+            .map(|s| s.parse().ok())
+            .flatten()
+            .unwrap_or(Level::INFO);
 
         // Calculate the total number of LEDs
         let density = env::var("LIGHTS_STRIP_DENSITY")
@@ -57,6 +66,7 @@ impl Config {
             animations_path,
             development,
             leds: density * length,
+            log_level,
         }
     }
 }
