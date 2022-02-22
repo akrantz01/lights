@@ -79,12 +79,7 @@ func (aa AddAnimation) Type() string {
 }
 
 func (aa AddAnimation) Execute(ctx context.Context, _ *database.Database, controller *lights.Controller) error {
-	success, err := controller.RegisterAnimation(ctx, aa.Id, aa.Wasm)
-	if err != nil {
-		return err
-	}
-
-	// Send back status
+	success := controller.RegisterAnimation(ctx, aa.Id, aa.Wasm)
 	aa.Response <- success
 
 	return nil
