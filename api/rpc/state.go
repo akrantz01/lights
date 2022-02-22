@@ -22,7 +22,7 @@ func (c ChangeState) Type() string {
 	return "change-state"
 }
 
-func (c ChangeState) Execute(ctx context.Context, db *database.Database, controller lights.LightController) error {
+func (c ChangeState) Execute(ctx context.Context, db *database.Database, controller *lights.Controller) error {
 	// Get the last brightness if necessary
 	var lastBrightness uint8
 	if c.On {
@@ -34,22 +34,12 @@ func (c ChangeState) Execute(ctx context.Context, db *database.Database, control
 	}
 
 	// Set the brightness
-	result, free := controller.Brightness(ctx, func(params lights.LightController_brightness_Params) error {
-		if c.On {
-			params.SetLevel(lastBrightness)
-		} else {
-			params.SetLevel(0)
-		}
-		return nil
-	})
-	defer free()
+	controller.Brightness(ctx, lastBrightness)
 
 	// Save the current state
 	if err := db.SetState(c.On); err != nil {
 		return err
 	}
-
-	<-result.Done()
 
 	return nil
 }

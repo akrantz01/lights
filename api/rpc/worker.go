@@ -14,11 +14,11 @@ type Callable interface {
 	// Type returns a string with the action being performed
 	Type() string
 	// Execute runs the RPC(s) to make the desired change(s)
-	Execute(ctx context.Context, db *database.Database, controller lights.LightController) error
+	Execute(ctx context.Context, db *database.Database, controller *lights.Controller) error
 }
 
 // NewProcessor creates a new message processor for stateful RPC messages
-func NewProcessor(db *database.Database, lc lights.LightController) (chan Callable, context.CancelFunc) {
+func NewProcessor(db *database.Database, lc *lights.Controller) (chan Callable, context.CancelFunc) {
 	actions := make(chan Callable, 100)
 
 	ctx, cancel := context.WithCancel(context.Background())

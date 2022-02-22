@@ -1,8 +1,8 @@
 using Go = import "go.capnp";
 @0xd91d0c9586c33e4f;
 
-$Go.package("lights");
-$Go.import("github.com/akrantz01/lights/lights-web/lights");
+$Go.package("cp");
+$Go.import("github.com/akrantz01/lights/lights-web/lights/cp");
 
 struct Color @0xb3f078772ec8e414 {
   # An RGB color with values in the range 0-255 inclusive

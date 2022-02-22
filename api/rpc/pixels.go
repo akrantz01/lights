@@ -24,41 +24,11 @@ func (sa SetPixels) Type() string {
 	return "set-arbitrary-pixels"
 }
 
-func (sa SetPixels) Execute(ctx context.Context, db *database.Database, controller lights.LightController) error {
+func (sa SetPixels) Execute(ctx context.Context, db *database.Database, controller *lights.Controller) error {
 	// Switch to queue to set all the pixels at the same time from the viewer's perspective
-	queueResult, free := controller.Mode(ctx, func(params lights.LightController_mode_Params) error {
-		params.SetMode(lights.Mode_queue)
-		return nil
-	})
-	defer free()
-	<-queueResult.Done()
+	controller.Queue(ctx)
 
-	setResult, free := controller.Set(ctx, func(params lights.LightController_set_Params) error {
-		// Set desired color
-		color, err := params.NewColor()
-		if err != nil {
-			return err
-		}
-		color.SetR(sa.Color.Red)
-		color.SetG(sa.Color.Green)
-		color.SetB(sa.Color.Blue)
-
-		// Set the indexes
-		position, err := params.NewPosition()
-		if err != nil {
-			return err
-		}
-		list, err := position.NewList(int32(len(sa.Indexes)))
-		if err != nil {
-			return err
-		}
-		for i, v := range sa.Indexes {
-			list.Set(i, v)
-		}
-
-		return nil
-	})
-	defer free()
+	controller.Set(ctx, sa.Indexes, sa.Color)
 
 	// Save the changed pixels
 	if err := db.SetArbitraryPixels(sa.Indexes, sa.Color); err != nil {
@@ -70,21 +40,11 @@ func (sa SetPixels) Execute(ctx context.Context, db *database.Database, controll
 		return err
 	}
 
-	<-setResult.Done()
-
 	// "Commit" the changes to the strip
-	showResult, free := controller.Show(ctx, func(params lights.LightController_show_Params) error {
-		return nil
-	})
-	<-showResult.Done()
+	controller.Show(ctx)
 
 	// Switch back to instant
-	instantResult, free := controller.Mode(ctx, func(params lights.LightController_mode_Params) error {
-		params.SetMode(lights.Mode_instant)
-		return nil
-	})
-	defer free()
-	<-instantResult.Done()
+	controller.Instant(ctx)
 
 	return nil
 }

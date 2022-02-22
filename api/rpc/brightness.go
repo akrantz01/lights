@@ -22,13 +22,8 @@ func (cb ChangeBrightness) Type() string {
 	return "change-brightness"
 }
 
-func (cb ChangeBrightness) Execute(ctx context.Context, db *database.Database, controller lights.LightController) error {
-	// Set the brightness
-	result, free := controller.Brightness(ctx, func(params lights.LightController_brightness_Params) error {
-		params.SetLevel(cb.Brightness)
-		return nil
-	})
-	defer free()
+func (cb ChangeBrightness) Execute(ctx context.Context, db *database.Database, controller *lights.Controller) error {
+	controller.Brightness(ctx, cb.Brightness)
 
 	// Save the change
 	if err := db.SetBrightness(cb.Brightness); err != nil {
@@ -39,8 +34,6 @@ func (cb ChangeBrightness) Execute(ctx context.Context, db *database.Database, c
 	if err := db.SetState(cb.Brightness != 0); err != nil {
 		return err
 	}
-
-	<-result.Done()
 
 	return nil
 }

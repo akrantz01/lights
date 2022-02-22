@@ -24,42 +24,12 @@ func (ap ApplyPreset) Type() string {
 	return "apply-preset"
 }
 
-func (ap ApplyPreset) Execute(ctx context.Context, db *database.Database, controller lights.LightController) error {
+func (ap ApplyPreset) Execute(ctx context.Context, db *database.Database, controller *lights.Controller) error {
 	// Switch to queued mode
-	queuedResult, free := controller.Mode(ctx, func(params lights.LightController_mode_Params) error {
-		params.SetMode(lights.Mode_queue)
-		return nil
-	})
-	<-queuedResult.Done()
-	free()
+	controller.Queue(ctx)
 
 	// Set all the pixels
-	setAllResult, free := controller.SetAll(ctx, func(params lights.LightController_setAll_Params) error {
-		// Create the new list
-		list, err := params.NewColors(int32(len(ap.Pixels)))
-		if err != nil {
-			return err
-		}
-
-		// Fill the list
-		for i, color := range ap.Pixels {
-			c, err := lights.NewColor(list.Segment())
-			if err != nil {
-				return err
-			}
-			c.SetR(color.Red)
-			c.SetG(color.Green)
-			c.SetB(color.Blue)
-
-			if err := list.Set(i, c); err != nil {
-				return err
-			}
-		}
-
-		return nil
-	})
-	<-setAllResult.Done()
-	free()
+	controller.SetAll(ctx, ap.Pixels)
 
 	// Save the pixel changes
 	if err := db.SetAllPixels(ap.Pixels); err != nil {
@@ -70,12 +40,7 @@ func (ap ApplyPreset) Execute(ctx context.Context, db *database.Database, contro
 	}
 
 	// Change the brightness
-	brightnessChange, free := controller.Brightness(ctx, func(params lights.LightController_brightness_Params) error {
-		params.SetLevel(ap.Brightness)
-		return nil
-	})
-	<-brightnessChange.Done()
-	free()
+	controller.Brightness(ctx, ap.Brightness)
 
 	// Save the brightness change
 	if err := db.SetBrightness(ap.Brightness); err != nil {
@@ -83,19 +48,10 @@ func (ap ApplyPreset) Execute(ctx context.Context, db *database.Database, contro
 	}
 
 	// Propagate the changes
-	showResult, free := controller.Show(ctx, func(params lights.LightController_show_Params) error {
-		return nil
-	})
-	<-showResult.Done()
-	free()
+	controller.Show(ctx)
 
 	// Switch back to instant mode
-	instantResult, free := controller.Mode(ctx, func(params lights.LightController_mode_Params) error {
-		params.SetMode(lights.Mode_instant)
-		return nil
-	})
-	<-instantResult.Done()
-	free()
+	controller.Instant(ctx)
 
 	// Mark the strip as being on
 	if err := db.SetState(true); err != nil {
