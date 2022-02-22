@@ -24,3 +24,27 @@ jobs:
           work-dir: setup
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
+  build-api:
+    name: Build API
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform:
+          - linux.arm64
+          - linux.amd64
+          - windows.amd64
+          - darwin.amd64
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '^1.17.5'
+      - run: |
+          platform=${{ matrix.platform }}
+          platform_split=(${platform//\//})
+          GOOS=${platform_split[0]} GOARCH=${platform_split[1]} go build -o ./lights-api.${{ matrix.platform }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: lights-api.${{ matrix.platform }}
+          path: ${{ github.workspace }}/lights-api.${{ matrix.platform }}
