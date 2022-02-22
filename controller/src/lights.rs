@@ -11,8 +11,10 @@ use pb::{
     StartAnimationArgs, UnregisterAnimationArgs,
 };
 
+pub type Service = ControllerServer<ControllerService>;
+
 /// Create an instance of the service implementation to run
-pub fn service() -> ControllerServer<ControllerService> {
+pub fn service() -> Service {
     let controller = ControllerService::default();
     ControllerServer::new(controller)
 }

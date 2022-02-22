@@ -1,5 +1,6 @@
 use eyre::WrapErr;
 use tonic::transport::Server;
+use tonic_health::server::health_reporter;
 use tracing::{info, info_span};
 
 mod config;
@@ -15,10 +16,15 @@ async fn main() -> eyre::Result<()> {
         .with_max_level(config.log_level)
         .init();
 
+    // Create the health reporter
+    let (mut reporter, health_service) = health_reporter();
+    reporter.set_serving::<lights::Service>().await;
+
     // Start the server
     info!(address = %config.address, "listening and ready to handle connections");
     Server::builder()
         .trace_fn(|_| info_span!("controller"))
+        .add_service(health_service)
         .add_service(lights::service())
         .serve(config.address)
         .await?;
