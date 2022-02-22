@@ -54,3 +54,30 @@ jobs:
         with:
           name: lights-api.linux-${{ matrix.arch }}
           path: ${{ github.workspace }}/api/lights-api.linux-${{ matrix.arch }}
+
+  build-controller:
+    name: Build Controller
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7, 3.8, 3.9]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/cache@v2
+        with:
+          path: .venv
+          key: ${{ runner.os }}-lights-controller-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-lights-controller-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+            ${{ runner.os }}-lights-controller-${{ matrix.python-version }}
+            ${{ runner.os }}-lights-controller
+      - name: Install Poetry
+        run: curl -sSL https://install.python-poetry.org | python3 -
+      - run: poetry build
+      - uses: actions/upload-artifact@v2
+        with:
+          name: lights-controller.${{ matrix.python-version }}.whl
+          path: ${{ github.workspace }}/dist/lights-*.whl
