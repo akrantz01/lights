@@ -16,22 +16,19 @@ const LED_INVERT: bool = false;
 // Currently we don't support changing the pin. This corresponds to GPIO 18 (pin 12) on the Raspberry Pi
 const LED_PIN: i32 = 18;
 
-/// A user-friendly interface around the low-level controller. [Pixels] can be shared between
-/// multiple threads safely by cloning.
+pub type SharedPixels = Arc<Mutex<Pixels>>;
+
+/// A user-friendly interface around the low-level controller.
 #[derive(Clone, Debug)]
 pub struct Pixels {
-    shared: Arc<Mutex<Shared>>,
-}
-
-#[derive(Debug)]
-struct Shared {
     controller: Controller,
-    auto_commit: bool,
+    pub length: u16,
 }
 
 impl Pixels {
-    /// Create a new connection to the light strip with the given number of pixels
-    pub fn new(count: u16) -> Result<Pixels, PixelsError> {
+    /// Create a new connection to the light strip with the given number of pixels. The connection is
+    /// wrapped in an [std::sync::Arc] and [tokio::sync::Mutex] to ensure thread-safe access.
+    pub fn new(count: u16) -> Result<SharedPixels, PixelsError> {
         let controller = ControllerBuilder::new()
             .freq(LED_FREQUENCY)
             .dma(LED_DMA_CHANNEL)
@@ -48,74 +45,36 @@ impl Pixels {
             .build()
             .map_err::<PixelsError, _>(Into::into)?;
 
-        let shared = Shared {
+        let pixels = Pixels {
             controller,
-            auto_commit: true,
+            length: count,
         };
-        Ok(Pixels {
-            shared: Arc::new(Mutex::new(shared)),
-        })
+        Ok(Arc::new(Mutex::new(pixels)))
     }
 
     /// Set the color of an individual pixel
-    pub async fn set(&self, index: u16, r: u8, g: u8, b: u8) {
-        let mut shared = self.shared.lock().await;
-
-        // Set the pixel
-        let pixels = shared.controller.leds_mut(LED_CHANNEL);
+    pub fn set(&mut self, index: u16, r: u8, g: u8, b: u8) {
+        let pixels = self.controller.leds_mut(LED_CHANNEL);
         pixels[index as usize] = [b, g, r, 0];
-
-        if shared.auto_commit {
-            if let Err(e) = shared.controller.render() {
-                error!(error = %e, "failed to commit changes");
-            }
-        }
     }
 
     /// Fill the entire strip with the same color
-    pub async fn fill(&self, r: u8, g: u8, b: u8) {
-        let mut shared = self.shared.lock().await;
-
-        // Fill all the pixels
-        let pixels = shared.controller.leds_mut(LED_CHANNEL);
+    pub fn fill(&mut self, r: u8, g: u8, b: u8) {
+        let pixels = self.controller.leds_mut(LED_CHANNEL);
         for pixel in pixels {
             *pixel = [b, g, r, 0];
-        }
-
-        if shared.auto_commit {
-            if let Err(e) = shared.controller.render() {
-                error!(error = %e, "failed to commit changes");
-            }
         }
     }
 
     /// Set the brightness of the strip
-    pub async fn brightness(&self, value: u8) {
-        let mut shared = self.shared.lock().await;
-
-        shared.controller.set_brightness(LED_CHANNEL, value);
-
-        if shared.auto_commit {
-            if let Err(e) = shared.controller.render() {
-                error!(error = %e, "failed to commit changes");
-            }
-        }
+    pub fn brightness(&mut self, value: u8) {
+        self.controller.set_brightness(LED_CHANNEL, value);
     }
 
-    /// Set whether changes should be automatically written to the strip
-    pub async fn auto_commit(&self, enabled: bool) {
-        let mut shared = self.shared.lock().await;
-        shared.auto_commit = enabled;
-    }
-
-    /// Write any queued changes to the strip. Does nothing when `Pixels.auto_write` is `true`
-    pub async fn show(&self) {
-        let mut shared = self.shared.lock().await;
-
-        if !shared.auto_commit {
-            if let Err(e) = shared.controller.render() {
-                error!(error = %e, "failed to commit changes");
-            }
+    /// Write any queued changes to the strip
+    pub fn show(&mut self) {
+        if let Err(e) = self.controller.render() {
+            error!(error = %e, "failed to commit changes");
         }
     }
 }

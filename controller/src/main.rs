@@ -20,6 +20,10 @@ async fn main() -> eyre::Result<()> {
         .with_max_level(config.log_level)
         .init();
 
+    // Connect to the pixels
+    let pixels = Pixels::new(config.leds).wrap_err("failed to setup LEDs")?;
+    info!(count = %config.leds, "connected to LED strip");
+
     // Create the health reporter
     let (mut reporter, health_service) = health_reporter();
     reporter.set_serving::<lights::Service>().await;
@@ -29,7 +33,7 @@ async fn main() -> eyre::Result<()> {
     Server::builder()
         .trace_fn(|_| info_span!("controller"))
         .add_service(health_service)
-        .add_service(lights::service())
+        .add_service(lights::service(pixels))
         .serve(config.address)
         .await?;
 
