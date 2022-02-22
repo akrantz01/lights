@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package lights;
+
 // An RGB color with values in the range 0-255 inclusive.
 message Color {
   uint32 r = 1;
@@ -8,28 +10,28 @@ message Color {
 }
 
 // The arguments for the Set method
-message Set {
+message SetArgs {
   repeated uint32 indexes = 1;
   Color color = 2;
 }
 
 // The arguments for the SetAll method
-message SetAll {
+message SetAllArgs {
   repeated Color colors = 1;
 }
 
 // The arguments for the Brightness method
-message Brightness {
+message BrightnessArgs {
   uint32 brightness = 1;
 }
 
 // The arguments for the StartAnimation method
-message StartAnimation {
+message StartAnimationArgs {
   string id = 1;
 }
 
 // The arguments for the RegisterAnimation method
-message RegisterAnimation {
+message RegisterAnimationArgs {
   string id = 1;
   bytes wasm = 2;
 }
@@ -40,7 +42,7 @@ message AnimationStatus {
 }
 
 // The arguments for the UnregisterAnimation method
-message UnregisterAnimation {
+message UnregisterAnimationArgs {
   string id = 1;
 }
 
@@ -50,26 +52,26 @@ message Empty {}
 // Controls an individual strip of NeoPixels
 service Controller {
   // Set the color of a set of pixels
-  rpc Set(Set) returns (Empty) {}
+  rpc Set(SetArgs) returns (Empty) {}
 
   // Set the color of all pixels at the same time
-  rpc SetAll(SetAll) returns (Empty) {}
+  rpc SetAll(SetAllArgs) returns (Empty) {}
 
   // Fill the entire strip with the given color
   rpc Fill(Color) returns (Empty) {}
 
   // Set the brightness of the strip. Only values 0-100 inclusive are accepted
-  rpc Brightness(Brightness) returns (Empty) {}
+  rpc Brightness(BrightnessArgs) returns (Empty) {}
 
   // Run the specified animation by id. Once started, no other actions can be performed until stopped.
-  rpc StartAnimation(StartAnimation) returns (Empty) {}
+  rpc StartAnimation(StartAnimationArgs) returns (Empty) {}
 
   // Stop the currently running animation. This method is idempotent.
   rpc StopAnimation(Empty) returns (Empty) {}
 
   // Register an animation with an associated id
-  rpc RegisterAnimation(RegisterAnimation) returns (AnimationStatus) {}
+  rpc RegisterAnimation(RegisterAnimationArgs) returns (AnimationStatus) {}
 
   // Remove an animation from the registry by id
-  rpc UnregisterAnimation(UnregisterAnimation) returns (Empty) {}
+  rpc UnregisterAnimation(UnregisterAnimationArgs) returns (Empty) {}
 }
