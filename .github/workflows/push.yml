@@ -68,7 +68,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - uses: actions/cache@v2
         with:
-          path: .venv
+          path: |
+            ${{ github.workspace}}/.venv
+            ~/.local/bin
           key: ${{ runner.os }}-lights-controller-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-lights-controller-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
@@ -76,8 +78,9 @@ jobs:
             ${{ runner.os }}-lights-controller
       - name: Install Poetry
         run: curl -sSL https://install.python-poetry.org | python3 -
+      - run: poetry install
       - run: poetry build
       - uses: actions/upload-artifact@v2
         with:
-          name: lights-controller.${{ matrix.python-version }}.whl
+          name: lights-controller.py${{ matrix.python-version }}.whl
           path: ${{ github.workspace }}/dist/lights-*.whl
