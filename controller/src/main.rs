@@ -2,6 +2,7 @@ use eyre::WrapErr;
 use tonic::transport::Server;
 use tonic_health::server::health_reporter;
 use tracing::{info, info_span};
+use tracing_subscriber::fmt::format::FmtSpan;
 
 mod config;
 mod errors;
@@ -17,6 +18,7 @@ async fn main() -> eyre::Result<()> {
     color_eyre::install()?;
     let config = Config::load().wrap_err("failed to load configuration")?;
     tracing_subscriber::fmt()
+        .with_span_events(FmtSpan::CLOSE)
         .with_max_level(config.log_level)
         .init();
 

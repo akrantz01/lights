@@ -1,6 +1,6 @@
 use crate::pixels::SharedPixels;
 use tonic::{Request, Response, Status};
-use tracing::instrument;
+use tracing::{info, instrument};
 
 mod pb {
     tonic::include_proto!("lights");
@@ -46,7 +46,7 @@ pub struct ControllerService {
 
 #[tonic::async_trait]
 impl Controller for ControllerService {
-    #[instrument(skip(self))]
+    #[instrument(skip_all, fields(remote_addr = ?request.remote_addr()))]
     async fn set(&self, request: Request<SetArgs>) -> Result<Response<Empty>, Status> {
         let args = request.into_inner();
         let color = args
@@ -57,17 +57,19 @@ impl Controller for ControllerService {
         let b = in_range!(color.b, u8);
 
         let mut pixels = self.pixels.lock().await;
-        for index in args.indexes {
-            let index = in_range!(index, self.length, u16);
+        for index in &args.indexes {
+            let index = in_range!(*index, self.length, u16);
             pixels.set(index, r, g, b);
         }
 
         pixels.show();
 
+        info!(indexes = ?args.indexes, ?color, "set pixel(s) to color");
+
         Ok(Response::new(Empty {}))
     }
 
-    #[instrument(skip(self))]
+    #[instrument(skip_all, fields(remote_addr = ?request.remote_addr()))]
     async fn set_all(&self, request: Request<SetAllArgs>) -> Result<Response<Empty>, Status> {
         let colors = request.into_inner().colors;
         if colors.len() != self.length as usize {
@@ -89,10 +91,12 @@ impl Controller for ControllerService {
 
         pixels.show();
 
+        info!("set colors of all pixels");
+
         Ok(Response::new(Empty {}))
     }
 
-    #[instrument(skip(self))]
+    #[instrument(skip_all, fields(remote_addr = ?request.remote_addr()))]
     async fn fill(&self, request: Request<Color>) -> Result<Response<Empty>, Status> {
         let args = request.into_inner();
 
@@ -104,10 +108,12 @@ impl Controller for ControllerService {
         );
         pixels.show();
 
+        info!(color = ?args, "filled pixels");
+
         Ok(Response::new(Empty {}))
     }
 
-    #[instrument(skip(self))]
+    #[instrument(skip_all, fields(remote_addr = ?request.remote_addr()))]
     async fn brightness(
         &self,
         request: Request<BrightnessArgs>,
@@ -118,10 +124,12 @@ impl Controller for ControllerService {
         pixels.brightness(in_range!(brightness, u8));
         pixels.show();
 
+        info!(%brightness, "changed brightness");
+
         Ok(Response::new(Empty {}))
     }
 
-    #[instrument(skip(self))]
+    #[instrument(skip_all, fields(remote_addr = ?request.remote_addr()))]
     async fn start_animation(
         &self,
         request: Request<StartAnimationArgs>,
@@ -129,12 +137,12 @@ impl Controller for ControllerService {
         Err(Status::unimplemented("not yet implemented"))
     }
 
-    #[instrument(skip(self))]
+    #[instrument(skip_all, fields(remote_addr = ?request.remote_addr()))]
     async fn stop_animation(&self, request: Request<Empty>) -> Result<Response<Empty>, Status> {
         Err(Status::unimplemented("not yet implemented"))
     }
 
-    #[instrument(skip(self))]
+    #[instrument(skip_all, fields(remote_addr = ?request.remote_addr()))]
     async fn register_animation(
         &self,
         request: Request<RegisterAnimationArgs>,
@@ -142,7 +150,7 @@ impl Controller for ControllerService {
         Err(Status::unimplemented("not yet implemented"))
     }
 
-    #[instrument(skip(self))]
+    #[instrument(skip_all, fields(remote_addr = ?request.remote_addr()))]
     async fn unregister_animation(
         &self,
         request: Request<UnregisterAnimationArgs>,

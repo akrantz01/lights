@@ -4,7 +4,7 @@ use crate::{
 };
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use tracing::error;
+use tracing::{error, instrument};
 
 // From https://github.com/adafruit/Adafruit_Blinka/blob/7.0.1/src/adafruit_blinka/microcontroller/bcm283x/neopixel.py#L9-L13
 const LED_CHANNEL: usize = 0;
@@ -48,12 +48,14 @@ impl Pixels {
     }
 
     /// Set the color of an individual pixel
+    #[instrument(skip(self))]
     pub fn set(&mut self, index: u16, r: u8, g: u8, b: u8) {
         let pixels = self.controller.leds_mut(LED_CHANNEL);
         pixels[index as usize] = [b, g, r, 0];
     }
 
     /// Fill the entire strip with the same color
+    #[instrument(skip(self))]
     pub fn fill(&mut self, r: u8, g: u8, b: u8) {
         let pixels = self.controller.leds_mut(LED_CHANNEL);
         for pixel in pixels {
@@ -62,11 +64,13 @@ impl Pixels {
     }
 
     /// Set the brightness of the strip
+    #[instrument(skip(self))]
     pub fn brightness(&mut self, value: u8) {
         self.controller.set_brightness(LED_CHANNEL, value);
     }
 
     /// Write any queued changes to the strip
+    #[instrument(skip(self))]
     pub fn show(&mut self) {
         if let Err(e) = self.controller.render() {
             error!(error = %e, "failed to commit changes");
