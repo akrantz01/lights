@@ -100,7 +100,17 @@ impl Controller for ControllerService {
 
     #[instrument(skip(self))]
     async fn fill(&self, request: Request<Color>) -> Result<Response<Empty>, Status> {
-        Err(Status::unimplemented("not yet implemented"))
+        let args = request.into_inner();
+
+        let mut pixels = self.pixels.lock().await;
+        pixels.fill(
+            in_range!(args.r, u8),
+            in_range!(args.g, u8),
+            in_range!(args.b, u8),
+        );
+        pixels.show();
+
+        Ok(Response::new(Empty {}))
     }
 
     #[instrument(skip(self))]
