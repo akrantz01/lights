@@ -112,7 +112,13 @@ impl Controller for ControllerService {
         &self,
         request: Request<BrightnessArgs>,
     ) -> Result<Response<Empty>, Status> {
-        Err(Status::unimplemented("not yet implemented"))
+        let brightness = request.into_inner().brightness;
+
+        let mut pixels = self.pixels.lock().await;
+        pixels.brightness(in_range!(brightness, u8));
+        pixels.show();
+
+        Ok(Response::new(Empty {}))
     }
 
     #[instrument(skip(self))]
