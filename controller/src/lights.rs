@@ -48,7 +48,6 @@ pub struct ControllerService {
 impl Controller for ControllerService {
     #[instrument(skip(self))]
     async fn set(&self, request: Request<SetArgs>) -> Result<Response<Empty>, Status> {
-        // Extract the arguments
         let args = request.into_inner();
         let color = args
             .color
@@ -57,14 +56,12 @@ impl Controller for ControllerService {
         let g = in_range!(color.g, u8);
         let b = in_range!(color.b, u8);
 
-        // Set the desired indexes
         let mut pixels = self.pixels.lock().await;
         for index in args.indexes {
             let index = in_range!(index, self.length, u16);
             pixels.set(index, r, g, b);
         }
 
-        // Commit the changes
         pixels.show();
 
         Ok(Response::new(Empty {}))
@@ -72,7 +69,6 @@ impl Controller for ControllerService {
 
     #[instrument(skip(self))]
     async fn set_all(&self, request: Request<SetAllArgs>) -> Result<Response<Empty>, Status> {
-        // Get arguments
         let colors = request.into_inner().colors;
         if colors.len() != self.length as usize {
             return Err(Status::invalid_argument(format!(
@@ -81,7 +77,6 @@ impl Controller for ControllerService {
             )));
         }
 
-        // Set each pixel
         let mut pixels = self.pixels.lock().await;
         for (i, color) in colors.iter().enumerate() {
             pixels.set(
@@ -92,7 +87,6 @@ impl Controller for ControllerService {
             );
         }
 
-        // Commit the changes
         pixels.show();
 
         Ok(Response::new(Empty {}))
