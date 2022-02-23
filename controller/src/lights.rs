@@ -33,14 +33,15 @@ macro_rules! in_range {
 pub type Service = ControllerServer<ControllerService>;
 
 /// Create an instance of the service implementation to run
-pub fn service(pixels: SharedPixels) -> Service {
-    ControllerServer::new(ControllerService { pixels })
+pub fn service(length: u16, pixels: SharedPixels) -> Service {
+    ControllerServer::new(ControllerService { pixels, length })
 }
 
 /// The implementation of the controller
 #[derive(Debug)]
 pub struct ControllerService {
     pixels: SharedPixels,
+    length: u16,
 }
 
 #[tonic::async_trait]
@@ -59,7 +60,7 @@ impl Controller for ControllerService {
         // Set the desired indexes
         let mut pixels = self.pixels.lock().await;
         for index in args.indexes {
-            let index = in_range!(index, pixels.length, u16);
+            let index = in_range!(index, self.length, u16);
             pixels.set(index, r, g, b);
         }
 

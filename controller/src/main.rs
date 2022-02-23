@@ -33,7 +33,7 @@ async fn main() -> eyre::Result<()> {
     Server::builder()
         .trace_fn(|_| info_span!("controller"))
         .add_service(health_service)
-        .add_service(lights::service(pixels))
+        .add_service(lights::service(config.leds, pixels))
         .serve(config.address)
         .await?;
 

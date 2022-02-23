@@ -22,7 +22,6 @@ pub type SharedPixels = Arc<Mutex<Pixels>>;
 #[derive(Clone, Debug)]
 pub struct Pixels {
     controller: Controller,
-    pub length: u16,
 }
 
 impl Pixels {
@@ -45,11 +44,7 @@ impl Pixels {
             .build()
             .map_err::<PixelsError, _>(Into::into)?;
 
-        let pixels = Pixels {
-            controller,
-            length: count,
-        };
-        Ok(Arc::new(Mutex::new(pixels)))
+        Ok(Arc::new(Mutex::new(Pixels { controller })))
     }
 
     /// Set the color of an individual pixel
