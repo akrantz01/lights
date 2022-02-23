@@ -72,7 +72,30 @@ impl Controller for ControllerService {
 
     #[instrument(skip(self))]
     async fn set_all(&self, request: Request<SetAllArgs>) -> Result<Response<Empty>, Status> {
-        Err(Status::unimplemented("not yet implemented"))
+        // Get arguments
+        let colors = request.into_inner().colors;
+        if colors.len() != self.length as usize {
+            return Err(Status::invalid_argument(format!(
+                "colors must have {} elements",
+                self.length
+            )));
+        }
+
+        // Set each pixel
+        let mut pixels = self.pixels.lock().await;
+        for (i, color) in colors.iter().enumerate() {
+            pixels.set(
+                i as u16,
+                in_range!(color.r, u8),
+                in_range!(color.g, u8),
+                in_range!(color.b, u8),
+            );
+        }
+
+        // Commit the changes
+        pixels.show();
+
+        Ok(Response::new(Empty {}))
     }
 
     #[instrument(skip(self))]
