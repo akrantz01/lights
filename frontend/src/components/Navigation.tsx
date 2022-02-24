@@ -20,7 +20,7 @@ const navigation: NavItem[] = [
   { name: 'Animations', href: '/animations' },
   { name: 'Presets', href: '/presets' },
   { name: 'Schedules', href: '/schedules' },
-  { name: 'GitHub', href: 'https://github.com/akrantz01/lights' },
+  { name: 'GitHub', href: 'https://github.com/akrantz01/lights', external: true },
   { name: 'New Schedule', href: '/new/schedule', hidden: true },
   { name: 'New Preset', href: '/new/preset', hidden: true },
   { name: 'New Animation', href: '/new/animation', hidden: true },
@@ -87,8 +87,9 @@ const Navigation = (): JSX.Element => {
                                 <a
                                   key={item.name}
                                   href={item.href}
-                                  target={item.external ? '_blank' : ''}
+                                  target="_blank"
                                   rel="noreferrer"
+                                  className="text-gray-300 hover:bg-gray-700 hover:text-white inline px-3 py-2 rounded-md text-sm font-medium"
                                 >
                                   {item.name}
                                 </a>
