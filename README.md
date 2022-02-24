@@ -40,8 +40,8 @@ the Raspberry Pi, this makes it possible to develop on any system that is on the
 
 Some features I would like to add in the future:
 
-[ ] animations editable in the web UI
-[ ] a mobile app
+- [ ] animations editable in the web UI
+- [ ] a mobile app
 
 
 ### Contributing
