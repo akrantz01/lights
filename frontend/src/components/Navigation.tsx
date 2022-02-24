@@ -12,6 +12,7 @@ interface NavItem {
   name: string;
   href: string;
   hidden?: boolean;
+  external?: boolean;
 }
 
 const navigation: NavItem[] = [
@@ -19,6 +20,7 @@ const navigation: NavItem[] = [
   { name: 'Animations', href: '/animations' },
   { name: 'Presets', href: '/presets' },
   { name: 'Schedules', href: '/schedules' },
+  { name: 'GitHub', href: 'https://github.com/akrantz01/lights' },
   { name: 'New Schedule', href: '/new/schedule', hidden: true },
   { name: 'New Preset', href: '/new/preset', hidden: true },
   { name: 'New Animation', href: '/new/animation', hidden: true },
@@ -79,11 +81,26 @@ const Navigation = (): JSX.Element => {
                       <div className="ml-10 flex items-baseline space-x-4">
                         {navigation
                           .filter((item) => !item.hidden)
-                          .map((item) => (
-                            <Link key={item.name} to={item.href} getProps={isActive}>
-                              {item.name}
-                            </Link>
-                          ))}
+                          .map((item) => {
+                            if (item.external) {
+                              return (
+                                <a
+                                  key={item.name}
+                                  href={item.href}
+                                  target={item.external ? '_blank' : ''}
+                                  rel="noreferrer"
+                                >
+                                  {item.name}
+                                </a>
+                              );
+                            } else {
+                              return (
+                                <Link key={item.name} to={item.href} getProps={isActive}>
+                                  {item.name}
+                                </Link>
+                              );
+                            }
+                          })}
                       </div>
                     </div>
                   </div>
