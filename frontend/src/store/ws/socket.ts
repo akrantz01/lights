@@ -10,9 +10,6 @@ export default class Socket {
   private reconnectionInterval: NodeJS.Timeout | null = null;
   private reconnectionQueue: string[] | null = null;
 
-  // Keep track of if the connection has ever been opened successfully
-  private opened = false;
-
   /**
    * Connect to the server
    */
@@ -73,7 +70,6 @@ export default class Socket {
 
     // Mark that we've opened the connection
     dispatch(opened());
-    this.opened = true;
   };
 
   /**
@@ -120,7 +116,6 @@ export default class Socket {
     if (this.ws) {
       this.ws.close(code || 1000, reason || 'WebSocket connection closed');
       this.ws = null;
-      this.opened = false;
     }
   };
 
@@ -156,5 +151,5 @@ export default class Socket {
    * Only attempt reconnection if the connection has successfully opened at some point,
    * and we are not currently trying to reconnect.
    */
-  private canAttemptReconnect = (): boolean => this.opened && this.reconnectionInterval == null;
+  private canAttemptReconnect = (): boolean => this.reconnectionInterval == null;
 }
