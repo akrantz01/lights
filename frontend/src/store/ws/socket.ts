@@ -2,37 +2,16 @@ import { Action, Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit
 
 import { attemptReconnect, beginReconnect, broken, closed, error, opened, reconnected } from './actions';
 
-// Create an exponential backoff strategy with a maximum duration of 30s
-const exponentialBackoff = (fn: () => void) => {
-  let timeoutId: NodeJS.Timeout | null;
-  let attempts = 0;
-
-  const executor = () => {
-    fn();
-
-    attempts++;
-    const delay = 1000 + (2 ** attempts / 8) * 1000;
-    timeoutId = setTimeout(executor, delay > 30000 ? 30000 : delay);
-  };
-
-  // Kick-off the timer
-  timeoutId = setTimeout(executor, 1000);
-
-  return () => {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-      timeoutId = null;
-    }
-  };
-};
-
 export default class Socket {
   private ws: WebSocket | null = null;
 
-  // Track reconnection state
-  private reconnectionClear: (() => void) | null = null;
+  // Track number of reconnection attempts
   private reconnectionAttempts = 0;
+  private reconnectionInterval: NodeJS.Timeout | null = null;
   private reconnectionQueue: string[] | null = null;
+
+  // Keep track of if the connection has ever been opened successfully
+  private opened = false;
 
   /**
    * Connect to the server
@@ -80,8 +59,10 @@ export default class Socket {
    */
   private onOpen = (dispatch: Dispatch) => () => {
     // Cleanup stuff from reconnection
-    if (this.reconnectionClear) {
-      this.reconnectionClear();
+    if (this.reconnectionInterval) {
+      clearInterval(this.reconnectionInterval);
+      this.reconnectionInterval = null;
+      this.reconnectionAttempts = 0;
 
       // Clear the queued messages
       this.reconnectionQueue?.map((message) => this.sendMessage(message));
@@ -92,6 +73,7 @@ export default class Socket {
 
     // Mark that we've opened the connection
     dispatch(opened());
+    this.opened = true;
   };
 
   /**
@@ -125,7 +107,7 @@ export default class Socket {
    */
   private sendMessage = (message: string) => {
     if (this.ws) this.ws.send(message);
-    else if (this.reconnectionClear !== null) this.reconnectionQueue?.push(message);
+    else if (this.reconnectionInterval !== null) this.reconnectionQueue?.push(message);
     else throw new Error('WebSocket not initialized');
   };
 
@@ -138,6 +120,7 @@ export default class Socket {
     if (this.ws) {
       this.ws.close(code || 1000, reason || 'WebSocket connection closed');
       this.ws = null;
+      this.opened = false;
     }
   };
 
@@ -159,18 +142,19 @@ export default class Socket {
     // Initiate a reconnection
     this.open(dispatch);
 
-    // Continuously attempt reconnection with exponential backoff
-    this.reconnectionClear = exponentialBackoff(() => {
+    // Continuously attempt reconnection every 2s
+    this.reconnectionInterval = setInterval(() => {
       // Notify attempting reconnection
       this.reconnectionAttempts++;
       dispatch(attemptReconnect(this.reconnectionAttempts));
 
       this.open(dispatch);
-    });
+    }, 2000);
   };
 
   /**
-   * Only attempt reconnection if we are not currently trying to reconnect.
+   * Only attempt reconnection if the connection has successfully opened at some point,
+   * and we are not currently trying to reconnect.
    */
-  private canAttemptReconnect = (): boolean => this.reconnectionClear == null;
+  private canAttemptReconnect = (): boolean => this.opened && this.reconnectionInterval == null;
 }
