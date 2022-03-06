@@ -45,6 +45,14 @@ impl From<io::Error> for LoadError {
 }
 
 #[derive(Debug, Error)]
+pub enum RegistrationError {
+    #[error("failed to build animation")]
+    BuildError(#[from] BuildError),
+    #[error("failed to save animation")]
+    SaveError(#[from] SaveError),
+}
+
+#[derive(Debug, Error)]
 pub enum SaveError {
     #[error("failed to write to file")]
     IO(#[from] io::Error),

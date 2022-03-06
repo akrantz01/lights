@@ -11,6 +11,7 @@ mod interface;
 mod lights;
 mod pixels;
 
+use animations::Animator;
 use config::Config;
 use pixels::Pixels;
 
@@ -27,6 +28,9 @@ async fn main() -> eyre::Result<()> {
     let pixels = Pixels::new(config.leds).wrap_err("failed to setup LEDs")?;
     info!(count = %config.leds, "connected to LED strip");
 
+    // Create and start the animator
+    let (animator, _) = Animator::new(config.animations_path, config.development, pixels.clone());
+
     // Create the health reporter
     let (mut reporter, health_service) = health_reporter();
     reporter.set_serving::<lights::Service>().await;
@@ -36,7 +40,7 @@ async fn main() -> eyre::Result<()> {
     Server::builder()
         .trace_fn(|_| info_span!("controller"))
         .add_service(health_service)
-        .add_service(lights::service(config.leds, pixels))
+        .add_service(lights::service(animator, config.leds, pixels))
         .serve(config.address)
         .await?;
 

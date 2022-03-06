@@ -1,6 +1,6 @@
-use crate::pixels::SharedPixels;
+use crate::{animations::SharedAnimator, pixels::SharedPixels};
 use tonic::{Request, Response, Status};
-use tracing::{info, instrument};
+use tracing::{error, info, instrument};
 
 mod pb {
     tonic::include_proto!("lights");
@@ -33,13 +33,18 @@ macro_rules! in_range {
 pub type Service = ControllerServer<ControllerService>;
 
 /// Create an instance of the service implementation to run
-pub fn service(length: u16, pixels: SharedPixels) -> Service {
-    ControllerServer::new(ControllerService { pixels, length })
+pub fn service(animator: SharedAnimator, length: u16, pixels: SharedPixels) -> Service {
+    ControllerServer::new(ControllerService {
+        animator,
+        pixels,
+        length,
+    })
 }
 
 /// The implementation of the controller
 #[derive(Debug)]
 pub struct ControllerService {
+    animator: SharedAnimator,
     pixels: SharedPixels,
     length: u16,
 }
@@ -146,12 +151,15 @@ impl Controller for ControllerService {
         &self,
         request: Request<StartAnimationArgs>,
     ) -> Result<Response<Empty>, Status> {
-        Err(Status::unimplemented("not yet implemented"))
+        self.animator.start(&request.into_inner().id).await;
+        Ok(Response::new(Empty {}))
     }
 
+    #[allow(unused_variables)]
     #[instrument(skip_all, fields(remote_addr = ?request.remote_addr()))]
     async fn stop_animation(&self, request: Request<Empty>) -> Result<Response<Empty>, Status> {
-        Err(Status::unimplemented("not yet implemented"))
+        self.animator.stop().await;
+        Ok(Response::new(Empty {}))
     }
 
     #[instrument(skip_all, fields(remote_addr = ?request.remote_addr()))]
@@ -159,7 +167,16 @@ impl Controller for ControllerService {
         &self,
         request: Request<RegisterAnimationArgs>,
     ) -> Result<Response<AnimationStatus>, Status> {
-        Err(Status::unimplemented("not yet implemented"))
+        let RegisterAnimationArgs { id, wasm } = request.into_inner();
+
+        let result = self.animator.register(&id, wasm).await;
+        let success = result.is_ok();
+
+        if let Err(err) = result {
+            error!(%err, "failed to register animation");
+        }
+
+        Ok(Response::new(AnimationStatus { success }))
     }
 
     #[instrument(skip_all, fields(remote_addr = ?request.remote_addr()))]
@@ -167,6 +184,12 @@ impl Controller for ControllerService {
         &self,
         request: Request<UnregisterAnimationArgs>,
     ) -> Result<Response<Empty>, Status> {
-        Err(Status::unimplemented("not yet implemented"))
+        match self.animator.remove(&request.into_inner().id).await {
+            Ok(()) => Ok(Response::new(Empty {})),
+            Err(err) => {
+                error!(%err, "failed to remove animation");
+                Err(Status::aborted("failed to remove animation"))
+            }
+        }
     }
 }
