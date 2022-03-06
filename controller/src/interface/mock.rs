@@ -21,20 +21,8 @@ impl Controller {
         Ok(())
     }
 
-    pub fn wait(&mut self) -> Result<(), WS2811Error> {
-        Ok(())
-    }
-
-    pub fn brightness(&self, _: usize) -> u8 {
-        self.brightness
-    }
-
     pub fn set_brightness(&mut self, _: usize, value: u8) {
         self.brightness = value;
-    }
-
-    pub fn leds(&self, _: usize) -> &[RawColor] {
-        self.leds.as_slice()
     }
 
     pub fn leds_mut(&mut self, _: usize) -> &mut [RawColor] {
