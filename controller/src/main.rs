@@ -4,6 +4,7 @@ use tonic_health::server::health_reporter;
 use tracing::{info, info_span};
 use tracing_subscriber::fmt::format::FmtSpan;
 
+mod animations;
 mod config;
 mod errors;
 mod interface;

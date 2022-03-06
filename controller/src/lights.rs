@@ -56,7 +56,10 @@ impl Controller for ControllerService {
         let g = in_range!(color.g, u8);
         let b = in_range!(color.b, u8);
 
-        let mut pixels = self.pixels.lock().await;
+        let mut pixels = self
+            .pixels
+            .lock()
+            .map_err(|e| Status::aborted(format!("{e}")))?;
         for index in &args.indexes {
             let index = in_range!(*index, self.length, u16);
             pixels.set(index, r, g, b);
@@ -79,7 +82,10 @@ impl Controller for ControllerService {
             )));
         }
 
-        let mut pixels = self.pixels.lock().await;
+        let mut pixels = self
+            .pixels
+            .lock()
+            .map_err(|e| Status::aborted(format!("{e}")))?;
         for (i, color) in colors.iter().enumerate() {
             pixels.set(
                 i as u16,
@@ -100,7 +106,10 @@ impl Controller for ControllerService {
     async fn fill(&self, request: Request<Color>) -> Result<Response<Empty>, Status> {
         let args = request.into_inner();
 
-        let mut pixels = self.pixels.lock().await;
+        let mut pixels = self
+            .pixels
+            .lock()
+            .map_err(|e| Status::aborted(format!("{e}")))?;
         pixels.fill(
             in_range!(args.r, u8),
             in_range!(args.g, u8),
@@ -120,7 +129,10 @@ impl Controller for ControllerService {
     ) -> Result<Response<Empty>, Status> {
         let brightness = request.into_inner().brightness;
 
-        let mut pixels = self.pixels.lock().await;
+        let mut pixels = self
+            .pixels
+            .lock()
+            .map_err(|e| Status::aborted(format!("{e}")))?;
         pixels.brightness(in_range!(brightness, u8));
         pixels.show();
 

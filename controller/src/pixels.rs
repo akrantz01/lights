@@ -2,8 +2,7 @@ use crate::{
     errors::PixelsError,
     interface::{ChannelBuilder, Controller, ControllerBuilder, StripType},
 };
-use std::sync::Arc;
-use tokio::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use tracing::{error, instrument};
 
 // From https://github.com/adafruit/Adafruit_Blinka/blob/7.0.1/src/adafruit_blinka/microcontroller/bcm283x/neopixel.py#L9-L13
@@ -16,6 +15,7 @@ const LED_INVERT: bool = false;
 // Currently we don't support changing the pin. This corresponds to GPIO 18 (pin 12) on the Raspberry Pi
 const LED_PIN: i32 = 18;
 
+// TODO: use async mutex pending https://github.com/wasmerio/wasmer/pull/2807
 pub type SharedPixels = Arc<Mutex<Pixels>>;
 
 /// A user-friendly interface around the low-level controller.
