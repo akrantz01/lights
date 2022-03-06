@@ -1,7 +1,7 @@
 use crate::pixels::SharedPixels;
 use std::{io, path::PathBuf, sync::Arc};
 use tokio::{
-    sync::mpsc::{self, Receiver, Sender},
+    sync::mpsc::{self, error::TryRecvError, Receiver, Sender},
     task::{self, JoinHandle},
 };
 use tracing::{error, instrument};
@@ -48,7 +48,7 @@ impl Animator {
         // Launch the executor
         let executor_path = base_path.clone();
         let executor_pixels = pixels.clone();
-        let handle = task::spawn_blocking(|| executor(executor_path, executor_pixels, rx));
+        let handle = task::spawn(executor(executor_path, executor_pixels, rx));
 
         (
             Arc::new(Self {
@@ -98,6 +98,42 @@ impl Animator {
 }
 
 /// Waits for an animation to be received and then runs it
-fn executor(path: PathBuf, pixels: SharedPixels, actions: Receiver<Action>) {
-    todo!()
+async fn executor(path: PathBuf, pixels: SharedPixels, mut actions: Receiver<Action>) {
+    let mut animation: Option<Animation> = None;
+
+    loop {
+        match &animation {
+            None => match actions.recv().await {
+                Some(Action::Start(id)) => {
+                    match Animation::load(&id, &path, pixels.clone()).await {
+                        Ok(a) => animation = Some(a),
+                        Err(err) => error!(%err, "failed to load animation"),
+                    }
+                }
+                Some(Action::Stop) => continue, // Already stopped, nothing to do
+                None => break,                  // Exit when the channel closes
+            },
+            Some(a) => {
+                // Execute a frame
+                let method = a.animate().unwrap();
+                if let Err(err) = method.call() {
+                    animation = None;
+                    error!(%err, "an error occurred while executing the animation");
+                }
+
+                // Check if there is an action waiting
+                match actions.try_recv() {
+                    Ok(Action::Start(id)) => {
+                        match Animation::load(&id, &path, pixels.clone()).await {
+                            Ok(a) => animation = Some(a),
+                            Err(err) => error!(%err, "failed to load animation"),
+                        }
+                    }
+                    Ok(Action::Stop) => animation = None, // Stop the animation
+                    Err(TryRecvError::Empty) => continue, // No action, just continue to the next frame
+                    Err(TryRecvError::Disconnected) => break, // Exit when channel closes
+                }
+            }
+        }
+    }
 }
