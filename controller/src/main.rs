@@ -1,4 +1,5 @@
 use eyre::WrapErr;
+use tokio::fs;
 use tonic::transport::Server;
 use tonic_health::server::health_reporter;
 use tracing::{info, info_span};
@@ -23,6 +24,13 @@ async fn main() -> eyre::Result<()> {
         .with_span_events(FmtSpan::CLOSE)
         .with_max_level(config.log_level)
         .init();
+
+    // Ensure animations folder exists
+    if !config.animations_path.exists() {
+        fs::create_dir_all(&config.animations_path)
+            .await
+            .wrap_err("failed to create animations directory")?;
+    }
 
     // Connect to the pixels
     let pixels = Pixels::new(config.leds).wrap_err("failed to setup LEDs")?;
