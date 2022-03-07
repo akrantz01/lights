@@ -63,10 +63,10 @@ impl Controller for ControllerService {
 
         for index in &args.indexes {
             let index = in_range!(*index, self.length, u16);
-            self.pixels.set(index, r, g, b);
+            self.pixels.set(index, r, g, b).await;
         }
 
-        self.pixels.show();
+        self.pixels.show().await;
 
         info!(indexes = ?args.indexes, ?color, "set pixel(s) to color");
 
@@ -84,15 +84,17 @@ impl Controller for ControllerService {
         }
 
         for (i, color) in colors.iter().enumerate() {
-            self.pixels.set(
-                i as u16,
-                in_range!(color.r, u8),
-                in_range!(color.g, u8),
-                in_range!(color.b, u8),
-            );
+            self.pixels
+                .set(
+                    i as u16,
+                    in_range!(color.r, u8),
+                    in_range!(color.g, u8),
+                    in_range!(color.b, u8),
+                )
+                .await;
         }
 
-        self.pixels.show();
+        self.pixels.show().await;
 
         info!("set colors of all pixels");
 
@@ -103,12 +105,14 @@ impl Controller for ControllerService {
     async fn fill(&self, request: Request<Color>) -> Result<Response<Empty>, Status> {
         let args = request.into_inner();
 
-        self.pixels.fill(
-            in_range!(args.r, u8),
-            in_range!(args.g, u8),
-            in_range!(args.b, u8),
-        );
-        self.pixels.show();
+        self.pixels
+            .fill(
+                in_range!(args.r, u8),
+                in_range!(args.g, u8),
+                in_range!(args.b, u8),
+            )
+            .await;
+        self.pixels.show().await;
 
         info!(color = ?args, "filled pixels");
 
@@ -122,8 +126,8 @@ impl Controller for ControllerService {
     ) -> Result<Response<Empty>, Status> {
         let brightness = request.into_inner().brightness;
 
-        self.pixels.brightness(in_range!(brightness, u8));
-        self.pixels.show();
+        self.pixels.brightness(in_range!(brightness, u8)).await;
+        self.pixels.show().await;
 
         info!(%brightness, "changed brightness");
 

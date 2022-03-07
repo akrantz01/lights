@@ -67,7 +67,7 @@ async fn main() -> eyre::Result<()> {
     animator_handle.await?;
 
     // Stop the pixel manager
-    pixels.shutdown();
+    pixels.shutdown().await;
     pixels_handle.await?;
 
     info!("shutdown successful. good bye!");

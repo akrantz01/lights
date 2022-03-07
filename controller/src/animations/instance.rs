@@ -22,7 +22,7 @@ pub(crate) fn build(
             "brightness" => Function::new(&store, &FunctionType::new(vec![Type::I32], Vec::new()), move |args| {
                 let value = u8_from_value(&args[0])?;
 
-                brightness_pixels.brightness(value);
+                brightness_pixels.blocking_brightness(value);
                 Ok(Vec::new())
             }),
             "fill" => Function::new(&store, &FunctionType::new(vec![Type::I32, Type::I32, Type::I32], Vec::new()), move |args| {
@@ -30,7 +30,7 @@ pub(crate) fn build(
                 let g = u8_from_value(&args[1])?;
                 let b = u8_from_value(&args[2])?;
 
-                fill_pixels.fill(r, g, b);
+                fill_pixels.blocking_fill(r, g, b);
                 Ok(Vec::new())
             }),
             "set" => Function::new(&store, &FunctionType::new(vec![Type::I32, Type::I32, Type::I32, Type::I32], Vec::new()), move |args| {
@@ -39,11 +39,11 @@ pub(crate) fn build(
                 let g = u8_from_value(&args[2])?;
                 let b = u8_from_value(&args[3])?;
 
-                set_pixels.set(index, r, g, b);
+                set_pixels.blocking_set(index, r, g, b);
                 Ok(Vec::new())
             }),
             "show" => Function::new(&store, &FunctionType::new(Vec::new(), Vec::new()), move |_| {
-                pixels.show();
+                pixels.blocking_show();
                 Ok(Vec::new())
             }),
             "sleep" => Function::new_native(&store, sleep),

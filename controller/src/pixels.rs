@@ -4,8 +4,8 @@ use crate::{
 };
 use tokio::{
     sync::{
-        mpsc::{self, UnboundedReceiver, UnboundedSender},
-        oneshot::{self, Sender},
+        mpsc::{self, Receiver, Sender as MpscSender},
+        oneshot::{self, Sender as OneshotSender},
     },
     task::{self, JoinHandle},
 };
@@ -38,15 +38,16 @@ enum Action {
 
 /// A user-friendly interface around the low-level controller.
 #[derive(Clone, Debug)]
-pub struct Pixels(UnboundedSender<Action>);
+pub struct Pixels(MpscSender<Action>);
 
+// TODO: remove blocking variants pending https://github.com/wasmerio/wasmer/pull/2807
 impl Pixels {
     /// Create a new connection to the light strip with the given number of pixels. The connection is
     /// wrapped in an [std::sync::Arc] and [tokio::sync::Mutex] to ensure thread-safe access.
     pub async fn new(count: u16) -> Result<(Pixels, JoinHandle<()>), PixelsError> {
         // Create the communication channels
         let (err_tx, err_rx) = oneshot::channel();
-        let (tx, rx) = mpsc::unbounded_channel();
+        let (tx, rx) = mpsc::channel(1);
 
         // Spawn the manager
         let handle = task::spawn_blocking(move || pixel_manager(count, rx, err_tx));
@@ -60,39 +61,66 @@ impl Pixels {
     }
 
     /// Send an action to the manager
-    fn send(&self, action: Action) {
-        if let Err(err) = self.0.send(action) {
+    async fn send(&self, action: Action) {
+        if let Err(err) = self.0.send(action).await {
+            error!(action = ?err.0, %err, "failed to send action");
+        }
+    }
+
+    /// Send an action to the manager from a synchronous context
+    fn blocking_send(&self, action: Action) {
+        if let Err(err) = self.0.blocking_send(action) {
             error!(action = ?err.0, %err, "failed to send action");
         }
     }
 
     /// Set the color of an individual pixel
     #[instrument(skip(self))]
-    pub fn set(&self, index: u16, r: u8, g: u8, b: u8) {
-        self.send(Action::Set { index, r, g, b })
+    pub async fn set(&self, index: u16, r: u8, g: u8, b: u8) {
+        self.send(Action::Set { index, r, g, b }).await
+    }
+
+    /// Set the color of an individual pixel from a synchronous context
+    pub fn blocking_set(&self, index: u16, r: u8, g: u8, b: u8) {
+        self.blocking_send(Action::Set { index, r, g, b })
     }
 
     /// Fill the entire strip with the same color
     #[instrument(skip(self))]
-    pub fn fill(&self, r: u8, g: u8, b: u8) {
-        self.send(Action::Fill { r, g, b })
+    pub async fn fill(&self, r: u8, g: u8, b: u8) {
+        self.send(Action::Fill { r, g, b }).await
+    }
+
+    /// Fill the entire strip with the same color from a synchronous context
+    pub fn blocking_fill(&self, r: u8, g: u8, b: u8) {
+        self.blocking_send(Action::Fill { r, g, b })
     }
 
     /// Set the brightness of the strip
     #[instrument(skip(self))]
-    pub fn brightness(&self, value: u8) {
-        self.send(Action::Brightness(value))
+    pub async fn brightness(&self, value: u8) {
+        self.send(Action::Brightness(value)).await
+    }
+
+    /// Set the brightness of the strip from a synchronous context
+    pub fn blocking_brightness(&self, value: u8) {
+        self.blocking_send(Action::Brightness(value))
     }
 
     /// Write any queued changes to the strip
     #[instrument(skip(self))]
-    pub fn show(&self) {
-        self.send(Action::Show)
+    pub async fn show(&self) {
+        self.send(Action::Show).await
+    }
+
+    /// Write any queued changes to the strip
+    pub fn blocking_show(&self) {
+        self.blocking_send(Action::Show)
     }
 
     /// Shutdown the manager
-    pub fn shutdown(&self) {
-        self.send(Action::Shutdown)
+    pub async fn shutdown(&self) {
+        self.send(Action::Shutdown).await
     }
 }
 
@@ -100,8 +128,8 @@ impl Pixels {
 #[instrument(skip_all)]
 fn pixel_manager(
     leds: u16,
-    mut actions: UnboundedReceiver<Action>,
-    err_tx: Sender<Option<PixelsError>>,
+    mut actions: Receiver<Action>,
+    err_tx: OneshotSender<Option<PixelsError>>,
 ) {
     // Attempt to create a new controller
     let mut controller = match ControllerBuilder::new()
