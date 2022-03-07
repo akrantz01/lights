@@ -133,14 +133,7 @@ fn pixel_manager(
     info!("pixel manager started");
 
     // Handle incoming actions
-    loop {
-        // Attempt to receive an action, or exit if closed
-        let action = match actions.blocking_recv() {
-            Some(a) => a,
-            None => break,
-        };
-
-        // Perform the specified action
+    while let Some(action) = actions.blocking_recv() {
         match action {
             Action::Shutdown => break,
             Action::Set { index, r, g, b } => {
