@@ -18,7 +18,6 @@ pub(crate) fn build(
     let brightness_pixels = pixels.clone();
     let fill_pixels = pixels.clone();
     let set_pixels = pixels.clone();
-    let show_pixels = pixels.clone();
 
     // Build all the methods to be exposed
     let imports = imports! {
@@ -53,7 +52,7 @@ pub(crate) fn build(
                 Ok(Vec::new())
             }),
             "show" => Function::new(&store, &FunctionType::new(Vec::new(), Vec::new()), move |_| {
-                let mut p = show_pixels.lock().map_err(|_| RuntimeError::new("lock poisoned"))?;
+                let mut p = pixels.lock().map_err(|_| RuntimeError::new("lock poisoned"))?;
                 p.show();
                 Ok(Vec::new())
             }),

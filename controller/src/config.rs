@@ -27,25 +27,25 @@ impl Config {
         }
 
         let address = env::var("LIGHTS_CONTROLLER_ADDRESS")
-            .unwrap_or("127.0.0.1:30000".into())
+            .unwrap_or_else(|_| "127.0.0.1:30000".into())
             .parse()?;
         let animations_path = env::var("LIGHTS_CONTROLLER_ANIMATIONS_PATH")
-            .unwrap_or("./animations".into())
+            .unwrap_or_else(|_| "./animations".into())
             .into();
         let development = env::var("LIGHTS_DEVELOPMENT")
             .map(|s| s.to_lowercase())
             .map(|d| d == "yes" || d == "y" || d == "true" || d == "t")
             .unwrap_or(false);
         let log_level = env::var("LIGHTS_LOG_LEVEL")
-            .unwrap_or("info".into())
+            .unwrap_or_else(|_| "info".into())
             .parse()?;
 
         // Calculate the total number of LEDs
         let density: u16 = env::var("LIGHTS_STRIP_DENSITY")
-            .unwrap_or("30".into())
+            .unwrap_or_else(|_| "30".into())
             .parse()?;
         let length: u16 = env::var("LIGHTS_STRIP_LENGTH")
-            .unwrap_or("5".into())
+            .unwrap_or_else(|_| "5".into())
             .parse()?;
 
         Ok(Config {

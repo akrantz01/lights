@@ -56,7 +56,7 @@ impl Controller for ControllerService {
         let args = request.into_inner();
         let color = args
             .color
-            .ok_or(Status::invalid_argument("missing argument 'color'"))?;
+            .ok_or_else(|| Status::invalid_argument("missing argument 'color'"))?;
         let r = in_range!(color.r, u8);
         let g = in_range!(color.g, u8);
         let b = in_range!(color.b, u8);
