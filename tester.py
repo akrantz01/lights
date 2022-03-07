@@ -1,5 +1,7 @@
 import click
+from dotenv import load_dotenv
 import grpc
+from os import environ
 from tester_pb2 import (
     BrightnessArgs,
     Color,
@@ -14,6 +16,8 @@ from tester_pb2_grpc import ControllerStub
 import typing as t
 
 from lights_controller import SETTINGS
+
+load_dotenv()
 
 
 class MutuallyExclusiveOption(click.Option):
@@ -92,22 +96,14 @@ def validate_color(ctx, param, value):
     "address",
     type=str,
     help="The address of the server to connect to",
-    default=SETTINGS.controller_host,
-)
-@click.option(
-    "-p",
-    "--port",
-    "port",
-    type=int,
-    help="The port of the server to connect to",
-    default=SETTINGS.controller_port,
+    default=environ.get("LIGHTS_CONTROLLER_ADDRESS") or "127.0.0.1:30000",
 )
 @click.pass_context
-def main(ctx: click.Context, address: str, port: int):
+def main(ctx: click.Context, address: str):
     if ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
     else:
-        channel = grpc.insecure_channel(f"{address}:{port}")
+        channel = grpc.insecure_channel(address)
         ctx.obj = ControllerStub(channel)
 
 
