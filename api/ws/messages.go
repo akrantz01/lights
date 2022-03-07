@@ -1,8 +1,8 @@
 package ws
 
 import (
-	"github.com/akrantz01/lights/lights-web/auth"
-	"github.com/akrantz01/lights/lights-web/database"
+	"github.com/akrantz01/lights/api/auth"
+	"github.com/akrantz01/lights/api/database"
 )
 
 type MessageType string

@@ -5,8 +5,8 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/akrantz01/lights/lights-web/database"
-	"github.com/akrantz01/lights/lights-web/lights/pb"
+	"github.com/akrantz01/lights/api/database"
+	"github.com/akrantz01/lights/api/lights/pb"
 )
 
 var logger = zap.L().Named("controller")

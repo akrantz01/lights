@@ -3,8 +3,8 @@ package rpc
 import (
 	"context"
 
-	"github.com/akrantz01/lights/lights-web/database"
-	"github.com/akrantz01/lights/lights-web/lights"
+	"github.com/akrantz01/lights/api/database"
+	"github.com/akrantz01/lights/api/lights"
 )
 
 // SetPixels changes the color of multiple pixels at the same time

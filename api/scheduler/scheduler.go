@@ -6,8 +6,8 @@ import (
 	"github.com/go-co-op/gocron"
 	"go.uber.org/zap"
 
-	"github.com/akrantz01/lights/lights-web/database"
-	"github.com/akrantz01/lights/lights-web/rpc"
+	"github.com/akrantz01/lights/api/database"
+	"github.com/akrantz01/lights/api/rpc"
 )
 
 type Scheduler struct {

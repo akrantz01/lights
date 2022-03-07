@@ -4,7 +4,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"github.com/akrantz01/lights/lights-web/lights/pb"
+	"github.com/akrantz01/lights/api/lights/pb"
 )
 
 // Controller is a wrapper around a pb.ControllerClient to make it easier to work with.

@@ -7,11 +7,11 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/akrantz01/lights/lights-web/database"
-	"github.com/akrantz01/lights/lights-web/events"
-	"github.com/akrantz01/lights/lights-web/handlers"
-	"github.com/akrantz01/lights/lights-web/logging"
-	"github.com/akrantz01/lights/lights-web/scheduler"
+	"github.com/akrantz01/lights/api/database"
+	"github.com/akrantz01/lights/api/events"
+	"github.com/akrantz01/lights/api/handlers"
+	"github.com/akrantz01/lights/api/logging"
+	"github.com/akrantz01/lights/api/scheduler"
 )
 
 // Create a new schedule in the database

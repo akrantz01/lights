@@ -1,4 +1,4 @@
-module github.com/akrantz01/lights/lights-web
+module github.com/akrantz01/lights/api
 
 go 1.17
 

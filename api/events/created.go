@@ -6,7 +6,7 @@ import (
 	"github.com/r3labs/sse/v2"
 	"go.uber.org/zap"
 
-	"github.com/akrantz01/lights/lights-web/database"
+	"github.com/akrantz01/lights/api/database"
 )
 
 var created = []byte("created")

@@ -3,9 +3,9 @@ package scheduler
 import (
 	"go.uber.org/zap"
 
-	"github.com/akrantz01/lights/lights-web/database"
-	"github.com/akrantz01/lights/lights-web/rpc"
-	"github.com/akrantz01/lights/lights-web/ws"
+	"github.com/akrantz01/lights/api/database"
+	"github.com/akrantz01/lights/api/rpc"
+	"github.com/akrantz01/lights/api/ws"
 )
 
 // handler is the function that gets run when executing a schedule
