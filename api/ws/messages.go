@@ -1,8 +1,8 @@
 package ws
 
 import (
-	"github.com/akrantz01/lights/lights-web/auth"
-	"github.com/akrantz01/lights/lights-web/database"
+	"github.com/akrantz01/lights/api/auth"
+	"github.com/akrantz01/lights/api/database"
 )
 
 type MessageType string
@@ -133,21 +133,11 @@ type ModifiedPixels struct {
 	Payload ModifiedPixelsPayload `json:"payload"`
 }
 type ModifiedPixelsPayload struct {
-	Indexes []uint16       `json:"indexes"`
+	Indexes []uint32       `json:"indexes"`
 	Color   database.Color `json:"color"`
 }
 
-func NewSingleModifiedPixel(index uint16, color database.Color) ModifiedPixels {
-	return ModifiedPixels{
-		Type: MessageModifiedPixels,
-		Payload: ModifiedPixelsPayload{
-			Indexes: []uint16{index},
-			Color:   color,
-		},
-	}
-}
-
-func NewModifiedPixels(indexes []uint16, color database.Color) ModifiedPixels {
+func NewModifiedPixels(indexes []uint32, color database.Color) ModifiedPixels {
 	return ModifiedPixels{
 		Type: MessageModifiedPixels,
 		Payload: ModifiedPixelsPayload{
@@ -177,7 +167,7 @@ type SetPixelRange struct {
 // SetArbitraryPixels is received when a client wishes to change the color of individual, non-linear pixels
 type SetArbitraryPixels struct {
 	Payload struct {
-		Indexes []uint16       `json:"indexes"`
+		Indexes []uint32       `json:"indexes"`
 		Color   database.Color `json:"color"`
 	} `json:"payload"`
 }

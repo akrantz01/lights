@@ -1,9 +1,23 @@
-import capnp
 import click
+from dotenv import load_dotenv
+import grpc
+from os import environ
+from tester_pb2 import (
+    BrightnessArgs,
+    Color,
+    Empty,
+    RegisterAnimationArgs,
+    SetAllArgs,
+    SetArgs,
+    StartAnimationArgs,
+    UnregisterAnimationArgs,
+)
+from tester_pb2_grpc import ControllerStub
 import typing as t
 
-from lights_capnp import lights
 from lights_controller import SETTINGS
+
+load_dotenv()
 
 
 class MutuallyExclusiveOption(click.Option):
@@ -64,13 +78,13 @@ def validate_color(ctx, param, value):
         return value
     elif isinstance(value, dict):
         if "r" in value and "g" in value and "b" in value:
-            return value
+            return Color(r=value["r"], g=value["g"], b=value["b"])
     elif isinstance(value, tuple):
         return [validate_color(ctx, param, c) for c in value]
 
     try:
         [r, g, b] = value.split(",")
-        return {"r": int(r), "g": int(g), "b": int(b)}
+        return Color(r=int(r), g=int(g), b=int(b))
     except ValueError:
         raise click.BadParameter("format must be 'r,g,b'")
 
@@ -82,23 +96,15 @@ def validate_color(ctx, param, value):
     "address",
     type=str,
     help="The address of the server to connect to",
-    default=SETTINGS.controller_host,
-)
-@click.option(
-    "-p",
-    "--port",
-    "port",
-    type=int,
-    help="The port of the server to connect to",
-    default=SETTINGS.controller_port,
+    default=environ.get("LIGHTS_CONTROLLER_ADDRESS") or "127.0.0.1:30000",
 )
 @click.pass_context
-def main(ctx: click.Context, address: str, port: int):
+def main(ctx: click.Context, address: str):
     if ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
     else:
-        client = capnp.TwoPartyClient(f"{address}:{port}")
-        ctx.obj = client.bootstrap().cast_as(lights.LightController)
+        channel = grpc.insecure_channel(address)
+        ctx.obj = ControllerStub(channel)
 
 
 @main.command(
@@ -146,21 +152,20 @@ def main(ctx: click.Context, address: str, port: int):
 )
 @click.pass_obj
 def set(
-    obj: lights.LightController,
-    color: t.Dict[str, int],
+    obj: ControllerStub,
+    color: Color,
     position_single: t.Optional[int],
     position_range: t.Optional[t.Dict[str, int]],
     position_list: t.Optional[t.List[int]],
 ):
-    position = {}
     if position_single is not None:
-        position["single"] = position_single
+        indexes = [position_single]
     elif position_range is not None:
-        position["range"] = position_range
+        indexes = list(range(position_range["start"], position_range["end"]))
     else:
-        position["list"] = position_list
+        indexes = position_list
 
-    obj.set(position, color).wait()
+    obj.Set(SetArgs(indexes=indexes, color=color))
 
 
 @main.command(
@@ -168,14 +173,14 @@ def set(
     help="Set the colors of all the pixels. The color must be in the format 'r,g,b'.",
 )
 @click.argument(
-    "color",
+    "colors",
     required=True,
     callback=validate_color,
     nargs=-1,
 )
 @click.pass_obj
-def set_all(obj: lights.LightController, color: t.List[t.Dict[str, int]]):
-    obj.setAll(color).wait()
+def set_all(obj: ControllerStub, colors: t.List[Color]):
+    obj.SetAll(SetAllArgs(colors=colors))
 
 
 @main.command(
@@ -187,8 +192,8 @@ def set_all(obj: lights.LightController, color: t.List[t.Dict[str, int]]):
     callback=validate_color,
 )
 @click.pass_obj
-def fill(obj: lights.LightController, color: t.Dict[str, int]):
-    obj.fill(color).wait()
+def fill(obj: ControllerStub, color: Color):
+    obj.Fill(color)
 
 
 @main.command(
@@ -196,25 +201,8 @@ def fill(obj: lights.LightController, color: t.Dict[str, int]):
 )
 @click.argument("level", required=True, type=click.IntRange(0, 100, clamp=True))
 @click.pass_obj
-def brightness(obj: lights.LightController, level: int):
-    obj.brightness(level).wait()
-
-
-@main.command(
-    name="mode",
-    help="Set the display mode of the strip. 'instant' will immediately propagate any changes, where as 'queue' will "
-    "require a separate command to display the changes.",
-)
-@click.argument("mode", type=click.Choice(["instant", "queue"], case_sensitive=False))
-@click.pass_obj
-def set_mode(obj: lights.LightController, mode: str):
-    obj.mode(mode.lower()).wait()
-
-
-@main.command(help="Write any queued changes to the strip.")
-@click.pass_obj
-def show(obj: lights.LightController):
-    obj.show().wait()
+def brightness(obj: ControllerStub, level: int):
+    obj.Brightness(BrightnessArgs(brightness=level))
 
 
 @main.group(help="Manage strip animations")
@@ -225,22 +213,22 @@ def animations():
 @animations.command(help="Start an animation")
 @click.argument("name", required=True)
 @click.pass_obj
-def start(obj: lights.LightController, name: str):
-    obj.animate(name).wait()
+def start(obj: ControllerStub, name: str):
+    obj.StartAnimation(StartAnimationArgs(id=name))
 
 
 @animations.command(help="Stop the currently running animation")
 @click.pass_obj
-def stop(obj: lights.LightController):
-    obj.stopAnimation().wait()
+def stop(obj: ControllerStub):
+    obj.StopAnimation(Empty())
 
 
 @animations.command(help="Register a new animation")
 @click.argument("name", required=True)
 @click.argument("wasm", required=True, type=click.File("rb"))
 @click.pass_obj
-def register(obj: lights.LightController, name: str, wasm: t.BinaryIO):
-    result = obj.registerAnimation(name, wasm.read()).wait()
+def register(obj: ControllerStub, name: str, wasm: t.BinaryIO):
+    result = obj.RegisterAnimation(RegisterAnimationArgs(id=name, wasm=wasm.read()))
     if not result.success:
         click.echo("Registration unsuccessful")
 
@@ -248,16 +236,8 @@ def register(obj: lights.LightController, name: str, wasm: t.BinaryIO):
 @animations.command(help="Unregister an animation")
 @click.argument("name", required=True)
 @click.pass_obj
-def unregister(obj: lights.LightController, name: str):
-    obj.unregisterAnimation(name).wait()
-
-
-@animations.command(name="list", help="List get a list of all animations")
-@click.pass_obj
-def list_animations(obj: lights.LightController):
-    result = obj.listAnimations().wait()
-    for name in result.names:
-        click.echo(name)
+def unregister(obj: ControllerStub, name: str):
+    obj.UnregisterAnimation(UnregisterAnimationArgs(id=name))
 
 
 if __name__ == "__main__":

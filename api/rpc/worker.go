@@ -5,8 +5,8 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/akrantz01/lights/lights-web/database"
-	"github.com/akrantz01/lights/lights-web/lights"
+	"github.com/akrantz01/lights/api/database"
+	"github.com/akrantz01/lights/api/lights"
 )
 
 // Callable is used to execute Cap'n Proto RPC calls to the controller from a worker

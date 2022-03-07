@@ -1,14 +1,32 @@
 package lights
 
+import (
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+
+	"github.com/akrantz01/lights/api/lights/pb"
+)
+
+// Controller is a wrapper around a pb.ControllerClient to make it easier to work with.
+type Controller struct {
+	conn  *grpc.ClientConn
+	inner pb.ControllerClient
+}
+
 // Connect starts an RPC connection to the controller
 func Connect(address string) (*Controller, error) {
-	c := &Controller{
-		address: address,
-	}
-
-	if err := c.connect(); err != nil {
+	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
 		return nil, err
 	}
 
-	return c, nil
+	return &Controller{
+		conn:  conn,
+		inner: pb.NewControllerClient(conn),
+	}, nil
+}
+
+// Close disconnects from the server
+func (c *Controller) Close() error {
+	return c.conn.Close()
 }

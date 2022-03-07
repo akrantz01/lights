@@ -36,9 +36,7 @@ func ReadConfig() (*Config, error) {
 	listenPort := getEnvOrDefault("LIGHTS_WEB_PORT", "3000")
 	listenAddress := net.JoinHostPort(listenHost, listenPort)
 
-	controllerHost := getEnvOrDefault("LIGHTS_CONTROLLER_HOST", "127.0.0.1")
-	controllerPort := getEnvOrDefault("LIGHTS_CONTROLLER_PORT", "30000")
-	controllerAddress := net.JoinHostPort(controllerHost, controllerPort)
+	controllerAddress := getEnvOrDefault("LIGHTS_CONTROLLER_ADDRESS", "127.0.0.1:30000")
 
 	rawDevelopment := strings.ToLower(getEnvOrDefault("LIGHTS_DEVELOPMENT", "no"))
 	development := rawDevelopment == "y" || rawDevelopment == "yes" || rawDevelopment == "true"

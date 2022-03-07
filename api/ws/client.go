@@ -10,9 +10,9 @@ import (
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
 
-	"github.com/akrantz01/lights/lights-web/auth"
-	"github.com/akrantz01/lights/lights-web/database"
-	"github.com/akrantz01/lights/lights-web/rpc"
+	"github.com/akrantz01/lights/api/auth"
+	"github.com/akrantz01/lights/api/database"
+	"github.com/akrantz01/lights/api/rpc"
 )
 
 const (

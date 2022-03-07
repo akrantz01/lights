@@ -3,8 +3,8 @@ package rpc
 import (
 	"context"
 
-	"github.com/akrantz01/lights/lights-web/database"
-	"github.com/akrantz01/lights/lights-web/lights"
+	"github.com/akrantz01/lights/api/database"
+	"github.com/akrantz01/lights/api/lights"
 )
 
 // ChangeState changes whether the strip is on or off
