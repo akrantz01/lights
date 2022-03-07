@@ -8,8 +8,6 @@ static mut INDEX: u8 = 0;
 
 #[no_mangle]
 pub extern "C" fn animate() {
-    mode(Mode::Queue);
-
     for i in 0..LEDS {
         let pixel_index = unsafe { (i * 256 / LEDS) + INDEX as u16 };
         let (r, g, b) = wheel((pixel_index & 255) as u8);
