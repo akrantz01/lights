@@ -33,7 +33,9 @@ async fn main() -> eyre::Result<()> {
     }
 
     // Connect to the pixels
-    let pixels = Pixels::new(config.leds).wrap_err("failed to setup LEDs")?;
+    let (pixels, pixels_handle) = Pixels::new(config.leds)
+        .await
+        .wrap_err("failed to setup LEDs")?;
     info!(count = %config.leds, "connected to LED strip");
 
     // Create and start the animator
@@ -49,7 +51,11 @@ async fn main() -> eyre::Result<()> {
     Server::builder()
         .trace_fn(|_| info_span!("controller"))
         .add_service(health_service)
-        .add_service(lights::service(animator.clone(), config.leds, pixels))
+        .add_service(lights::service(
+            animator.clone(),
+            config.leds,
+            pixels.clone(),
+        ))
         .serve_with_shutdown(config.address, async { signal::ctrl_c().await.unwrap() })
         .await?;
 
@@ -59,6 +65,10 @@ async fn main() -> eyre::Result<()> {
     // Stop the animator
     animator.shutdown().await;
     animator_handle.await?;
+
+    // Stop the pixel manager
+    pixels.shutdown();
+    pixels_handle.await?;
 
     info!("shutdown successful. good bye!");
     Ok(())

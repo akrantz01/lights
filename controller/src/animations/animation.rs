@@ -1,5 +1,5 @@
 use super::{instance, BuildError, LoadError, SaveError};
-use crate::pixels::SharedPixels;
+use crate::pixels::Pixels;
 use std::{
     io::{self, ErrorKind},
     path::Path,
@@ -17,7 +17,7 @@ impl Animation {
     pub fn build<B: AsRef<[u8]>>(
         wasm: B,
         development: bool,
-        pixels: SharedPixels,
+        pixels: Pixels,
     ) -> Result<Self, BuildError> {
         let engine = Dylib::new(get_compiler(development)).engine();
         let store = Store::new(&engine);
@@ -39,7 +39,7 @@ impl Animation {
     pub async fn load<P: AsRef<Path>>(
         id: &str,
         base: P,
-        pixels: SharedPixels,
+        pixels: Pixels,
     ) -> Result<Self, LoadError> {
         // Read the animation
         let path = base.as_ref().join(id);

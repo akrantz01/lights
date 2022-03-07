@@ -1,4 +1,4 @@
-use crate::{animations::SharedAnimator, pixels::SharedPixels};
+use crate::{animations::SharedAnimator, pixels::Pixels};
 use tonic::{Request, Response, Status};
 use tracing::{error, info, instrument};
 
@@ -33,7 +33,7 @@ macro_rules! in_range {
 pub type Service = ControllerServer<ControllerService>;
 
 /// Create an instance of the service implementation to run
-pub fn service(animator: SharedAnimator, length: u16, pixels: SharedPixels) -> Service {
+pub fn service(animator: SharedAnimator, length: u16, pixels: Pixels) -> Service {
     ControllerServer::new(ControllerService {
         animator,
         pixels,
@@ -45,7 +45,7 @@ pub fn service(animator: SharedAnimator, length: u16, pixels: SharedPixels) -> S
 #[derive(Debug)]
 pub struct ControllerService {
     animator: SharedAnimator,
-    pixels: SharedPixels,
+    pixels: Pixels,
     length: u16,
 }
 
@@ -61,16 +61,12 @@ impl Controller for ControllerService {
         let g = in_range!(color.g, u8);
         let b = in_range!(color.b, u8);
 
-        let mut pixels = self
-            .pixels
-            .lock()
-            .map_err(|e| Status::aborted(format!("{e}")))?;
         for index in &args.indexes {
             let index = in_range!(*index, self.length, u16);
-            pixels.set(index, r, g, b);
+            self.pixels.set(index, r, g, b);
         }
 
-        pixels.show();
+        self.pixels.show();
 
         info!(indexes = ?args.indexes, ?color, "set pixel(s) to color");
 
@@ -87,12 +83,8 @@ impl Controller for ControllerService {
             )));
         }
 
-        let mut pixels = self
-            .pixels
-            .lock()
-            .map_err(|e| Status::aborted(format!("{e}")))?;
         for (i, color) in colors.iter().enumerate() {
-            pixels.set(
+            self.pixels.set(
                 i as u16,
                 in_range!(color.r, u8),
                 in_range!(color.g, u8),
@@ -100,7 +92,7 @@ impl Controller for ControllerService {
             );
         }
 
-        pixels.show();
+        self.pixels.show();
 
         info!("set colors of all pixels");
 
@@ -111,16 +103,12 @@ impl Controller for ControllerService {
     async fn fill(&self, request: Request<Color>) -> Result<Response<Empty>, Status> {
         let args = request.into_inner();
 
-        let mut pixels = self
-            .pixels
-            .lock()
-            .map_err(|e| Status::aborted(format!("{e}")))?;
-        pixels.fill(
+        self.pixels.fill(
             in_range!(args.r, u8),
             in_range!(args.g, u8),
             in_range!(args.b, u8),
         );
-        pixels.show();
+        self.pixels.show();
 
         info!(color = ?args, "filled pixels");
 
@@ -134,12 +122,8 @@ impl Controller for ControllerService {
     ) -> Result<Response<Empty>, Status> {
         let brightness = request.into_inner().brightness;
 
-        let mut pixels = self
-            .pixels
-            .lock()
-            .map_err(|e| Status::aborted(format!("{e}")))?;
-        pixels.brightness(in_range!(brightness, u8));
-        pixels.show();
+        self.pixels.brightness(in_range!(brightness, u8));
+        self.pixels.show();
 
         info!(%brightness, "changed brightness");
 

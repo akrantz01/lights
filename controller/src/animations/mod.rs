@@ -1,4 +1,4 @@
-use crate::pixels::SharedPixels;
+use crate::pixels::Pixels;
 use std::{io, path::PathBuf, sync::Arc};
 use tokio::{
     sync::mpsc::{self, error::TryRecvError, Receiver, Sender},
@@ -31,7 +31,7 @@ pub type SharedAnimator = Arc<Animator>;
 pub struct Animator {
     base_path: PathBuf,
     development: bool,
-    pixels: SharedPixels,
+    pixels: Pixels,
     tx: Sender<Action>,
 }
 
@@ -40,7 +40,7 @@ impl Animator {
     pub fn new<P: Into<PathBuf>>(
         base_path: P,
         development: bool,
-        pixels: SharedPixels,
+        pixels: Pixels,
     ) -> (SharedAnimator, JoinHandle<()>) {
         let base_path = base_path.into();
 
@@ -109,7 +109,7 @@ impl Animator {
 
 /// Waits for an animation to be received and then runs it
 #[instrument(name = "animator", skip_all)]
-async fn executor(path: PathBuf, pixels: SharedPixels, mut actions: Receiver<Action>) {
+async fn executor(path: PathBuf, pixels: Pixels, mut actions: Receiver<Action>) {
     info!("animator started");
     let mut animation: Option<Animation> = None;
 

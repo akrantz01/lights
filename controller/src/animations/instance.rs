@@ -1,18 +1,15 @@
-use crate::pixels::SharedPixels;
+use crate::pixels::Pixels;
 use std::thread;
 use std::time::Duration;
 use tracing::instrument;
-use wasmer::{
-    imports, Function, FunctionType, Instance, InstantiationError, Module, RuntimeError, Store,
-    Type,
-};
+use wasmer::{imports, Function, FunctionType, Instance, InstantiationError, Module, Store, Type};
 
 /// Build a new instance with its attached methods
 #[instrument(skip_all)]
 pub(crate) fn build(
     module: Module,
     store: Store,
-    pixels: SharedPixels,
+    pixels: Pixels,
 ) -> Result<Instance, InstantiationError> {
     // Create a bunch of references to pixels to be used by the closures
     let brightness_pixels = pixels.clone();
@@ -25,9 +22,7 @@ pub(crate) fn build(
             "brightness" => Function::new(&store, &FunctionType::new(vec![Type::I32], Vec::new()), move |args| {
                 let value = u8_from_value(&args[0])?;
 
-                let mut p = brightness_pixels.lock().map_err(|_| RuntimeError::new("lock poisoned"))?;
-                p.brightness(value);
-
+                brightness_pixels.brightness(value);
                 Ok(Vec::new())
             }),
             "fill" => Function::new(&store, &FunctionType::new(vec![Type::I32, Type::I32, Type::I32], Vec::new()), move |args| {
@@ -35,9 +30,7 @@ pub(crate) fn build(
                 let g = u8_from_value(&args[1])?;
                 let b = u8_from_value(&args[2])?;
 
-                let mut p = fill_pixels.lock().map_err(|_| RuntimeError::new("lock poisoned"))?;
-                p.fill(r, g, b);
-
+                fill_pixels.fill(r, g, b);
                 Ok(Vec::new())
             }),
             "set" => Function::new(&store, &FunctionType::new(vec![Type::I32, Type::I32, Type::I32, Type::I32], Vec::new()), move |args| {
@@ -46,14 +39,11 @@ pub(crate) fn build(
                 let g = u8_from_value(&args[2])?;
                 let b = u8_from_value(&args[3])?;
 
-                let mut p = set_pixels.lock().map_err(|_| RuntimeError::new("lock poisoned"))?;
-                p.set(index, r, g, b);
-
+                set_pixels.set(index, r, g, b);
                 Ok(Vec::new())
             }),
             "show" => Function::new(&store, &FunctionType::new(Vec::new(), Vec::new()), move |_| {
-                let mut p = pixels.lock().map_err(|_| RuntimeError::new("lock poisoned"))?;
-                p.show();
+                pixels.show();
                 Ok(Vec::new())
             }),
             "sleep" => Function::new_native(&store, sleep),
