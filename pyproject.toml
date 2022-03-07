@@ -25,6 +25,7 @@ wasmer-compiler-llvm = "^1.1.0"
 [tool.poetry.dev-dependencies]
 black = "^21.9b0"
 ipython = "^7.28.0"
+grpcio-tools = "^1.44.0"
 
 [tool.poetry.scripts]
 lights-controller = "lights_controller.main:main"
