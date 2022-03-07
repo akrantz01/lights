@@ -9,11 +9,11 @@ import (
 
 // SetPixels changes the color of multiple pixels at the same time
 type SetPixels struct {
-	Indexes []uint16
+	Indexes []uint32
 	Color   database.Color
 }
 
-func NewSetPixels(indexes []uint16, color database.Color) SetPixels {
+func NewSetPixels(indexes []uint32, color database.Color) SetPixels {
 	return SetPixels{
 		Indexes: indexes,
 		Color:   color,
@@ -25,9 +25,6 @@ func (sa SetPixels) Type() string {
 }
 
 func (sa SetPixels) Execute(ctx context.Context, db *database.Database, controller *lights.Controller) error {
-	// Switch to queue to set all the pixels at the same time from the viewer's perspective
-	controller.Queue(ctx)
-
 	controller.Set(ctx, sa.Indexes, sa.Color)
 
 	// Save the changed pixels
@@ -39,12 +36,6 @@ func (sa SetPixels) Execute(ctx context.Context, db *database.Database, controll
 	if err := db.SetPixelMode(database.PixelModeIndividual); err != nil {
 		return err
 	}
-
-	// "Commit" the changes to the strip
-	controller.Show(ctx)
-
-	// Switch back to instant
-	controller.Instant(ctx)
 
 	return nil
 }

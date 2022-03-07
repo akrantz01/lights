@@ -25,9 +25,6 @@ func (ap ApplyPreset) Type() string {
 }
 
 func (ap ApplyPreset) Execute(ctx context.Context, db *database.Database, controller *lights.Controller) error {
-	// Switch to queued mode
-	controller.Queue(ctx)
-
 	// Set all the pixels
 	controller.SetAll(ctx, ap.Pixels)
 
@@ -46,12 +43,6 @@ func (ap ApplyPreset) Execute(ctx context.Context, db *database.Database, contro
 	if err := db.SetBrightness(ap.Brightness); err != nil {
 		return err
 	}
-
-	// Propagate the changes
-	controller.Show(ctx)
-
-	// Switch back to instant mode
-	controller.Instant(ctx)
 
 	// Mark the strip as being on
 	if err := db.SetState(true); err != nil {

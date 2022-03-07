@@ -42,7 +42,7 @@ func (d *Database) GetPixels() ([]Color, error) {
 }
 
 // SetArbitraryPixels sets a list of pixel indexes to the given color
-func (d *Database) SetArbitraryPixels(indexes []uint16, color Color) error {
+func (d *Database) SetArbitraryPixels(indexes []uint32, color Color) error {
 	// Convert the color to its binary encoding
 	encodedColor := []byte{color.Red, color.Green, color.Blue}
 
@@ -50,7 +50,7 @@ func (d *Database) SetArbitraryPixels(indexes []uint16, color Color) error {
 		for _, i := range indexes {
 			// Encode the index for insertion
 			encoded := make([]byte, 2)
-			binary.LittleEndian.PutUint16(encoded, i)
+			binary.LittleEndian.PutUint16(encoded, uint16(i))
 
 			// Set the value
 			if err := txn.Set([]byte{'p', encoded[0], encoded[1]}, encodedColor); err != nil {
