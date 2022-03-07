@@ -10,7 +10,7 @@
 
 import { clientsClaim } from 'workbox-core';
 import { createHandlerBoundToURL, precacheAndRoute } from 'workbox-precaching';
-import { offlineFallback, staticResourceCache } from 'workbox-recipes';
+import { imageCache, offlineFallback, staticResourceCache } from 'workbox-recipes';
 import { registerRoute, setDefaultHandler } from 'workbox-routing';
 import { NetworkOnly } from 'workbox-strategies';
 
@@ -64,5 +64,6 @@ self.addEventListener('message', (event) => {
 });
 
 // Any other custom service worker logic can go here.
+imageCache();
 offlineFallback();
 staticResourceCache();
