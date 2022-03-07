@@ -1,56 +1,4 @@
 [[package]]
-name = "adafruit-blinka"
-version = "6.20.4"
-description = "CircuitPython APIs for non-CircuitPython versions of Python such as CPython on Linux and MicroPython."
-category = "main"
-optional = false
-python-versions = ">=3.7.0"
-
-[package.dependencies]
-Adafruit-PlatformDetect = ">=3.13.0"
-Adafruit-PureIO = ">=1.1.7"
-pyftdi = ">=0.40.0"
-
-[[package]]
-name = "adafruit-circuitpython-neopixel"
-version = "6.2.4"
-description = "CircuitPython library for NeoPixel LEDs."
-category = "main"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-Adafruit-Blinka = "*"
-adafruit-circuitpython-pixelbuf = "*"
-
-[[package]]
-name = "adafruit-circuitpython-pixelbuf"
-version = "1.1.2"
-description = "A pure Python implementation of adafruit_pixelbuf for smaller boards."
-category = "main"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-Adafruit-Blinka = "*"
-
-[[package]]
-name = "adafruit-platformdetect"
-version = "3.20.1"
-description = "Platform detection for use by libraries like Adafruit-Blinka."
-category = "main"
-optional = false
-python-versions = ">=3.6.0"
-
-[[package]]
-name = "adafruit-pureio"
-version = "1.1.9"
-description = "Pure python (i.e. no native extensions) access to Linux IO    including I2C and SPI. Drop in replacement for smbus and spidev modules."
-category = "main"
-optional = false
-python-versions = ">=3.5.0"
-
-[[package]]
 name = "appnope"
 version = "0.1.2"
 description = "Disable App Nap on macOS >= 10.9"
@@ -125,7 +73,7 @@ python-versions = ">=3.5"
 name = "grpcio"
 version = "1.44.0"
 description = "HTTP/2-based RPC framework"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -139,7 +87,7 @@ protobuf = ["grpcio-tools (>=1.44.0)"]
 name = "grpcio-tools"
 version = "1.44.0"
 description = "Protobuf code generator for gRPC"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -296,7 +244,7 @@ wcwidth = "*"
 name = "protobuf"
 version = "3.19.4"
 description = "Protocol Buffers"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.5"
 
@@ -309,43 +257,12 @@ optional = false
 python-versions = "*"
 
 [[package]]
-name = "pycapnp"
-version = "1.1.0"
-description = "A cython wrapping of the C++ Cap'n Proto library"
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
-name = "pyftdi"
-version = "0.53.3"
-description = "FTDI device driver (pure Python)"
-category = "main"
-optional = false
-python-versions = ">=3.6"
-
-[package.dependencies]
-pyserial = ">=3.0"
-pyusb = ">=1.0.0,<1.2.0 || >1.2.0"
-
-[[package]]
 name = "pygments"
 version = "2.11.2"
 description = "Pygments is a syntax highlighting package written in Python."
 category = "dev"
 optional = false
 python-versions = ">=3.5"
-
-[[package]]
-name = "pyserial"
-version = "3.5"
-description = "Python Serial Port Extension"
-category = "main"
-optional = false
-python-versions = "*"
-
-[package.extras]
-cp2110 = ["hidapi"]
 
 [[package]]
 name = "python-dotenv"
@@ -359,34 +276,10 @@ python-versions = ">=3.5"
 cli = ["click (>=5.0)"]
 
 [[package]]
-name = "pyusb"
-version = "1.2.1"
-description = "Python USB access module"
-category = "main"
-optional = false
-python-versions = ">=3.6.0"
-
-[[package]]
-name = "rpi-ws281x"
-version = "4.3.2"
-description = "Userspace Raspberry Pi PWM/PCM/SPI library for SK6812 and WS281X LEDs."
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
-name = "rpi.gpio"
-version = "0.7.1"
-description = "A module to control Raspberry Pi GPIO channels"
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "six"
 version = "1.16.0"
 description = "Python 2 and 3 compatibility utilities"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 
@@ -426,30 +319,6 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
-name = "wasmer"
-version = "1.1.0"
-description = "Python extension to run WebAssembly binaries"
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
-name = "wasmer-compiler-cranelift"
-version = "1.1.0"
-description = "The Cranelift compiler for the `wasmer` package (to compile WebAssembly module)"
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
-name = "wasmer-compiler-llvm"
-version = "1.1.0"
-description = "Python extension to run WebAssembly binaries"
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "wcwidth"
 version = "0.2.5"
 description = "Measures the displayed width of unicode strings in a terminal"
@@ -472,24 +341,9 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "7072d1e06d1b32dd7590b4fd4462fb1bea6f7bbb0fbe856655c57d931fea6764"
+content-hash = "9094229284052de7e3884cf5dc92a6b576df4dd2d01aae66f6d33b4f539a5b50"
 
 [metadata.files]
-adafruit-blinka = [
-    {file = "Adafruit-Blinka-6.20.4.tar.gz", hash = "sha256:1fa09816451e7e6a7ee44c405c9cdaa06148761adf71740cd466da907dfb9abf"},
-]
-adafruit-circuitpython-neopixel = [
-    {file = "adafruit-circuitpython-neopixel-6.2.4.tar.gz", hash = "sha256:b2ddcf1808f61495504b33fe1e16ca13ffef423a48df29139c463e9761386aab"},
-]
-adafruit-circuitpython-pixelbuf = [
-    {file = "adafruit-circuitpython-pixelbuf-1.1.2.tar.gz", hash = "sha256:a086c987219081ffde0b74d02a8a7de15ac1f5508219369d1fc16f4e28dfc519"},
-]
-adafruit-platformdetect = [
-    {file = "Adafruit-PlatformDetect-3.20.1.tar.gz", hash = "sha256:3f93963ec6d1b1310c72fc3bfeeab4ae3f69ff86de563ff639d5a496554c28cc"},
-]
-adafruit-pureio = [
-    {file = "Adafruit_PureIO-1.1.9.tar.gz", hash = "sha256:2caf22fb07c7f771d83267f331a76cde314723f884a9570ea6f768730c87a879"},
-]
 appnope = [
     {file = "appnope-0.1.2-py2.py3-none-any.whl", hash = "sha256:93aa393e9d6c54c5cd570ccadd8edad61ea0c4b9ea7a01409020c9aa019eb442"},
     {file = "appnope-0.1.2.tar.gz", hash = "sha256:dd83cd4b5b460958838f6eb3000c660b1f9caf2a5b1de4264e941512f603258a"},
@@ -682,55 +536,13 @@ ptyprocess = [
     {file = "ptyprocess-0.7.0-py2.py3-none-any.whl", hash = "sha256:4b41f3967fce3af57cc7e94b888626c18bf37a083e3651ca8feeb66d492fef35"},
     {file = "ptyprocess-0.7.0.tar.gz", hash = "sha256:5c5d0a3b48ceee0b48485e0c26037c0acd7d29765ca3fbb5cb3831d347423220"},
 ]
-pycapnp = [
-    {file = "pycapnp-1.1.0-cp37-cp37m-macosx_10_14_x86_64.whl", hash = "sha256:bdd013eae51d190a2426d00cc72d0aaed148a5be778ca86ee1adae3ab7a0613f"},
-    {file = "pycapnp-1.1.0-cp37-cp37m-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:b9a1d6306a0e3e0090574aeb08d432bd67f9eb04ab564e89ef34cd1fe320b20f"},
-    {file = "pycapnp-1.1.0-cp37-cp37m-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:47c8bc28521312660c95cfc8a552654949407f8b17bc7ed6955ad7dae34d21a4"},
-    {file = "pycapnp-1.1.0-cp37-cp37m-win_amd64.whl", hash = "sha256:60adf2674f89f629551171116b8f400b17e9a41a2ef15736767acec405d4ca50"},
-    {file = "pycapnp-1.1.0-cp38-cp38-macosx_10_14_x86_64.whl", hash = "sha256:a788a374ccb93354943c89f5b1caf785faf7bb90191cd6265e042aa004f8b206"},
-    {file = "pycapnp-1.1.0-cp38-cp38-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:2a1746017079107232faf26af8ef4284ab0b20ce5cbe688d44e7553a67e5e5cb"},
-    {file = "pycapnp-1.1.0-cp38-cp38-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:0c770145a4eccfe97f53ab500283aa9bf969d4a37bffc75737a964db4f2af833"},
-    {file = "pycapnp-1.1.0-cp38-cp38-win_amd64.whl", hash = "sha256:1774a4fe9db5f094ba40cf00898fa4b437773e7f9c538b779275b9f422a92ebc"},
-    {file = "pycapnp-1.1.0-cp39-cp39-macosx_10_14_x86_64.whl", hash = "sha256:2b28d5d951602c0b832bbe63f85ebdd7685b33118b1c11c2c65a243ec9f35a66"},
-    {file = "pycapnp-1.1.0-cp39-cp39-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:61b009faba34855c9d29db107e188898c83099347e22ebcbc1d955774403247b"},
-    {file = "pycapnp-1.1.0-cp39-cp39-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:2a7aa9af0185e5977a59228db5042dffb048b2d4bf4f665d2105b4781cf2fcbc"},
-    {file = "pycapnp-1.1.0-cp39-cp39-win_amd64.whl", hash = "sha256:13badfb644e2eb7f1219aab259d18b262d1512021e4112fa1ad5e74d17bc30cf"},
-    {file = "pycapnp-1.1.0.tar.gz", hash = "sha256:786a2e39b79e592a41e8a1eaeea6e41e2015ecb9f5b7f7c20dfc5768ba1ae077"},
-]
-pyftdi = [
-    {file = "pyftdi-0.53.3-py3-none-any.whl", hash = "sha256:6e86880ec6d66389de643ca83de5d59fffea3bd334f492e12fab71a832f878a2"},
-    {file = "pyftdi-0.53.3.tar.gz", hash = "sha256:4ef20c246bdb0f278d283337d7a6e69cf9bdb0ead525e7ad867d9e46ad26e613"},
-]
 pygments = [
     {file = "Pygments-2.11.2-py3-none-any.whl", hash = "sha256:44238f1b60a76d78fc8ca0528ee429702aae011c265fe6a8dd8b63049ae41c65"},
     {file = "Pygments-2.11.2.tar.gz", hash = "sha256:4e426f72023d88d03b2fa258de560726ce890ff3b630f88c21cbb8b2503b8c6a"},
 ]
-pyserial = [
-    {file = "pyserial-3.5-py2.py3-none-any.whl", hash = "sha256:c4451db6ba391ca6ca299fb3ec7bae67a5c55dde170964c7a14ceefec02f2cf0"},
-    {file = "pyserial-3.5.tar.gz", hash = "sha256:3c77e014170dfffbd816e6ffc205e9842efb10be9f58ec16d3e8675b4925cddb"},
-]
 python-dotenv = [
     {file = "python-dotenv-0.19.2.tar.gz", hash = "sha256:a5de49a31e953b45ff2d2fd434bbc2670e8db5273606c1e737cc6b93eff3655f"},
     {file = "python_dotenv-0.19.2-py2.py3-none-any.whl", hash = "sha256:32b2bdc1873fd3a3c346da1c6db83d0053c3c62f28f1f38516070c4c8971b1d3"},
-]
-pyusb = [
-    {file = "pyusb-1.2.1-py3-none-any.whl", hash = "sha256:2b4c7cb86dbadf044dfb9d3a4ff69fd217013dbe78a792177a3feb172449ea36"},
-    {file = "pyusb-1.2.1.tar.gz", hash = "sha256:a4cc7404a203144754164b8b40994e2849fde1cfff06b08492f12fff9d9de7b9"},
-]
-rpi-ws281x = [
-    {file = "rpi_ws281x-4.3.2-cp27-cp27mu-linux_armv7l.whl", hash = "sha256:55f9e8ed328bb97f998c8e7cc1325425582f8b4f313f6c875a7c5d2f683452ca"},
-    {file = "rpi_ws281x-4.3.2-cp37-cp37m-linux_armv7l.whl", hash = "sha256:680948581297d42b1d4db6184efe21ee9bf3b7aabfecb99df8f524bc157571b1"},
-    {file = "rpi_ws281x-4.3.2.tar.gz", hash = "sha256:4e1d5149343fe0885797363e1b78bbb4ea3888fc4204c0c75f91c4f0dcbb231d"},
-]
-"rpi.gpio" = [
-    {file = "RPi.GPIO-0.7.1-cp27-cp27mu-linux_armv6l.whl", hash = "sha256:b86b66dc02faa5461b443a1e1f0c1d209d64ab5229696f32fb3b0215e0600c8c"},
-    {file = "RPi.GPIO-0.7.1-cp310-cp310-linux_armv6l.whl", hash = "sha256:57b6c044ef5375a78c8dda27cdfadf329e76aa6943cd6cffbbbd345a9adf9ca5"},
-    {file = "RPi.GPIO-0.7.1-cp37-cp37m-linux_armv6l.whl", hash = "sha256:77afb817b81331ce3049a4b8f94a85e41b7c404d8e56b61ac0f1eb75c3120868"},
-    {file = "RPi.GPIO-0.7.1-cp38-cp38-linux_armv6l.whl", hash = "sha256:29226823da8b5ccb9001d795a944f2e00924eeae583490f0bc7317581172c624"},
-    {file = "RPi.GPIO-0.7.1-cp39-cp39-linux_armv6l.whl", hash = "sha256:15311d3b063b71dee738cd26570effc9985a952454d162937c34e08c0fc99902"},
-    {file = "RPi.GPIO-0.7.1-py2.7-linux-armv6l.egg", hash = "sha256:26b2ade4bb353bbe5417a64e40b45cdf00a82f27c2d320c0dd46c59751959d77"},
-    {file = "RPi.GPIO-0.7.1-py3.7-linux-armv6l.egg", hash = "sha256:96ea7e5bf6bf592828487bfa7d3d1d0e432d5d1682e9e33b4dab398914628fcd"},
-    {file = "RPi.GPIO-0.7.1.tar.gz", hash = "sha256:cd61c4b03c37b62bba4a5acfea9862749c33c618e0295e7e90aa4713fb373b70"},
 ]
 six = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
@@ -773,50 +585,6 @@ typed-ast = [
 typing-extensions = [
     {file = "typing_extensions-4.1.1-py3-none-any.whl", hash = "sha256:21c85e0fe4b9a155d0799430b0ad741cdce7e359660ccbd8b530613e8df88ce2"},
     {file = "typing_extensions-4.1.1.tar.gz", hash = "sha256:1a9462dcc3347a79b1f1c0271fbe79e844580bb598bafa1ed208b94da3cdcd42"},
-]
-wasmer = [
-    {file = "wasmer-1.1.0-cp310-cp310-macosx_10_7_x86_64.whl", hash = "sha256:c2af4b907ae2dabcac41e316e811d5937c93adf1f8b05c5d49427f8ce0f37630"},
-    {file = "wasmer-1.1.0-cp310-cp310-manylinux_2_24_x86_64.whl", hash = "sha256:ab1ae980021e5ec0bf0c6cdd3b979b1d15a5f3eb2b8a32da8dcb1156e4a1e484"},
-    {file = "wasmer-1.1.0-cp310-none-win_amd64.whl", hash = "sha256:d0d93aec6215893d33e803ef0a8d37bf948c585dd80ba0e23a83fafee820bc03"},
-    {file = "wasmer-1.1.0-cp37-cp37m-macosx_10_7_x86_64.whl", hash = "sha256:1e63d16bd6e2e2272d8721647831de5c537e0bb08002ee6d7abf167ec02d5178"},
-    {file = "wasmer-1.1.0-cp37-cp37m-manylinux_2_24_x86_64.whl", hash = "sha256:85e6a5bf44853e8e6a12e947ee3412da9e84f7ce49fc165ba5dbd293e9c5c405"},
-    {file = "wasmer-1.1.0-cp37-none-win_amd64.whl", hash = "sha256:a182a6eca9b46d895b4985fc822fab8da3d2f84fab74ca27e55a7430a7fcf336"},
-    {file = "wasmer-1.1.0-cp38-cp38-macosx_10_7_x86_64.whl", hash = "sha256:214d9a3cfb577ea9449eb2b5f13adceae34c55365e4c3d930066beb86a7f67bc"},
-    {file = "wasmer-1.1.0-cp38-cp38-manylinux_2_24_x86_64.whl", hash = "sha256:b9e5605552bd7d2bc6337519b176defe83bc69b98abf3caaaefa4f7ec231d18a"},
-    {file = "wasmer-1.1.0-cp38-none-win_amd64.whl", hash = "sha256:20b5190112e2e94a8947967f2bc683c9685855d0f34130d8434c87a55216a3bd"},
-    {file = "wasmer-1.1.0-cp39-cp39-macosx_10_7_x86_64.whl", hash = "sha256:ee442f0970f40ec5e32011c92fd753fb2061da0faa13de13fafc730c31be34e3"},
-    {file = "wasmer-1.1.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:aa112198b743cff2e391230436813fb4b244a24443e37866522b7197e3a034da"},
-    {file = "wasmer-1.1.0-cp39-cp39-manylinux_2_24_x86_64.whl", hash = "sha256:c0b37117f6d3ff51ee96431c7d224d99799b08d174e30fcd0fcd7e2e3cb8140c"},
-    {file = "wasmer-1.1.0-cp39-none-win_amd64.whl", hash = "sha256:a0a4730ec4907a4cb0d9d4a77ea2608c2c814f22a22b73fc80be0f110e014836"},
-    {file = "wasmer-1.1.0-py3-none-any.whl", hash = "sha256:2caf8c67feae9cd4246421551036917811c446da4f27ad4c989521ef42751931"},
-]
-wasmer-compiler-cranelift = [
-    {file = "wasmer_compiler_cranelift-1.1.0-cp310-cp310-macosx_10_7_x86_64.whl", hash = "sha256:9869910179f39696a020edc5689f7759257ac1cce569a7a0fcf340c59788baad"},
-    {file = "wasmer_compiler_cranelift-1.1.0-cp310-cp310-manylinux_2_24_x86_64.whl", hash = "sha256:405546ee864ac158a4107f374dfbb1c8d6cfb189829bdcd13050143a4bd98f28"},
-    {file = "wasmer_compiler_cranelift-1.1.0-cp310-none-win_amd64.whl", hash = "sha256:bdf75af9ef082e6aeb752550f694273340ece970b65099e0746db0f972760d11"},
-    {file = "wasmer_compiler_cranelift-1.1.0-cp37-cp37m-macosx_10_7_x86_64.whl", hash = "sha256:7d9c782b7721789b16e303b7e70c59df370896dd62b77e2779e3a44b4e1aa20c"},
-    {file = "wasmer_compiler_cranelift-1.1.0-cp37-cp37m-manylinux_2_24_x86_64.whl", hash = "sha256:ff7dd5bd69030b63521c24583bf0f5457cd2580237340b91ce35370f72a4a1cc"},
-    {file = "wasmer_compiler_cranelift-1.1.0-cp37-none-win_amd64.whl", hash = "sha256:447285402e366a34667a674db70458c491acd6940b797c175c0b0027f48e64bb"},
-    {file = "wasmer_compiler_cranelift-1.1.0-cp38-cp38-macosx_10_7_x86_64.whl", hash = "sha256:55a524985179f6b7b88ac973e8fac5a2574d3b125a966fba75fedd5a2525e484"},
-    {file = "wasmer_compiler_cranelift-1.1.0-cp38-cp38-manylinux_2_24_x86_64.whl", hash = "sha256:bd03db5a916ead51b442c66acad38847dfe127cf90b2019b1680f1920c4f8d06"},
-    {file = "wasmer_compiler_cranelift-1.1.0-cp38-none-win_amd64.whl", hash = "sha256:157d87cbd1d04adbad55b50cb4bedc28e444caf74797fd96df17390667e58699"},
-    {file = "wasmer_compiler_cranelift-1.1.0-cp39-cp39-macosx_10_7_x86_64.whl", hash = "sha256:ff25fc99ebafa04a6c271d08a90d17b927930e3019a2b333c7cfb48ba32c6f71"},
-    {file = "wasmer_compiler_cranelift-1.1.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:9697ae082317a56776df8ff7df8c922eac38488ef38d3478fe5f0ca144c185ab"},
-    {file = "wasmer_compiler_cranelift-1.1.0-cp39-cp39-manylinux_2_24_x86_64.whl", hash = "sha256:2a4349b1ddd727bd46bc5ede741839dcfc5153c52f064a83998c4150d5d4a85c"},
-    {file = "wasmer_compiler_cranelift-1.1.0-cp39-none-win_amd64.whl", hash = "sha256:32fe38614fccc933da77ee4372904a5fa9c12b859209a2e4048a8284c4c371f2"},
-    {file = "wasmer_compiler_cranelift-1.1.0-py3-none-any.whl", hash = "sha256:200fea80609cfb088457327acf66d5aa61f4c4f66b5a71133ada960b534c7355"},
-]
-wasmer-compiler-llvm = [
-    {file = "wasmer_compiler_llvm-1.1.0-cp310-cp310-macosx_10_7_x86_64.whl", hash = "sha256:11eb9dc1278ac66f01ff8119aa7e594a02e54b54d4bddd6f735779fbb7568f74"},
-    {file = "wasmer_compiler_llvm-1.1.0-cp310-cp310-manylinux_2_27_x86_64.whl", hash = "sha256:d93fcea6793a7ec7e477abcd99ea83fe2c6f5866053e7e357fc5c32c50fed056"},
-    {file = "wasmer_compiler_llvm-1.1.0-cp37-cp37m-macosx_10_7_x86_64.whl", hash = "sha256:c074d5ac20f326498a6979d7a9fa78e47afa4ea22ffebfae986d2297b1f8d7d3"},
-    {file = "wasmer_compiler_llvm-1.1.0-cp37-cp37m-manylinux_2_27_x86_64.whl", hash = "sha256:6b6ecf37b31b2866b775a1a260341d442bddf415f53c72e84966f185830092fe"},
-    {file = "wasmer_compiler_llvm-1.1.0-cp38-cp38-macosx_10_7_x86_64.whl", hash = "sha256:f34845d21545baec21ad36717de3616b945d142e9fe7d1ad71bc4c1e763ec193"},
-    {file = "wasmer_compiler_llvm-1.1.0-cp38-cp38-manylinux_2_27_x86_64.whl", hash = "sha256:1c7119a1de7df497ef09332128b62afc07a3d111b2870912b61ad5ab67e35826"},
-    {file = "wasmer_compiler_llvm-1.1.0-cp39-cp39-macosx_10_7_x86_64.whl", hash = "sha256:6d1485db9e0ef52dbeee7d04dd30bd68f766f4c0854496cb49fe8b0c36ecd430"},
-    {file = "wasmer_compiler_llvm-1.1.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:fbf94cc754092ef10a3a5e1f7b6c07d1f85c597eee3253122a567d06f25d75fa"},
-    {file = "wasmer_compiler_llvm-1.1.0-cp39-cp39-manylinux_2_27_x86_64.whl", hash = "sha256:3a933b01276b13f0615767a3e9808df0e5fec6adac308750fe68307714a7eef2"},
-    {file = "wasmer_compiler_llvm-1.1.0-py3-none-any.whl", hash = "sha256:cc7febd961dd50353c6fed475610e47a68d58d2e6ef77b735f1f850b9b007229"},
 ]
 wcwidth = [
     {file = "wcwidth-0.2.5-py2.py3-none-any.whl", hash = "sha256:beb4802a9cebb9144e99086eff703a642a13d6a0052920003a230f3294bbe784"},

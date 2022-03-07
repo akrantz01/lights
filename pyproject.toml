@@ -4,32 +4,16 @@ version = "0.1.0"
 description = "Control an Adafruit NeoPixel light strip from a Raspberry Pi"
 authors = ["Alex Krantz <alex@krantz.dev>"]
 license = "MIT"
-packages = [
-    { include = "lights_capnp" },
-    { include = "lights_controller" },
-]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-pycapnp = "^1.1.0"
 click = "^8.0.1"
-"RPi.GPIO" = { version = "^0.7.0", markers = "platform_machine == 'aarch64'"}
-Adafruit-Blinka = "^6.13.1"
-rpi-ws281x = "^4.3.0"
-adafruit-circuitpython-neopixel = "^6.2.1"
 python-dotenv = "^0.19.0"
-wasmer = "^1.1.0"
-wasmer-compiler-cranelift = "^1.1.0"
-wasmer-compiler-llvm = "^1.1.0"
+grpcio-tools = "^1.44.0"
 
 [tool.poetry.dev-dependencies]
 black = "^21.9b0"
 ipython = "^7.28.0"
-grpcio-tools = "^1.44.0"
-python-dotenv = "^0.19.0"
-
-[tool.poetry.scripts]
-lights-controller = "lights_controller.main:main"
 
 [tool.black]
 line-length = 88
