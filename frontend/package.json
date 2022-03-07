@@ -35,6 +35,8 @@
   "scripts": {
     "start": "HTTPS=true react-scripts start",
     "build": "react-scripts build",
+    "serve:setup-https": "mkcert localhost",
+    "serve": "yarn serve:setup-https && serve -s --ssl-cert ./localhost.pem --ssl-key ./localhost-key.pem ./build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "analyze": "source-map-explorer 'build/static/js/*.js'"
@@ -69,6 +71,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "postcss": "^8.4.5",
     "prettier": "^2.5.1",
+    "serve": "^13.0.2",
     "source-map-explorer": "^2.5.2",
     "tailwindcss": "^3.0.18"
   }
