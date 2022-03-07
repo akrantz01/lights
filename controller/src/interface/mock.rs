@@ -1,5 +1,5 @@
 use rs_ws281x::WS2811Error;
-use std::iter;
+use std::{iter, marker::PhantomData};
 use tracing::debug;
 
 type RawColor = [u8; 4];
@@ -11,6 +11,7 @@ pub enum StripType {
 
 #[derive(Clone, Debug)]
 pub struct Controller {
+    _marker: PhantomData<*const ()>, // Used to make !Send and !Sync
     leds: Vec<RawColor>,
     brightness: u8,
 }
@@ -32,6 +33,7 @@ impl Controller {
 
 #[derive(Debug, Default)]
 pub struct ControllerBuilder {
+    _marker: PhantomData<*const ()>, // Used to make !Send and !Sync
     length: usize,
     brightness: u8,
 }
@@ -57,6 +59,7 @@ impl ControllerBuilder {
 
     pub fn build(&mut self) -> Result<Controller, WS2811Error> {
         Ok(Controller {
+            _marker: PhantomData::default(),
             brightness: self.brightness,
             leds: iter::repeat::<RawColor>([0, 0, 0, 0])
                 .take(self.length)
@@ -71,6 +74,7 @@ type Channel = (usize, u8);
 
 #[derive(Debug, Default)]
 pub struct ChannelBuilder {
+    _marker: PhantomData<*const ()>, // Used to make !Send and !Sync
     length: i32,
     brightness: u8,
 }
