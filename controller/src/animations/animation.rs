@@ -35,7 +35,7 @@ impl Animation {
     }
 
     /// Load a pre-compiled animation from disk
-    #[instrument(skip(base))]
+    #[instrument(skip(base, pixels))]
     pub async fn load<P: AsRef<Path>>(
         id: &str,
         base: P,
