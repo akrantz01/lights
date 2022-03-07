@@ -3,7 +3,6 @@ module github.com/akrantz01/lights/lights-web
 go 1.17
 
 require (
-	capnproto.org/go/capnp/v3 v3.0.0-alpha.1
 	github.com/auth0/go-jwt-middleware/v2 v2.0.0
 	github.com/dgraph-io/badger/v3 v3.2103.2
 	github.com/go-chi/chi/v5 v5.0.7
