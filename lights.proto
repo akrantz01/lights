@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package lights;
+option go_package = "github.com/akrantz01/lights/lights-web/lights/pb";
 
 // An RGB color with values in the range 0-255 inclusive.
 message Color {
