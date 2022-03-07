@@ -4,7 +4,7 @@ use tokio::{
     sync::mpsc::{self, error::TryRecvError, Receiver, Sender},
     task::{self, JoinHandle},
 };
-use tracing::{error, instrument};
+use tracing::{error, info, instrument};
 
 mod animation;
 mod error;
@@ -20,6 +20,8 @@ enum Action {
     Start(String),
     /// Stop any currently running animation
     Stop,
+    /// Shutdown the animation executor
+    Shutdown,
 }
 
 pub type SharedAnimator = Arc<Animator>;
@@ -95,10 +97,20 @@ impl Animator {
             error!(%err, "failed to stop animation");
         }
     }
+
+    /// Shutdown the executor
+    #[instrument(skip(self))]
+    pub async fn shutdown(&self) {
+        if let Err(err) = self.tx.send(Action::Shutdown).await {
+            error!(%err, "failed to shutdown executor");
+        }
+    }
 }
 
 /// Waits for an animation to be received and then runs it
+#[instrument(name = "animator", skip_all)]
 async fn executor(path: PathBuf, pixels: SharedPixels, mut actions: Receiver<Action>) {
+    info!("animator started");
     let mut animation: Option<Animation> = None;
 
     loop {
@@ -111,7 +123,7 @@ async fn executor(path: PathBuf, pixels: SharedPixels, mut actions: Receiver<Act
                     }
                 }
                 Some(Action::Stop) => continue, // Already stopped, nothing to do
-                None => break,                  // Exit when the channel closes
+                Some(Action::Shutdown) | None => break, // Exit when the channel closes
             },
             Some(a) => {
                 // Execute a frame
@@ -131,9 +143,11 @@ async fn executor(path: PathBuf, pixels: SharedPixels, mut actions: Receiver<Act
                     }
                     Ok(Action::Stop) => animation = None, // Stop the animation
                     Err(TryRecvError::Empty) => continue, // No action, just continue to the next frame
-                    Err(TryRecvError::Disconnected) => break, // Exit when channel closes
+                    Ok(Action::Shutdown) | Err(TryRecvError::Disconnected) => break, // Exit when channel closes
                 }
             }
         }
     }
+
+    info!("shutdown successfully")
 }

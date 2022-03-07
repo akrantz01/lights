@@ -1,5 +1,5 @@
 use eyre::WrapErr;
-use tokio::fs;
+use tokio::{fs, signal};
 use tonic::transport::Server;
 use tonic_health::server::health_reporter;
 use tracing::{info, info_span};
@@ -37,7 +37,8 @@ async fn main() -> eyre::Result<()> {
     info!(count = %config.leds, "connected to LED strip");
 
     // Create and start the animator
-    let (animator, _) = Animator::new(config.animations_path, config.development, pixels.clone());
+    let (animator, animator_handle) =
+        Animator::new(config.animations_path, config.development, pixels.clone());
 
     // Create the health reporter
     let (mut reporter, health_service) = health_reporter();
@@ -48,9 +49,17 @@ async fn main() -> eyre::Result<()> {
     Server::builder()
         .trace_fn(|_| info_span!("controller"))
         .add_service(health_service)
-        .add_service(lights::service(animator, config.leds, pixels))
-        .serve(config.address)
+        .add_service(lights::service(animator.clone(), config.leds, pixels))
+        .serve_with_shutdown(config.address, async { signal::ctrl_c().await.unwrap() })
         .await?;
 
+    info!("signal received, shutting down...");
+    reporter.set_not_serving::<lights::Service>().await;
+
+    // Stop the animator
+    animator.shutdown().await;
+    animator_handle.await?;
+
+    info!("shutdown successful. good bye!");
     Ok(())
 }
