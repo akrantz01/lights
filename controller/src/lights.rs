@@ -151,7 +151,9 @@ impl Controller for ControllerService {
         &self,
         request: Request<StartAnimationArgs>,
     ) -> Result<Response<Empty>, Status> {
-        self.animator.start(&request.into_inner().id).await;
+        let id = request.into_inner().id;
+        self.animator.start(&id).await;
+        info!(%id, "started animation");
         Ok(Response::new(Empty {}))
     }
 
@@ -159,6 +161,7 @@ impl Controller for ControllerService {
     #[instrument(skip_all, fields(remote_addr = ?request.remote_addr()))]
     async fn stop_animation(&self, request: Request<Empty>) -> Result<Response<Empty>, Status> {
         self.animator.stop().await;
+        info!("stopped current animation");
         Ok(Response::new(Empty {}))
     }
 
@@ -173,7 +176,9 @@ impl Controller for ControllerService {
         let success = result.is_ok();
 
         if let Err(err) = result {
-            error!(%err, "failed to register animation");
+            error!(%id, %err, "failed to register animation");
+        } else {
+            info!(%id, "registered animation");
         }
 
         Ok(Response::new(AnimationStatus { success }))
@@ -184,10 +189,14 @@ impl Controller for ControllerService {
         &self,
         request: Request<UnregisterAnimationArgs>,
     ) -> Result<Response<Empty>, Status> {
-        match self.animator.remove(&request.into_inner().id).await {
-            Ok(()) => Ok(Response::new(Empty {})),
+        let id = request.into_inner().id;
+        match self.animator.remove(&id).await {
+            Ok(()) => {
+                info!(%id, "unregistered animation");
+                Ok(Response::new(Empty {}))
+            }
             Err(err) => {
-                error!(%err, "failed to remove animation");
+                error!(%id, %err, "failed to remove animation");
                 Err(Status::aborted("failed to remove animation"))
             }
         }
