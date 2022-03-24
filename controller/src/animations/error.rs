@@ -27,6 +27,8 @@ impl From<ExportError> for BuildError {
 pub enum LoadError {
     #[error("couldn't find the animation")]
     NotFound,
+    #[error("unknown animation type")]
+    Unknown,
     #[error("failed to read file: {0}")]
     IO(#[source] io::Error),
     #[error("failed to parse animation: {0}")]

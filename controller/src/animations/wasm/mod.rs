@@ -1,8 +1,7 @@
 use super::{animation::Animation, BuildError, LoadError, SaveError};
 use crate::pixels::Pixels;
 use async_trait::async_trait;
-use std::{error::Error, path::Path};
-use tokio::fs;
+use std::error::Error;
 use tracing::{debug, instrument};
 use wasmer::{CompilerConfig, Dylib, ExportError, Instance, Module, NativeFunc, Store};
 
@@ -19,7 +18,6 @@ impl Wasm {
 
 #[async_trait]
 impl Animation for Wasm {
-    /// Load and compile an animation from bytes
     #[instrument(skip_all)]
     fn build<B: AsRef<[u8]>>(
         wasm: B,
@@ -41,19 +39,21 @@ impl Animation for Wasm {
         Ok(Box::new(animation))
     }
 
-    /// Load a pre-compiled animation from disk
-    #[instrument(skip(base, pixels))]
-    async fn load(id: &str, base: &Path, pixels: Pixels) -> Result<Box<dyn Animation>, LoadError> {
-        // Read the animation
-        let path = base.join(id);
-        let wasm = fs::read(path).await?;
-        debug!("read animation");
+    #[instrument(skip_all)]
+    fn serialize(&self) -> Result<Vec<u8>, SaveError> {
+        Ok(self.0.module().serialize()?)
+    }
 
+    #[instrument(skip_all)]
+    fn deserialize(content: Vec<u8>, pixels: Pixels) -> Result<Box<dyn Animation>, LoadError>
+    where
+        Self: Sized,
+    {
         let engine = Dylib::headless().engine();
         let store = Store::new(&engine);
 
         // This is unsafe due to the possibility of a malicious actor being able to inject code
-        let module = unsafe { Module::deserialize(&store, &wasm)? };
+        let module = unsafe { Module::deserialize(&store, &content)? };
         debug!("loaded animation");
 
         let instance = instance::build(module, store, pixels)?;
@@ -62,18 +62,6 @@ impl Animation for Wasm {
         Ok(Box::new(Self(instance)))
     }
 
-    /// Save an animation to a file
-    #[instrument(skip(self, base))]
-    async fn save(&self, id: &str, base: &Path) -> Result<(), SaveError> {
-        let serialized = self.0.module().serialize()?;
-
-        let path = base.join(id);
-        fs::write(path, &serialized).await?;
-
-        Ok(())
-    }
-
-    /// Get the animate method to call
     fn animate(&self) -> Result<(), Box<dyn Error>> {
         Ok(self.get_animate_fn()?.call()?)
     }

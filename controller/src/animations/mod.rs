@@ -13,6 +13,7 @@ mod wasm;
 
 use animation::Animation;
 pub use error::{BuildError, LoadError, RegistrationError, SaveError};
+use flow::Flow;
 use wasm::Wasm;
 
 /// The action for the executor to perform
@@ -75,10 +76,10 @@ impl Animator {
     ) -> Result<(), RegistrationError> {
         let animation = match kind {
             AnimationKind::Wasm => Wasm::build(data, self.development, self.pixels.clone())?,
-            AnimationKind::Flow => todo!(),
+            AnimationKind::Flow => Flow::build(data, self.development, self.pixels.clone())?,
             _ => unreachable!(),
         };
-        animation.save(id, &self.base_path).await?;
+        animation.save(id, kind, &self.base_path).await?;
 
         Ok(())
     }
@@ -123,10 +124,12 @@ async fn executor(path: PathBuf, pixels: Pixels, mut actions: Receiver<Action>) 
     loop {
         match &animation {
             None => match actions.recv().await {
-                Some(Action::Start(id)) => match Wasm::load(&id, &path, pixels.clone()).await {
-                    Ok(a) => animation = Some(a),
-                    Err(err) => error!(%err, "failed to load animation"),
-                },
+                Some(Action::Start(id)) => {
+                    match animation::load(&id, &path, pixels.clone()).await {
+                        Ok(a) => animation = Some(a),
+                        Err(err) => error!(%err, "failed to load animation"),
+                    }
+                }
                 Some(Action::Stop) => continue, // Already stopped, nothing to do
                 Some(Action::Shutdown) | None => break, // Exit when the channel closes
             },
@@ -139,10 +142,12 @@ async fn executor(path: PathBuf, pixels: Pixels, mut actions: Receiver<Action>) 
 
                 // Check if there is an action waiting
                 match actions.try_recv() {
-                    Ok(Action::Start(id)) => match Wasm::load(&id, &path, pixels.clone()).await {
-                        Ok(a) => animation = Some(a),
-                        Err(err) => error!(%err, "failed to load animation"),
-                    },
+                    Ok(Action::Start(id)) => {
+                        match animation::load(&id, &path, pixels.clone()).await {
+                            Ok(a) => animation = Some(a),
+                            Err(err) => error!(%err, "failed to load animation"),
+                        }
+                    }
                     Ok(Action::Stop) => animation = None, // Stop the animation
                     Err(TryRecvError::Empty) => continue, // No action, just continue to the next frame
                     Ok(Action::Shutdown) | Err(TryRecvError::Disconnected) => break, // Exit when channel closes
