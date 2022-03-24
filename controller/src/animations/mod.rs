@@ -1,4 +1,4 @@
-use crate::pixels::Pixels;
+use crate::{lights::AnimationKind, pixels::Pixels};
 use std::{io, path::PathBuf, sync::Arc};
 use tokio::{
     sync::mpsc::{self, error::TryRecvError, Receiver, Sender},
@@ -66,13 +66,18 @@ impl Animator {
     }
 
     /// Compile and save an animation to disk
-    #[instrument(skip(self, wasm))]
+    #[instrument(skip(self, data))]
     pub async fn register<B: AsRef<[u8]>>(
         &self,
         id: &str,
-        wasm: B,
+        data: B,
+        kind: AnimationKind,
     ) -> Result<(), RegistrationError> {
-        let animation = Wasm::build(wasm, self.development, self.pixels.clone())?;
+        let animation = match kind {
+            AnimationKind::Wasm => Wasm::build(data, self.development, self.pixels.clone())?,
+            AnimationKind::Flow => todo!(),
+            _ => unreachable!(),
+        };
         animation.save(id, &self.base_path).await?;
 
         Ok(())

@@ -6,6 +6,7 @@ mod pb {
     tonic::include_proto!("lights");
 }
 
+pub(crate) use pb::AnimationKind;
 use pb::{
     controller_server::{Controller, ControllerServer},
     AnimationStatus, BrightnessArgs, Color, Empty, RegisterAnimationArgs, SetAllArgs, SetArgs,
@@ -154,9 +155,14 @@ impl Controller for ControllerService {
         &self,
         request: Request<RegisterAnimationArgs>,
     ) -> Result<Response<AnimationStatus>, Status> {
-        let RegisterAnimationArgs { id, wasm } = request.into_inner();
+        let RegisterAnimationArgs { id, data, kind } = request.into_inner();
 
-        let result = self.animator.register(&id, wasm).await;
+        let kind = AnimationKind::from_i32(kind).unwrap(); // This is safe to unwrap as prost converts any invalid types to Unknown (0)
+        if matches!(kind, AnimationKind::Unknown) {
+            return Err(Status::invalid_argument("unknown animation kind"));
+        }
+
+        let result = self.animator.register(&id, data, kind).await;
         let success = result.is_ok();
 
         if let Err(err) = result {
