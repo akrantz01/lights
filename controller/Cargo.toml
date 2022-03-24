@@ -12,6 +12,7 @@ llvm = ["wasmer/llvm"]
 cranelift = ["wasmer/cranelift"]
 
 [dependencies]
+async-trait = "0.1.52"
 tokio = { version = "1.17.0", features = ["fs", "macros", "parking_lot", "rt-multi-thread", "signal", "sync"] }
 
 color-eyre = { version = "0.6.0", default-features = false, features = ["track-caller"] }

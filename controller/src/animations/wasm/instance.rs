@@ -1,6 +1,5 @@
 use crate::pixels::Pixels;
-use std::thread;
-use std::time::Duration;
+use std::{thread, time::Duration};
 use tracing::instrument;
 use wasmer::{imports, Function, FunctionType, Instance, InstantiationError, Module, Store, Type};
 
