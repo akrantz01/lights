@@ -8,6 +8,7 @@ use tracing::{error, info, instrument};
 
 mod animation;
 mod error;
+mod flow;
 mod wasm;
 
 use animation::Animation;
