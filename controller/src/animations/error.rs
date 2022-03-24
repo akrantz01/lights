@@ -1,6 +1,10 @@
+use super::flow::SyntaxError;
+use serde_json::Error as SerdeError;
 use std::io::{self, ErrorKind};
 use thiserror::Error;
 use wasmer::{CompileError, DeserializeError, ExportError, InstantiationError, SerializeError};
+
+// TODO: re-work error handling
 
 #[derive(Debug, Error)]
 pub enum BuildError {
@@ -8,6 +12,10 @@ pub enum BuildError {
     Compilation(#[from] CompileError),
     #[error("failed to load animation: {0}")]
     Instantiation(#[from] InstantiationError),
+    #[error("failed to parse animation: {0}")]
+    Parsing(#[from] SerdeError),
+    #[error("syntax error: {0}")]
+    Syntax(#[from] SyntaxError),
     #[error("invalid signature for animate function")]
     InvalidSignature,
     #[error("missing animate function")]
