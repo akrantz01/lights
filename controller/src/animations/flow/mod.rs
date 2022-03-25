@@ -53,7 +53,20 @@ impl Animation for Flow {
 
     #[instrument(skip_all)]
     fn serialize(&self) -> Result<Vec<u8>, SaveError> {
-        todo!()
+        // Remove the need to clone parts
+        #[derive(Serialize)]
+        struct BorrowedAst<'b> {
+            functions: &'b HashMap<String, Function>,
+            globals: &'b HashMap<String, Literal>,
+            operations: &'b Vec<Operation>,
+        }
+
+        let borrowed = BorrowedAst {
+            functions: &self.functions,
+            globals: &self.globals,
+            operations: self.frame.as_operations(),
+        };
+        Ok(serde_json::to_vec(&borrowed)?)
     }
 
     #[instrument(skip_all)]
@@ -61,7 +74,9 @@ impl Animation for Flow {
     where
         Self: Sized,
     {
-        todo!()
+        let ast = serde_json::from_slice::<Ast>(content.as_ref())?;
+        let flow = Flow::from_ast(ast, pixels);
+        Ok(Box::new(flow))
     }
 
     fn animate(&self) -> Result<(), Box<dyn Error>> {
@@ -110,7 +125,7 @@ impl Flow {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
 pub(crate) struct Ast {
     #[serde(default)]
     pub functions: HashMap<String, Function>,

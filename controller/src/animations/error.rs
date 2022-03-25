@@ -40,9 +40,17 @@ pub enum LoadError {
     #[error("failed to read file: {0}")]
     IO(#[source] io::Error),
     #[error("failed to parse animation: {0}")]
-    Deserialization(#[from] DeserializeError),
+    Deserialization(#[source] DeserializationInner),
     #[error("failed to load animation: {0}")]
     Instantiation(#[from] InstantiationError),
+}
+
+#[derive(Debug, Error)]
+pub enum DeserializationInner {
+    #[error(transparent)]
+    Wasmer(#[from] DeserializeError),
+    #[error(transparent)]
+    Serde(#[from] SerdeError),
 }
 
 impl From<io::Error> for LoadError {
@@ -51,6 +59,18 @@ impl From<io::Error> for LoadError {
             ErrorKind::NotFound => LoadError::NotFound,
             _ => LoadError::IO(e),
         }
+    }
+}
+
+impl From<DeserializeError> for LoadError {
+    fn from(e: DeserializeError) -> Self {
+        LoadError::Deserialization(e.into())
+    }
+}
+
+impl From<SerdeError> for LoadError {
+    fn from(e: SerdeError) -> Self {
+        LoadError::Deserialization(e.into())
     }
 }
 
@@ -67,5 +87,25 @@ pub enum SaveError {
     #[error("failed to write to file: {0}")]
     IO(#[from] io::Error),
     #[error("failed to serialize animation: {0}")]
-    Serialization(#[from] SerializeError),
+    Serialization(#[source] SerializationInner),
+}
+
+#[derive(Debug, Error)]
+pub enum SerializationInner {
+    #[error(transparent)]
+    Wasmer(#[from] SerializeError),
+    #[error(transparent)]
+    Serde(#[from] SerdeError),
+}
+
+impl From<SerializeError> for SaveError {
+    fn from(e: SerializeError) -> Self {
+        SaveError::Serialization(e.into())
+    }
+}
+
+impl From<SerdeError> for SaveError {
+    fn from(e: SerdeError) -> Self {
+        SaveError::Serialization(e.into())
+    }
 }

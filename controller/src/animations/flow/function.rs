@@ -27,6 +27,11 @@ impl Function {
         self.args.len()
     }
 
+    /// Get the operations of the function. Only for use serializing the main function
+    pub(crate) fn as_operations(&self) -> &Vec<Operation> {
+        &self.operations
+    }
+
     /// Check that the function is syntactically valid
     pub(crate) fn validate<'s>(
         &'s self,
