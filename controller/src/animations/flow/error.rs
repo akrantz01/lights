@@ -16,4 +16,6 @@ pub enum SyntaxError {
         expected: usize,
         actual: usize,
     },
+    #[error("all function arguments must have unique names")]
+    NonUniqueArguments,
 }

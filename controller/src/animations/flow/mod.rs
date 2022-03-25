@@ -1,6 +1,7 @@
 use super::{animation::Animation, BuildError, LoadError, SaveError};
 use crate::pixels::Pixels;
 use async_trait::async_trait;
+use serde::{Deserialize, Serialize};
 use std::{
     collections::{HashMap, HashSet},
     error::Error,
@@ -8,10 +9,16 @@ use std::{
 use tracing::{debug, instrument};
 
 mod error;
-mod schema;
+mod function;
+mod literal;
+mod operation;
+mod operators;
+mod value;
 
 pub use error::SyntaxError;
-use schema::{Literal, Operation, Schema};
+use function::Function;
+use literal::Literal;
+use operation::Operation;
 
 /// An interpreted, user-editable animation
 pub(crate) struct Flow {
@@ -33,20 +40,11 @@ impl Animation for Flow {
         B: AsRef<[u8]>,
         Self: Sized,
     {
-        let ast = serde_json::from_slice::<Schema>(content.as_ref())?;
+        let ast = serde_json::from_slice::<Ast>(content.as_ref())?;
         debug!(globals = %ast.globals.len(), functions = %ast.functions.len(), "loaded abstract syntax tree");
 
         // Ensure the flow is valid
-        let flow = Flow {
-            globals: ast.globals,
-            functions: ast
-                .functions
-                .into_iter()
-                .map(|(name, function)| (name, function.into()))
-                .collect(),
-            frame: ast.operations.into(),
-            pixels,
-        };
+        let flow = Flow::from_ast(ast, pixels);
         flow.validate()?;
         debug!("syntactically valid flow");
 
@@ -72,6 +70,20 @@ impl Animation for Flow {
 }
 
 impl Flow {
+    /// Convert an [`Ast`] to a flow
+    fn from_ast(ast: Ast, pixels: Pixels) -> Self {
+        Flow {
+            globals: ast.globals,
+            functions: ast
+                .functions
+                .into_iter()
+                .map(|(name, function)| (name, function.into()))
+                .collect(),
+            frame: ast.operations.into(),
+            pixels,
+        }
+    }
+
     /// Ensure the entire flow is valid
     #[instrument(skip_all)]
     fn validate(&self) -> Result<(), SyntaxError> {
@@ -79,7 +91,7 @@ impl Flow {
         let functions = self
             .functions
             .iter()
-            .map(|(name, f)| (name.as_str(), f.args.len()))
+            .map(|(name, f)| (name.as_str(), f.num_args()))
             .collect::<HashMap<_, _>>();
         let global_variables = self
             .globals
@@ -89,66 +101,21 @@ impl Flow {
 
         // Validate each supporting function
         for (name, f) in &self.functions {
-            let mut scoped_variables = global_variables.clone();
-            scoped_variables.extend(f.args.iter().map(String::as_str));
-
-            f.validate(&functions, scoped_variables, true)?;
+            f.validate(&functions, &global_variables, true)?;
             debug!(%name, "validated function")
         }
 
         // Finally validate the frame function
-        self.frame.validate(&functions, global_variables, false)
+        self.frame.validate(&functions, &global_variables, false)
     }
 }
 
-/// A function with its own local scope that can be called
-struct Function {
-    variables: HashMap<String, Literal>,
-    args: Vec<String>,
-    operations: Vec<Operation>,
-}
-
-impl From<schema::Function> for Function {
-    fn from(f: schema::Function) -> Self {
-        Function {
-            variables: HashMap::new(),
-            args: f.args,
-            operations: f.operations,
-        }
-    }
-}
-
-impl From<Vec<Operation>> for Function {
-    fn from(operations: Vec<Operation>) -> Self {
-        Function {
-            variables: HashMap::new(),
-            args: Vec::new(),
-            operations,
-        }
-    }
-}
-
-impl Function {
-    /// Check that the function is syntactically valid
-    fn validate<'s>(
-        &'s self,
-        functions: &HashMap<&str, usize>,
-        mut variables: HashSet<&'s str>,
-        can_return: bool,
-    ) -> Result<(), SyntaxError> {
-        // Ensure the last operation is always End for the frame function
-        if !can_return && !matches!(self.operations.last(), Some(&Operation::End)) {
-            return Err(SyntaxError::ExpectedEnd);
-        }
-
-        for operation in &self.operations {
-            if !can_return && matches!(operation, &Operation::Return { .. }) {
-                return Err(SyntaxError::InvalidReturn);
-            }
-
-            operation.validate(functions, &mut variables)?;
-        }
-
-        Ok(())
-    }
+#[derive(Debug, Deserialize, Serialize)]
+pub(crate) struct Ast {
+    #[serde(default)]
+    pub functions: HashMap<String, Function>,
+    #[serde(default)]
+    pub globals: HashMap<String, Literal>,
+    #[serde(default)]
+    pub operations: Vec<Operation>,
 }
