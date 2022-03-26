@@ -1,12 +1,15 @@
-use super::{error::SyntaxError, literal::Literal, operation::Operation};
+use super::{
+    error::{RuntimeError, SyntaxError},
+    operation::Operation,
+    scope::Scope,
+};
+use crate::pixels::Pixels;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
 /// A function with its own local scope that can be called
 #[derive(Debug, Deserialize, Serialize)]
 pub(crate) struct Function {
-    #[serde(skip)]
-    variables: HashMap<String, Literal>,
     args: Vec<String>,
     operations: Vec<Operation>,
 }
@@ -14,7 +17,6 @@ pub(crate) struct Function {
 impl From<Vec<Operation>> for Function {
     fn from(operations: Vec<Operation>) -> Self {
         Function {
-            variables: HashMap::new(),
             args: Vec::new(),
             operations,
         }
@@ -60,6 +62,20 @@ impl Function {
             }
 
             operation.validate(functions, &mut variables)?;
+        }
+
+        Ok(())
+    }
+
+    /// Evaluate all the operations in the function
+    pub(crate) fn execute(
+        &self,
+        scope: &mut Scope,
+        functions: &HashMap<String, Function>,
+        pixels: &Pixels,
+    ) -> Result<(), RuntimeError> {
+        for op in &self.operations {
+            op.evaluate(scope, functions, pixels)?;
         }
 
         Ok(())

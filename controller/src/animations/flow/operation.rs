@@ -1,4 +1,10 @@
-use super::{error::SyntaxError, value::Value};
+use super::{
+    error::{RuntimeError, SyntaxError},
+    function::Function,
+    scope::Scope,
+    value::Value,
+};
+use crate::pixels::Pixels;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::{HashMap, HashSet},
@@ -133,6 +139,16 @@ impl Operation {
                 Ok(())
             }
         }
+    }
+
+    /// Evaluate the operation
+    pub(crate) fn evaluate(
+        &self,
+        scope: &mut Scope,
+        functions: &HashMap<String, Function>,
+        pixels: &Pixels,
+    ) -> Result<(), RuntimeError> {
+        Ok(())
     }
 
     /// Get the name of the operation

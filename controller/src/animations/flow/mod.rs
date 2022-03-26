@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::{
     collections::{HashMap, HashSet},
     error::Error,
+    sync::Mutex,
 };
 use tracing::{debug, instrument};
 
@@ -13,16 +14,18 @@ mod function;
 mod literal;
 mod operation;
 mod operators;
+mod scope;
 mod value;
 
 pub use error::SyntaxError;
 use function::Function;
 use literal::Literal;
 use operation::Operation;
+use scope::Scope;
 
 /// An interpreted, user-editable animation
 pub(crate) struct Flow {
-    globals: HashMap<String, Literal>,
+    globals: Mutex<HashMap<String, Literal>>,
     functions: HashMap<String, Function>,
     frame: Function,
     pixels: Pixels,
@@ -61,9 +64,10 @@ impl Animation for Flow {
             operations: &'b Vec<Operation>,
         }
 
+        let globals = self.globals.lock().unwrap();
         let borrowed = BorrowedAst {
             functions: &self.functions,
-            globals: &self.globals,
+            globals: &globals,
             operations: self.frame.as_operations(),
         };
         Ok(serde_json::to_vec(&borrowed)?)
@@ -80,7 +84,12 @@ impl Animation for Flow {
     }
 
     fn animate(&self) -> Result<(), Box<dyn Error>> {
-        todo!()
+        let mut globals = self.globals.lock().unwrap();
+        let mut scope = Scope::new(&mut globals);
+
+        self.frame
+            .execute(&mut scope, &self.functions, &self.pixels)
+            .map_err(Into::into)
     }
 }
 
@@ -88,7 +97,7 @@ impl Flow {
     /// Convert an [`Ast`] to a flow
     fn from_ast(ast: Ast, pixels: Pixels) -> Self {
         Flow {
-            globals: ast.globals,
+            globals: Mutex::new(ast.globals),
             functions: ast.functions,
             frame: ast.operations.into(),
             pixels,
@@ -104,11 +113,8 @@ impl Flow {
             .iter()
             .map(|(name, f)| (name.as_str(), f.num_args()))
             .collect::<HashMap<_, _>>();
-        let global_variables = self
-            .globals
-            .keys()
-            .map(String::as_str)
-            .collect::<HashSet<_>>();
+        let globals = self.globals.lock().unwrap();
+        let global_variables = globals.keys().map(String::as_str).collect::<HashSet<_>>();
 
         // Validate each supporting function
         for (name, f) in &self.functions {

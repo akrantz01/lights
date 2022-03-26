@@ -19,3 +19,6 @@ pub enum SyntaxError {
     #[error("all function arguments must have unique names")]
     NonUniqueArguments,
 }
+
+#[derive(Debug, Error)]
+pub enum RuntimeError {}
