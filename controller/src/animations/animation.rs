@@ -1,4 +1,5 @@
 use super::{BuildError, Flow, LoadError, SaveError, Wasm};
+use crate::animations::error::LoadKind;
 use crate::{lights::AnimationKind, pixels::Pixels};
 use async_trait::async_trait;
 use std::{
@@ -64,7 +65,7 @@ pub(crate) async fn load(
     match kind {
         AnimationKind::Wasm => Wasm::deserialize(content, pixels),
         AnimationKind::Flow => Flow::deserialize(content, pixels),
-        AnimationKind::Unknown => Err(LoadError::Unknown),
+        AnimationKind::Unknown => Err(LoadError::new(LoadKind::UnknownType)),
     }
 }
 
