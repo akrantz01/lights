@@ -89,11 +89,7 @@ impl Flow {
     fn from_ast(ast: Ast, pixels: Pixels) -> Self {
         Flow {
             globals: ast.globals,
-            functions: ast
-                .functions
-                .into_iter()
-                .map(|(name, function)| (name, function.into()))
-                .collect(),
+            functions: ast.functions,
             frame: ast.operations.into(),
             pixels,
         }

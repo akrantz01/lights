@@ -11,12 +11,12 @@ use std::{
 #[serde(rename_all = "lowercase", tag = "op")]
 pub(crate) enum Operation {
     // Structural operations
-    /// The ending point for the flow. Multiple [`End`]s can exist in a flow,
-    /// however, every flow must always terminate with an [`End`].
+    /// The ending point for the flow. Multiple [`Operation::End`]s can exist in a flow,
+    /// however, every flow must always terminate with an [`Operation::End`].
     End,
     /// Return can only be used within functions to end the flow and propagate
     /// a value to the caller. To end a function flow without returning, see
-    /// [`End`].
+    /// [`Operation::End`].
     Return { result: Value },
 
     // Control flow operations
