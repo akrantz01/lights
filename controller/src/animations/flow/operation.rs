@@ -1,6 +1,6 @@
 use super::{
     error::{RuntimeError, SyntaxError},
-    function::Function,
+    function::{function_call_is_valid, Function},
     scope::Scope,
     value::Value,
 };
@@ -41,6 +41,8 @@ pub(crate) enum Operation {
     },
     /// Create or update a variable with a name and value
     Variable { name: String, value: Value },
+    /// Call a function by name with some arguments
+    Function { name: String, args: Vec<Value> },
 
     // Pixel operations
     /// Set the brightness of the strip
@@ -109,6 +111,11 @@ impl Operation {
                 Ok(())
             }
 
+            // Check the function exists and its arguments are valid
+            Operation::Function { name, args } => {
+                function_call_is_valid(variables, functions, name, args)
+            }
+
             // Check operations with nested operations
             Operation::If {
                 condition,
@@ -159,6 +166,7 @@ impl Operation {
             Operation::If { .. } => "if",
             Operation::For { .. } => "for",
             Operation::Variable { .. } => "variable",
+            Operation::Function { .. } => "function",
             Operation::Brightness { .. } => "brightness",
             Operation::Fill { .. } => "fill",
             Operation::Set { .. } => "set",

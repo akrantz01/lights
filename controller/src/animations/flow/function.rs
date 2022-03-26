@@ -2,6 +2,7 @@ use super::{
     error::{RuntimeError, SyntaxError},
     operation::Operation,
     scope::Scope,
+    value::Value,
 };
 use crate::pixels::Pixels;
 use serde::{Deserialize, Serialize};
@@ -79,5 +80,32 @@ impl Function {
         }
 
         Ok(())
+    }
+}
+
+/// Check that a function call is valid
+pub(crate) fn function_call_is_valid(
+    known_variables: &HashSet<&str>,
+    known_functions: &HashMap<&str, usize>,
+    name: &str,
+    args: &Vec<Value>,
+) -> Result<(), SyntaxError> {
+    if let Some(arg_count) = known_functions.get(name) {
+        if *arg_count == args.len() {
+            for arg in args {
+                arg.validate(known_functions, known_variables)?;
+            }
+            Ok(())
+        } else {
+            Err(SyntaxError::MismatchArguments {
+                name: name.to_owned(),
+                expected: *arg_count,
+                actual: args.len(),
+            })
+        }
+    } else {
+        Err(SyntaxError::UnknownFunction {
+            name: name.to_owned(),
+        })
     }
 }

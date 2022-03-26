@@ -3,6 +3,7 @@ use super::{
     literal::Literal,
     operators::{BinaryOperator, Comparator, UnaryOperator},
 };
+use crate::animations::flow::function::function_call_is_valid;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
@@ -58,21 +59,7 @@ impl Value {
                 .validate(functions, variables)
                 .and(rhs.validate(functions, variables)),
             Value::Function { name, args } => {
-                if let Some(arg_count) = functions.get(name.as_str()) {
-                    if *arg_count == args.len() {
-                        Ok(())
-                    } else {
-                        Err(SyntaxError::MismatchArguments {
-                            name: name.to_owned(),
-                            expected: *arg_count,
-                            actual: args.len(),
-                        })
-                    }
-                } else {
-                    Err(SyntaxError::UnknownFunction {
-                        name: name.to_owned(),
-                    })
-                }
+                function_call_is_valid(variables, functions, name, args)
             }
         }
     }
