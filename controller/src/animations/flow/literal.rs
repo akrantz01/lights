@@ -920,27 +920,38 @@ mod tests {
     }
 
     #[test]
-    fn number_conversions() {
-        // Test boolean conversions
+    fn number_from_boolean() {
         assert_eq!(Number::from(true), Number::Integer(1));
         assert_eq!(Number::from(false), Number::Integer(0));
+    }
 
-        // Test signed integers
+    #[test]
+    fn number_from_signed() {
+        assert_eq!(Number::from(10_i8), Number::Integer(10));
         assert_eq!(Number::from(-10_i8), Number::Integer(-10));
+        assert_eq!(Number::from(15_i16), Number::Integer(15));
         assert_eq!(Number::from(-15_i16), Number::Integer(-15));
+        assert_eq!(Number::from(43_i32), Number::Integer(43));
         assert_eq!(Number::from(-43_i32), Number::Integer(-43));
+        assert_eq!(Number::from(63_i64), Number::Integer(63));
         assert_eq!(Number::from(-63_i64), Number::Integer(-63));
+    }
 
-        // Test signed integers
+    #[test]
+    fn number_from_unsigned() {
         assert_eq!(Number::from(10_u8), Number::Integer(10));
         assert_eq!(Number::from(15_u16), Number::Integer(15));
         assert_eq!(Number::from(43_u32), Number::Integer(43));
+    }
 
-        // Test floats
+    #[test]
+    fn number_from_float() {
         assert_eq!(Number::from(-63.79_f32), Number::Float(-63.79_f32 as f64));
         assert_eq!(Number::from(69.10_f64), Number::Float(69.10));
+    }
 
-        // Test converting to duration
+    #[test]
+    fn number_to_duration() {
         assert_eq!(
             Duration::from(Number::Integer(2500)),
             Duration::from_millis(2500)
