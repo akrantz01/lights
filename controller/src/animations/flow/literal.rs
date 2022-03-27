@@ -343,10 +343,7 @@ impl TryFrom<Literal> for Duration {
     fn try_from(value: Literal) -> Result<Self, Self::Error> {
         match value {
             Literal::String(_) => value.into_duration_from_string(),
-            Literal::Number(n) => match n {
-                Number::Integer(i) => Ok(Duration::from_millis(i as u64)),
-                Number::Float(f) => Ok(Duration::from_secs_f64(f)),
-            },
+            Literal::Number(n) => Ok(n.into()),
             _ => Err(DurationParseError::TypeError(TypeError::Conversion {
                 expected: "string, float, number",
                 found: value.kind(),
@@ -671,10 +668,20 @@ number_from!(u8 => Integer);
 number_from!(f64 => Float);
 number_from!(f32 => Float);
 
+impl From<Number> for Duration {
+    fn from(n: Number) -> Self {
+        match n {
+            Number::Integer(i) => Duration::from_millis(i as u64),
+            Number::Float(f) => Duration::from_secs_f64(f),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::Number;
     use std::cmp::Ordering;
+    use std::time::Duration;
 
     #[test]
     fn number_operations_on_float_and_float() {
@@ -786,5 +793,15 @@ mod tests {
         // Test floats
         assert_eq!(Number::from(-63.79_f32), Number::Float(-63.79_f32 as f64));
         assert_eq!(Number::from(69.10_f64), Number::Float(69.10));
+
+        // Test converting to duration
+        assert_eq!(
+            Duration::from(Number::Integer(2500)),
+            Duration::from_millis(2500)
+        );
+        assert_eq!(
+            Duration::from(Number::Float(5.5)),
+            Duration::from_millis(5500)
+        );
     }
 }
