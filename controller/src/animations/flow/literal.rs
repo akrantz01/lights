@@ -4,7 +4,9 @@ use std::{
     cmp::Ordering,
     iter::repeat,
     ops::{Add, Div, Mul, Neg, Rem, Sub},
+    time::Duration,
 };
+use thiserror::Error;
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(untagged)]
@@ -321,6 +323,132 @@ literal_from!(u16 => Number);
 literal_from!(u8 => Number);
 literal_from!(f64 => Number);
 literal_from!(f32 => Number);
+
+#[derive(Debug, Error)]
+pub enum DurationParseError {
+    #[error("invalid duration")]
+    InvalidDuration,
+    #[error("missing unit in duration")]
+    MissingUnit,
+    #[error("unknown unit '{0}' in duration")]
+    UnknownUnit(String),
+    #[error(transparent)]
+    TypeError(#[from] TypeError),
+}
+
+impl TryFrom<Literal> for Duration {
+    type Error = DurationParseError;
+
+    // Adapted from the implementation for https://pkg.go.dev/time#ParseDuration
+    fn try_from(value: Literal) -> Result<Self, Self::Error> {
+        // format matches ([0-9]*(\.[0-9]*)?[a-z]+)+
+        let raw = value.as_non_null_string()?.to_lowercase();
+
+        if raw.len() == 0 {
+            return Err(DurationParseError::InvalidDuration);
+        } else if raw == "0" {
+            return Ok(Duration::from_millis(0));
+        }
+
+        let mut nanos: u64 = 0;
+
+        let mut i = 0;
+        loop {
+            let c = match raw.chars().nth(i) {
+                Some(c) => c,
+                None => break,
+            };
+
+            // Next character must be [0-9.]
+            if !(c == '.' || '0' <= c && c <= '9') {
+                return Err(DurationParseError::InvalidDuration);
+            }
+
+            // Consume [0-9]*
+            let num = raw
+                .chars()
+                .skip(i)
+                .take_while(|c| '0' <= *c && *c <= '9')
+                .collect::<String>();
+            i += num.len();
+
+            let pre = num.len() != 0;
+            let v = num.parse::<u64>().unwrap();
+
+            // Consume (\.[0-9]*)?
+            let (post, f, scale) = if matches!(raw.chars().skip(i).next(), Some('.')) {
+                let num = raw
+                    .chars()
+                    .skip(i + 1)
+                    .take_while(|c| '0' <= *c && *c <= '9')
+                    .collect::<String>();
+                i += num.len();
+
+                let f = num.parse::<u64>().unwrap();
+                let scale = (10 * num.len()) as u64;
+
+                (num.len() != 0, f, scale)
+            } else {
+                (false, 0, 0)
+            };
+
+            if !pre && !post {
+                return Err(DurationParseError::InvalidDuration);
+            }
+
+            // Consume unit
+            let u = raw
+                .chars()
+                .skip(i)
+                .take_while(|c| *c != '.' && *c <= '0' || '9' <= *c)
+                .collect::<String>();
+            i += u.len();
+
+            if u.len() == 0 {
+                return Err(DurationParseError::MissingUnit);
+            }
+
+            let unit: u64 = match u.as_str() {
+                "ns" => 1,
+                "us" | "µs" | "μs" => 1 * 1000, // Accepts u, µ (U+00B5), μ (U+03BC)
+                "ms" => 1 * 1000 * 1000,
+                "s" => 1 * 1000 * 1000 * 1000,
+                "m" => 1 * 1000 * 1000 * 1000 * 60,
+                "h" => 1 * 1000 * 1000 * 1000 * 60 * 60,
+                _ => return Err(DurationParseError::UnknownUnit(u)),
+            };
+
+            // Check for overflow
+            if v > (1 << 63) / unit {
+                return Err(DurationParseError::InvalidDuration);
+            }
+
+            // Convert to unit
+            let mut v = v * unit;
+            if f > 0 {
+                // Get nanosecond accuracy for fractions of hours using f64
+                // v >= 0 && (f*unit/scale) <= 3.6e+12 (ns/h, h is the largest unit)
+                v += (f as f64 * (unit as f64 / scale as f64)) as u64;
+
+                // Check for overflow
+                if v > 1 << 63 {
+                    return Err(DurationParseError::InvalidDuration);
+                }
+            }
+
+            nanos += v;
+            if nanos > 1 << 63 {
+                return Err(DurationParseError::InvalidDuration);
+            }
+        }
+
+        if nanos > 1 << 63 - 1 {
+            Err(DurationParseError::InvalidDuration)
+        } else {
+            Ok(Duration::from_nanos(nanos))
+        }
+    }
+}
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize)]
 #[serde(untagged)]

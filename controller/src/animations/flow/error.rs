@@ -1,3 +1,4 @@
+use std::error::Error;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -26,6 +27,12 @@ pub enum RuntimeError {
     NameError(String),
     #[error(transparent)]
     TypeError(#[from] TypeError),
+    #[error("invalid format for '{to}': {source}")]
+    FormatError {
+        to: &'static str,
+        #[source]
+        source: Box<dyn Error>,
+    },
 }
 
 #[derive(Debug, Error)]

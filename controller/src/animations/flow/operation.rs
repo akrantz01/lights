@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use std::{
     collections::{HashMap, HashSet},
     fmt::{self, Display, Formatter},
-    time::Duration,
+    thread,
 };
 
 /// The possible operations that can be used in a flow. Every flow must///
@@ -65,7 +65,7 @@ pub(crate) enum Operation {
 
     // System operations
     /// Pause for the specified amount of time
-    Sleep { duration: Duration },
+    Sleep { duration: Value },
 }
 
 impl Display for Operation {
@@ -265,8 +265,18 @@ impl Operation {
                 Ok(())
             }
 
-            // TODO: figure out how to convert from value to duration
-            Operation::Sleep { .. } => unimplemented!(),
+            Operation::Sleep { duration } => {
+                let duration = duration
+                    .evaluate(scope, functions, pixels)?
+                    .try_into()
+                    .map_err(|e| RuntimeError::FormatError {
+                        to: "duration",
+                        source: Box::new(e),
+                    })?;
+                thread::sleep(duration);
+
+                Ok(())
+            }
         }
     }
 
