@@ -388,7 +388,9 @@ impl Literal {
             i += num.len();
 
             let pre = num.len() != 0;
-            let v = num.parse::<u64>().unwrap();
+            let v = num
+                .parse::<u64>()
+                .map_err(|_| DurationParseError::InvalidDuration)?;
 
             // Consume (\.[0-9]*)?
             let (post, f, scale) = if matches!(raw.chars().skip(i).next(), Some('.')) {
@@ -397,7 +399,7 @@ impl Literal {
                     .skip(i + 1)
                     .take_while(|c| '0' <= *c && *c <= '9')
                     .collect::<String>();
-                i += num.len();
+                i += num.len() + 1;
 
                 let f = num.parse::<u64>().unwrap();
                 let scale = (10 * num.len()) as u64;
@@ -679,9 +681,153 @@ impl From<Number> for Duration {
 
 #[cfg(test)]
 mod tests {
-    use super::Number;
-    use std::cmp::Ordering;
-    use std::time::Duration;
+    use super::{Literal, Number};
+    use crate::animations::flow::literal::DurationParseError;
+    use std::{cmp::Ordering, time::Duration};
+
+    #[test]
+    fn literal_from_boolean() {
+        assert_eq!(Literal::from(true), Literal::Boolean(true));
+        assert_eq!(Literal::from(false), Literal::Boolean(false));
+    }
+
+    #[test]
+    fn literal_from_number() {
+        // Test from number
+        assert_eq!(
+            Literal::from(Number::Integer(10)),
+            Literal::Number(Number::Integer(10))
+        );
+        assert_eq!(
+            Literal::from(Number::Float(5.3)),
+            Literal::Number(Number::Float(5.3))
+        );
+
+        // Test from signed integer
+        assert_eq!(Literal::from(-10_i8), Literal::Number(Number::Integer(-10)));
+        assert_eq!(
+            Literal::from(-15_i16),
+            Literal::Number(Number::Integer(-15))
+        );
+        assert_eq!(
+            Literal::from(-43_i32),
+            Literal::Number(Number::Integer(-43))
+        );
+        assert_eq!(
+            Literal::from(-63_i64),
+            Literal::Number(Number::Integer(-63))
+        );
+
+        // Test from unsigned integer
+        assert_eq!(Literal::from(10_u8), Literal::Number(Number::Integer(10)));
+        assert_eq!(Literal::from(15_u16), Literal::Number(Number::Integer(15)));
+        assert_eq!(Literal::from(43_u32), Literal::Number(Number::Integer(43)));
+
+        // Test from float
+        assert_eq!(
+            Literal::from(-63.79_f32),
+            Literal::Number(Number::Float(-63.79_f32 as f64))
+        );
+        assert_eq!(
+            Literal::from(69.10_f64),
+            Literal::Number(Number::Float(69.10))
+        );
+    }
+
+    #[test]
+    fn literal_from_string() {
+        assert_eq!(Literal::from("hello"), Literal::String("hello".to_owned()));
+        assert_eq!(
+            Literal::from("hello".to_owned()),
+            Literal::String("hello".to_owned())
+        );
+    }
+
+    #[test]
+    fn literal_from_option() {
+        assert_eq!(Literal::from(None::<&str>), Literal::Null);
+
+        assert_eq!(Literal::from(Some(true)), Literal::Boolean(true));
+        assert_eq!(
+            Literal::from(Some("testing")),
+            Literal::String("testing".to_owned())
+        );
+        assert_eq!(
+            Literal::from(Some(10)),
+            Literal::Number(Number::Integer(10))
+        );
+    }
+
+    #[test]
+    fn literal_to_duration() {
+        // Test failures
+        assert!(Duration::try_from(Literal::Null).is_err());
+        assert!(Duration::try_from(Literal::Boolean(true)).is_err());
+
+        // Test from number
+        assert_eq!(
+            Duration::try_from(Literal::Number(Number::Integer(1000))).unwrap(),
+            Duration::from_secs(1)
+        );
+        assert_eq!(
+            Duration::try_from(Literal::Number(Number::Float(5.5))).unwrap(),
+            Duration::from_millis(5500)
+        );
+
+        // Test from string
+        assert_eq!(
+            Duration::try_from(Literal::from("1h")).unwrap(),
+            Duration::from_secs(60 * 60)
+        );
+        assert_eq!(
+            Duration::try_from(Literal::from("5m")).unwrap(),
+            Duration::from_secs(60 * 5)
+        );
+        assert_eq!(
+            Duration::try_from(Literal::from("10s")).unwrap(),
+            Duration::from_secs(10)
+        );
+        assert_eq!(
+            Duration::try_from(Literal::from("5ms")).unwrap(),
+            Duration::from_millis(5)
+        );
+        assert_eq!(
+            Duration::try_from(Literal::from("60us")).unwrap(),
+            Duration::from_micros(60)
+        );
+        assert_eq!(
+            Duration::try_from(Literal::from("328ns")).unwrap(),
+            Duration::from_nanos(328)
+        );
+        assert_eq!(
+            Duration::try_from(Literal::from("6h5m4s3ms2us1ns")).unwrap(),
+            Duration::from_nanos(21904003002001)
+        );
+        assert_eq!(
+            Duration::try_from(Literal::from("4.5h")).unwrap(),
+            Duration::from_secs(60 * 60 * 4 + 60 * 30)
+        );
+        assert!(matches!(
+            Duration::try_from(Literal::from("5")),
+            Err(DurationParseError::MissingUnit)
+        ));
+        assert!(matches!(
+            Duration::try_from(Literal::from("5t")),
+            Err(DurationParseError::UnknownUnit(t)) if t == String::from('t')
+        ));
+        assert!(matches!(
+            Duration::try_from(Literal::from(".h")),
+            Err(DurationParseError::InvalidDuration)
+        ));
+        assert!(matches!(
+            Duration::try_from(Literal::from("")),
+            Err(DurationParseError::InvalidDuration)
+        ));
+        assert_eq!(
+            Duration::try_from(Literal::from("0")).unwrap(),
+            Duration::from_secs(0)
+        );
+    }
 
     #[test]
     fn number_operations_on_float_and_float() {
