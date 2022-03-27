@@ -155,7 +155,119 @@ impl Operation {
         functions: &HashMap<String, Function>,
         pixels: &Pixels,
     ) -> Result<(), RuntimeError> {
-        Ok(())
+        match self {
+            // TODO: figure out how to handle returning early
+            Operation::End => unimplemented!(),
+            Operation::Return { .. } => unimplemented!(),
+
+            Operation::If {
+                condition,
+                truthy,
+                falsy,
+            } => {
+                let condition = condition.evaluate(scope, functions, pixels)?.as_boolean()?;
+                if condition {
+                    for op in truthy {
+                        op.evaluate(scope, functions, pixels)?;
+                    }
+                } else {
+                    for op in falsy {
+                        op.evaluate(scope, functions, pixels)?;
+                    }
+                }
+
+                Ok(())
+            }
+            Operation::For {
+                start,
+                end,
+                index,
+                operations,
+            } => {
+                let start = start
+                    .evaluate(scope, functions, pixels)?
+                    .as_non_null_integer()?;
+                let end = end
+                    .evaluate(scope, functions, pixels)?
+                    .as_non_null_integer()?;
+
+                for i in start..end {
+                    scope.set(index.to_owned(), i.into());
+
+                    for op in operations {
+                        op.evaluate(scope, functions, pixels)?;
+                    }
+                }
+
+                Ok(())
+            }
+            Operation::Variable { name, value } => {
+                let value = value.evaluate(scope, functions, pixels)?;
+                scope.set(name.to_owned(), value);
+
+                Ok(())
+            }
+            Operation::Function { name, args } => {
+                let function = functions
+                    .get(name)
+                    .ok_or_else(|| RuntimeError::NameError(name.to_owned()))?;
+                function.execute_with_args(&mut scope.nested(), args, functions, pixels)?;
+
+                Ok(())
+            }
+
+            Operation::Brightness { value } => {
+                let value = value
+                    .evaluate(scope, functions, pixels)?
+                    .as_non_null_integer()?;
+
+                pixels.brightness(value as u8);
+                Ok(())
+            }
+            Operation::Fill { red, green, blue } => {
+                let red = red
+                    .evaluate(scope, functions, pixels)?
+                    .as_non_null_integer()?;
+                let green = green
+                    .evaluate(scope, functions, pixels)?
+                    .as_non_null_integer()?;
+                let blue = blue
+                    .evaluate(scope, functions, pixels)?
+                    .as_non_null_integer()?;
+
+                pixels.fill(red as u8, blue as u8, green as u8);
+                Ok(())
+            }
+            Operation::Set {
+                index,
+                red,
+                green,
+                blue,
+            } => {
+                let index = index
+                    .evaluate(scope, functions, pixels)?
+                    .as_non_null_integer()?;
+                let red = red
+                    .evaluate(scope, functions, pixels)?
+                    .as_non_null_integer()?;
+                let green = green
+                    .evaluate(scope, functions, pixels)?
+                    .as_non_null_integer()?;
+                let blue = blue
+                    .evaluate(scope, functions, pixels)?
+                    .as_non_null_integer()?;
+
+                pixels.set(index as u16, red as u8, green as u8, blue as u8);
+                Ok(())
+            }
+            Operation::Show => {
+                pixels.show();
+                Ok(())
+            }
+
+            // TODO: figure out how to convert from value to duration
+            Operation::Sleep { .. } => unimplemented!(),
+        }
     }
 
     /// Get the name of the operation

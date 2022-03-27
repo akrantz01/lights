@@ -1,5 +1,6 @@
 use super::{
     error::{RuntimeError, SyntaxError},
+    literal::Literal,
     operation::Operation,
     scope::Scope,
     value::Value,
@@ -7,6 +8,7 @@ use super::{
 use crate::pixels::Pixels;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
+use std::iter::zip;
 
 /// A function with its own local scope that can be called
 #[derive(Debug, Deserialize, Serialize)]
@@ -74,12 +76,29 @@ impl Function {
         scope: &mut Scope,
         functions: &HashMap<String, Function>,
         pixels: &Pixels,
-    ) -> Result<(), RuntimeError> {
+    ) -> Result<Literal, RuntimeError> {
         for op in &self.operations {
             op.evaluate(scope, functions, pixels)?;
         }
 
-        Ok(())
+        Ok(Literal::Null)
+    }
+
+    /// Execute a function with some arguments
+    pub(crate) fn execute_with_args(
+        &self,
+        scope: &mut Scope,
+        args: &[Value],
+        functions: &HashMap<String, Function>,
+        pixels: &Pixels,
+    ) -> Result<Literal, RuntimeError> {
+        // Add the arguments to the current scope
+        for (name, arg) in zip(&self.args, args) {
+            let value = arg.evaluate(scope, functions, pixels)?;
+            scope.set(name.to_owned(), value);
+        }
+
+        self.execute(scope, functions, pixels)
     }
 }
 

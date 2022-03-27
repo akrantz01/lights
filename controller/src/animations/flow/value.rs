@@ -1,9 +1,11 @@
 use super::{
-    error::SyntaxError,
+    error::{RuntimeError, SyntaxError},
+    function::{function_call_is_valid, Function},
     literal::Literal,
     operators::{BinaryOperator, Comparator, UnaryOperator},
+    scope::Scope,
 };
-use crate::animations::flow::function::function_call_is_valid;
+use crate::pixels::Pixels;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
@@ -61,6 +63,44 @@ impl Value {
             Value::Function { name, args } => {
                 function_call_is_valid(variables, functions, name, args)
             }
+        }
+    }
+
+    /// Resolve the value/expression/function call to a concrete value
+    pub(crate) fn evaluate(
+        &self,
+        scope: &mut Scope,
+        functions: &HashMap<String, Function>,
+        pixels: &Pixels,
+    ) -> Result<Literal, RuntimeError> {
+        match self {
+            Value::Variable { name } => scope
+                .get(name)
+                .cloned()
+                .ok_or_else(|| RuntimeError::NameError(name.to_owned())),
+            Value::Literal { value } => Ok(value.clone()),
+            Value::UnaryExpression { operator, value } => {
+                let value = value.evaluate(scope, functions, pixels)?;
+                Ok(operator.evaluate(value)?)
+            }
+            Value::BinaryExpression { operator, lhs, rhs } => {
+                let lhs = lhs.evaluate(scope, functions, pixels)?;
+                let rhs = rhs.evaluate(scope, functions, pixels)?;
+                Ok(operator.evaluate(lhs, rhs)?)
+            }
+            Value::Comparison {
+                comparator,
+                lhs,
+                rhs,
+            } => {
+                let lhs = lhs.evaluate(scope, functions, pixels)?;
+                let rhs = rhs.evaluate(scope, functions, pixels)?;
+                Ok(comparator.evaluate(&lhs, &rhs)?)
+            }
+            Value::Function { name, args } => functions
+                .get(name)
+                .ok_or_else(|| RuntimeError::NameError(name.to_owned()))?
+                .execute_with_args(&mut scope.nested(), args, functions, pixels),
         }
     }
 }

@@ -21,4 +21,31 @@ pub enum SyntaxError {
 }
 
 #[derive(Debug, Error)]
-pub enum RuntimeError {}
+pub enum RuntimeError {
+    #[error("variable '{0}' referenced before assignment")]
+    NameError(String),
+    #[error(transparent)]
+    TypeError(#[from] TypeError),
+}
+
+#[derive(Debug, Error)]
+pub enum TypeError {
+    #[error("cannot convert from '{found}' to '{expected}'")]
+    Conversion {
+        expected: &'static str,
+        found: &'static str,
+    },
+    #[error("cannot compare types '{a}' and '{b}'")]
+    Comparison { a: &'static str, b: &'static str },
+    #[error("operator '{operator}' is not defined for '{kind}'")]
+    UnaryOperator {
+        operator: &'static str,
+        kind: &'static str,
+    },
+    #[error("operator '{operator}' is not defined on '{a}' and '{b}'")]
+    BinaryOperator {
+        operator: &'static str,
+        a: &'static str,
+        b: &'static str,
+    },
+}

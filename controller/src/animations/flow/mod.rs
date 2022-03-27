@@ -89,7 +89,9 @@ impl Animation for Flow {
 
         self.frame
             .execute(&mut scope, &self.functions, &self.pixels)
-            .map_err(Into::into)
+            .map_err(|e| Box::new(e))?;
+
+        Ok(())
     }
 }
 
