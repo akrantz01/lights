@@ -670,3 +670,121 @@ number_from!(u16 => Integer);
 number_from!(u8 => Integer);
 number_from!(f64 => Float);
 number_from!(f32 => Float);
+
+#[cfg(test)]
+mod tests {
+    use super::Number;
+    use std::cmp::Ordering;
+
+    #[test]
+    fn number_operations_on_float_and_float() {
+        let a_raw = 5.3;
+        let a = Number::Float(a_raw);
+        let b_raw = 7.2;
+        let b = Number::Float(b_raw);
+
+        // Test equality/comparison
+        assert_eq!(a == b, false);
+        assert_eq!(a.partial_cmp(&b), Some(Ordering::Less));
+
+        // Test basic operators
+        assert_eq!(-a, Number::Float(-a_raw));
+        assert_eq!(a + b, Number::Float(a_raw + b_raw));
+        assert_eq!(a - b, Number::Float(a_raw - b_raw));
+        assert_eq!(a * b, Number::Float(a_raw * b_raw));
+        assert_eq!(a / b, Number::Float(a_raw / b_raw));
+        assert_eq!(a % b, Number::Float(a_raw % b_raw));
+        assert_eq!(a.pow(b), Number::Float(a_raw.powf(b_raw)));
+
+        // Test bitwise operators
+        assert!(a.try_not().is_err());
+        assert!(a.try_bitand(b).is_err());
+        assert!(a.try_bitor(b).is_err());
+        assert!(a.try_bitxor(b).is_err());
+    }
+
+    #[test]
+    fn number_operations_on_integer_and_integer() {
+        let a_raw = 5;
+        let a = Number::Integer(a_raw);
+        let b_raw = 7;
+        let b = Number::Integer(b_raw);
+
+        // Test equality/comparison
+        assert_eq!(a == b, false);
+        assert_eq!(a.partial_cmp(&b), Some(Ordering::Less));
+
+        // Test basic operators
+        assert_eq!(-a, Number::Integer(-a_raw));
+        assert_eq!(a + b, Number::Integer(a_raw + b_raw));
+        assert_eq!(a - b, Number::Integer(a_raw - b_raw));
+        assert_eq!(a * b, Number::Integer(a_raw * b_raw));
+        assert_eq!(a / b, Number::Integer(a_raw / b_raw));
+        assert_eq!(a % b, Number::Integer(a_raw % b_raw));
+        assert_eq!(a.pow(b), Number::Integer(a_raw.pow(b_raw as u32)));
+
+        // Test bitwise operators
+        assert_eq!(a.try_not().unwrap(), Number::Integer(!a_raw));
+        assert_eq!(a.try_bitand(b).unwrap(), Number::Integer(a_raw & b_raw));
+        assert_eq!(a.try_bitor(b).unwrap(), Number::Integer(a_raw | b_raw));
+        assert_eq!(a.try_bitxor(b).unwrap(), Number::Integer(a_raw ^ b_raw));
+    }
+
+    #[test]
+    fn number_operations_on_mixed_numbers() {
+        let i_raw = 5;
+        let i = Number::Integer(i_raw);
+        let f_raw = 7.2;
+        let f = Number::Float(f_raw);
+
+        // Test equality/comparison
+        assert_eq!(i == f, false);
+        assert_eq!(f == i, false);
+        assert_eq!(i.partial_cmp(&f), Some(Ordering::Less));
+        assert_eq!(f.partial_cmp(&i), Some(Ordering::Greater));
+
+        // Test basic operators
+        assert_eq!(i + f, Number::Float(i_raw as f64 + f_raw));
+        assert_eq!(f + i, Number::Float(f_raw + i_raw as f64));
+        assert_eq!(i - f, Number::Float(i_raw as f64 - f_raw));
+        assert_eq!(f - i, Number::Float(f_raw - i_raw as f64));
+        assert_eq!(i * f, Number::Float(i_raw as f64 * f_raw));
+        assert_eq!(f * i, Number::Float(f_raw * i_raw as f64));
+        assert_eq!(i / f, Number::Float(i_raw as f64 / f_raw));
+        assert_eq!(f / i, Number::Float(f_raw / i_raw as f64));
+        assert_eq!(i % f, Number::Float(i_raw as f64 % f_raw));
+        assert_eq!(f % i, Number::Float(f_raw % i_raw as f64));
+        assert_eq!(i.pow(f), Number::Float((i_raw as f64).powf(f_raw)));
+        assert_eq!(f.pow(i), Number::Float(f_raw.powi(i_raw as i32)));
+
+        // Test bitwise operators
+        assert!(i.try_bitand(f).is_err());
+        assert!(f.try_bitand(i).is_err());
+        assert!(i.try_bitor(f).is_err());
+        assert!(f.try_bitor(i).is_err());
+        assert!(i.try_bitxor(f).is_err());
+        assert!(f.try_bitxor(i).is_err());
+    }
+
+    #[test]
+    fn number_conversions() {
+        // Test boolean conversions
+        assert_eq!(Number::from(true), Number::Integer(1));
+        assert_eq!(Number::from(false), Number::Integer(0));
+
+        // Test signed integers
+        assert_eq!(Number::from(-10_i8), Number::Integer(-10));
+        assert_eq!(Number::from(-15_i16), Number::Integer(-15));
+        assert_eq!(Number::from(-43_i32), Number::Integer(-43));
+        assert_eq!(Number::from(-63_i64), Number::Integer(-63));
+
+        // Test signed integers
+        assert_eq!(Number::from(10_u8), Number::Integer(10));
+        assert_eq!(Number::from(15_u16), Number::Integer(15));
+        assert_eq!(Number::from(43_u32), Number::Integer(43));
+
+        // Test floats
+        assert_eq!(Number::from(-63.79_f32), Number::Float(-63.79_f32 as f64));
+        assert_eq!(Number::from(69.10_f64), Number::Float(69.10));
+    }
+}
