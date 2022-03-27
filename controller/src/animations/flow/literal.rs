@@ -341,8 +341,26 @@ impl TryFrom<Literal> for Duration {
 
     // Adapted from the implementation for https://pkg.go.dev/time#ParseDuration
     fn try_from(value: Literal) -> Result<Self, Self::Error> {
+        match value {
+            Literal::String(_) => value.into_duration_from_string(),
+            Literal::Number(n) => match n {
+                Number::Integer(i) => Ok(Duration::from_millis(i as u64)),
+                Number::Float(f) => Ok(Duration::from_secs_f64(f)),
+            },
+            _ => Err(DurationParseError::TypeError(TypeError::Conversion {
+                expected: "string, float, number",
+                found: value.kind(),
+            })),
+        }
+    }
+}
+
+impl Literal {
+    /// Extract a duration from a string. Adapted from the implementation for
+    /// https://pkg.go.dev/time#ParseDuration
+    fn into_duration_from_string(self) -> Result<Duration, DurationParseError> {
         // format matches ([0-9]*(\.[0-9]*)?[a-z]+)+
-        let raw = value.as_non_null_string()?.to_lowercase();
+        let raw = self.as_non_null_string()?.to_lowercase();
 
         if raw.len() == 0 {
             return Err(DurationParseError::InvalidDuration);
