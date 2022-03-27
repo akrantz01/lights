@@ -1,6 +1,7 @@
 use super::{
     error::{RuntimeError, SyntaxError},
     function::{function_call_is_valid, Function},
+    literal::Literal,
     scope::Scope,
     value::Value,
 };
@@ -154,11 +155,12 @@ impl Operation {
         scope: &mut Scope,
         functions: &HashMap<String, Function>,
         pixels: &Pixels,
-    ) -> Result<(), RuntimeError> {
+    ) -> Result<ReturnType, RuntimeError> {
         match self {
-            // TODO: figure out how to handle returning early
-            Operation::End => unimplemented!(),
-            Operation::Return { .. } => unimplemented!(),
+            Operation::End => Ok(ReturnType::End),
+            Operation::Return { result } => Ok(ReturnType::Return(
+                result.evaluate(scope, functions, pixels)?,
+            )),
 
             Operation::If {
                 condition,
@@ -168,15 +170,23 @@ impl Operation {
                 let condition = condition.evaluate(scope, functions, pixels)?.as_boolean()?;
                 if condition {
                     for op in truthy {
-                        op.evaluate(scope, functions, pixels)?;
+                        match op.evaluate(scope, functions, pixels)? {
+                            ReturnType::Continue => {}
+                            ReturnType::End => break,
+                            ReturnType::Return(value) => return Ok(ReturnType::Return(value)),
+                        }
                     }
                 } else {
                     for op in falsy {
-                        op.evaluate(scope, functions, pixels)?;
+                        match op.evaluate(scope, functions, pixels)? {
+                            ReturnType::Continue => {}
+                            ReturnType::End => break,
+                            ReturnType::Return(value) => return Ok(ReturnType::Return(value)),
+                        }
                     }
                 }
 
-                Ok(())
+                Ok(ReturnType::Continue)
             }
             Operation::For {
                 start,
@@ -195,17 +205,21 @@ impl Operation {
                     scope.set(index.to_owned(), i.into());
 
                     for op in operations {
-                        op.evaluate(scope, functions, pixels)?;
+                        match op.evaluate(scope, functions, pixels)? {
+                            ReturnType::Continue => {}
+                            ReturnType::End => break,
+                            ReturnType::Return(value) => return Ok(ReturnType::Return(value)),
+                        }
                     }
                 }
 
-                Ok(())
+                Ok(ReturnType::Continue)
             }
             Operation::Variable { name, value } => {
                 let value = value.evaluate(scope, functions, pixels)?;
                 scope.set(name.to_owned(), value);
 
-                Ok(())
+                Ok(ReturnType::Continue)
             }
             Operation::Function { name, args } => {
                 let function = functions
@@ -213,7 +227,7 @@ impl Operation {
                     .ok_or_else(|| RuntimeError::NameError(name.to_owned()))?;
                 function.execute_with_args(&mut scope.nested(), args, functions, pixels)?;
 
-                Ok(())
+                Ok(ReturnType::Continue)
             }
 
             Operation::Brightness { value } => {
@@ -222,7 +236,7 @@ impl Operation {
                     .as_non_null_integer()?;
 
                 pixels.brightness(value as u8);
-                Ok(())
+                Ok(ReturnType::Continue)
             }
             Operation::Fill { red, green, blue } => {
                 let red = red
@@ -236,7 +250,7 @@ impl Operation {
                     .as_non_null_integer()?;
 
                 pixels.fill(red as u8, blue as u8, green as u8);
-                Ok(())
+                Ok(ReturnType::Continue)
             }
             Operation::Set {
                 index,
@@ -258,11 +272,11 @@ impl Operation {
                     .as_non_null_integer()?;
 
                 pixels.set(index as u16, red as u8, green as u8, blue as u8);
-                Ok(())
+                Ok(ReturnType::Continue)
             }
             Operation::Show => {
                 pixels.show();
-                Ok(())
+                Ok(ReturnType::Continue)
             }
 
             Operation::Sleep { duration } => {
@@ -275,7 +289,7 @@ impl Operation {
                     })?;
                 thread::sleep(duration);
 
-                Ok(())
+                Ok(ReturnType::Continue)
             }
         }
     }
@@ -296,4 +310,12 @@ impl Operation {
             Operation::Sleep { .. } => "sleep",
         }
     }
+}
+
+/// A control value used by operations
+#[derive(Debug)]
+pub(crate) enum ReturnType {
+    Continue,
+    Return(Literal),
+    End,
 }

@@ -1,7 +1,7 @@
 use super::{
     error::{RuntimeError, SyntaxError},
     literal::Literal,
-    operation::Operation,
+    operation::{Operation, ReturnType},
     scope::Scope,
     value::Value,
 };
@@ -78,7 +78,11 @@ impl Function {
         pixels: &Pixels,
     ) -> Result<Literal, RuntimeError> {
         for op in &self.operations {
-            op.evaluate(scope, functions, pixels)?;
+            match op.evaluate(scope, functions, pixels)? {
+                ReturnType::Continue => {}
+                ReturnType::End => break,
+                ReturnType::Return(value) => return Ok(value),
+            }
         }
 
         Ok(Literal::Null)
