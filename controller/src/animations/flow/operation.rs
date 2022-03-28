@@ -331,9 +331,10 @@ mod tests {
             literal::{Literal, Number},
             operators::{BinaryOperator, Comparator},
         },
-        Function, Operation, ReturnType, RuntimeError, Value,
+        Function, Operation, Pixels, ReturnType, RuntimeError, Value,
     };
     use crate::evaluate;
+    use faux::when;
     use std::time::Instant;
 
     #[test]
@@ -604,6 +605,83 @@ mod tests {
         };
 
         evaluate!(op => Err(RuntimeError::NameError(s)) if s == "nonexistent");
+    }
+
+    #[test]
+    fn brightness() {
+        let mut pixels = Pixels::faux();
+        when!(pixels.brightness(8)).once().then(|_| ());
+
+        let op = Operation::Brightness {
+            value: Value::Literal {
+                value: Literal::from(8),
+            },
+        };
+
+        evaluate!(
+            op => Ok(ReturnType::Continue),
+            with pixels = pixels
+        );
+    }
+
+    #[test]
+    fn fill() {
+        let mut pixels = Pixels::faux();
+        when!(pixels.fill(255, 0, 0)).once().then(|_| ());
+
+        let op = Operation::Fill {
+            red: Value::Literal {
+                value: Literal::from(255),
+            },
+            green: Value::Literal {
+                value: Literal::from(0),
+            },
+            blue: Value::Literal {
+                value: Literal::from(0),
+            },
+        };
+
+        evaluate!(
+            op => Ok(ReturnType::Continue),
+            with pixels = pixels
+        );
+    }
+
+    #[test]
+    fn set() {
+        let mut pixels = Pixels::faux();
+        when!(pixels.set(54, 0, 255, 0)).once().then(|_| ());
+
+        let op = Operation::Set {
+            index: Value::Literal {
+                value: Literal::from(54),
+            },
+            red: Value::Literal {
+                value: Literal::from(0),
+            },
+            green: Value::Literal {
+                value: Literal::from(255),
+            },
+            blue: Value::Literal {
+                value: Literal::from(0),
+            },
+        };
+
+        evaluate!(
+            op => Ok(ReturnType::Continue),
+            with pixels = pixels
+        );
+    }
+
+    #[test]
+    fn show() {
+        let mut pixels = Pixels::faux();
+        when!(pixels.show()).once().then(|_| ());
+
+        evaluate!(
+            Operation::Show => Ok(ReturnType::Continue),
+            with pixels = pixels
+        );
     }
 
     #[test]

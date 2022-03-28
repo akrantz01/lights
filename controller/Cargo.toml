@@ -38,3 +38,6 @@ wasmer = { version = "2.2.0", default-features = false, features = ["dylib", "sy
 
 [build-dependencies]
 tonic-build = "0.6.2"
+
+[dev-dependencies]
+faux = "0.1.6"

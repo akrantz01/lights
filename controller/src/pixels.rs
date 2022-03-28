@@ -2,7 +2,7 @@ use crate::{
     errors::PixelsError,
     interface::{ChannelBuilder, ControllerBuilder, StripType},
 };
-use std::sync::mpsc::{self, Receiver, SyncSender as MpscSender};
+use std::sync::mpsc::{self, Receiver, SyncSender as MpscSender, SyncSender};
 use tokio::{
     sync::oneshot::{self, Sender as OneshotSender},
     task::{self, JoinHandle},
@@ -35,8 +35,11 @@ enum Action {
 }
 
 /// A user-friendly interface around the low-level controller.
+#[cfg_attr(test, faux::create)]
 #[derive(Clone, Debug)]
-pub struct Pixels(MpscSender<Action>);
+pub struct Pixels {
+    tx: MpscSender<Action>,
+}
 
 impl Pixels {
     /// Create a new connection to the light strip with the given number of pixels. The connection is
@@ -53,20 +56,30 @@ impl Pixels {
         if let Some(err) = err_rx.await.unwrap() {
             Err(err)
         } else {
-            Ok((Pixels(tx), handle))
+            Ok((Pixels::construct(tx), handle))
         }
     }
 
-    /// Create a new mocked connection that does nothing.
-    #[cfg(test)]
-    pub fn new_mocked() -> Self {
-        let (tx, _) = mpsc::sync_channel(5);
-        Self(tx)
+    /// Construct a real or fake instance
+    #[inline]
+    #[allow(unused_variables)]
+    fn construct(tx: SyncSender<Action>) -> Pixels {
+        #[cfg(not(test))]
+        {
+            Pixels { tx }
+        }
+        #[cfg(test)]
+        {
+            Pixels::faux()
+        }
     }
+}
 
+#[cfg_attr(test, faux::methods)]
+impl Pixels {
     /// Send an action to the manager
     fn send(&self, action: Action) {
-        if let Err(err) = self.0.send(action) {
+        if let Err(err) = self.tx.send(action) {
             error!(action = ?err.0, %err, "failed to send action");
         }
     }
