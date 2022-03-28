@@ -817,445 +817,270 @@ mod tests {
         );
     }
 
+    macro_rules! test_literal_to {
+        (
+            $method:ident:
+                null => $null:pat_param $( if $null_guard:expr )?,
+                boolean(true) => $bool_true:pat_param $( if $bool_true_guard:expr )?,
+                boolean(false) => $bool_false:pat_param $( if $bool_false_guard:expr )?,
+                integer(5) => $int_pos:pat_param $( if $int_pos_guard:expr )?,
+                integer(0) => $int_zero:pat_param $( if $int_zero_guard:expr )?,
+                integer(-5) => $int_neg:pat_param $( if $int_neg_guard:expr )?,
+                float(5.3) => $float_pos:pat_param $( if $float_pos_guard:expr )?,
+                float(0.0) => $float_zero:pat_param $( if $float_zero_guard:expr )?,
+                float(-5.3) => $float_neg:pat_param $( if $float_neg_guard:expr )?,
+                string("abc") => $str_contents:pat_param $( if $str_contents_guard:expr )?,
+                string("") => $str_empty:pat_param $( if $str_empty_guard:expr )?,
+        ) => {
+            test_literal_to!(@inner Literal::Null, $method, $null, $( $null_guard )?);
+
+            test_literal_to!(@inner Literal::Boolean(true), $method, $bool_true, $( $bool_true_guard )?);
+            test_literal_to!(@inner Literal::Boolean(false), $method, $bool_false, $( $bool_false_guard )?);
+
+            test_literal_to!(@inner Literal::Number(Number::Integer(5)), $method, $int_pos, $( $int_pos_guard )?);
+            test_literal_to!(@inner Literal::Number(Number::Integer(0)), $method, $int_zero, $( $int_zero_guard )?);
+            test_literal_to!(@inner Literal::Number(Number::Integer(-5)), $method, $int_neg, $( $int_neg_guard )?);
+            test_literal_to!(@inner Literal::Number(Number::Float(5.3)), $method, $float_pos, $( $float_pos_guard )?);
+            test_literal_to!(@inner Literal::Number(Number::Float(0.0)), $method, $float_zero, $( $float_zero_guard )?);
+            test_literal_to!(@inner Literal::Number(Number::Float(-5.3)), $method, $float_neg, $( $float_neg_guard )?);
+
+            test_literal_to!(@inner Literal::String(String::from("abc")), $method, $str_contents, $( $str_contents_guard )?);
+            test_literal_to!(@inner Literal::String(String::new()), $method, $str_empty, $( $str_empty_guard )?);
+        };
+        (@inner $source:expr, $method:ident, $expected:pat_param, $( $guard:expr )?) => {
+            assert!(matches!($source.$method(), $expected $( if $guard )?));
+        };
+    }
+
     #[test]
     fn literal_to_boolean() {
-        assert!(matches!(Literal::Null.as_boolean(), Ok(false)));
-
-        assert!(matches!(Literal::Boolean(false).as_boolean(), Ok(false)));
-        assert!(matches!(Literal::Boolean(true).as_boolean(), Ok(true)));
-
-        assert!(matches!(
-            Literal::Number(Number::Integer(5)).as_boolean(),
-            Ok(true)
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Integer(-5)).as_boolean(),
-            Ok(true)
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Integer(0)).as_boolean(),
-            Ok(false)
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Float(5.3)).as_boolean(),
-            Ok(true)
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Float(-5.3)).as_boolean(),
-            Ok(true)
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Float(0.0)).as_boolean(),
-            Ok(false)
-        ));
-
-        assert!(matches!(
-            Literal::String("abc".into()).as_boolean(),
-            Ok(true)
-        ));
-        assert!(matches!(Literal::String("".into()).as_boolean(), Ok(false)));
+        test_literal_to!(
+            as_boolean:
+                null => Ok(false),
+                boolean(true) => Ok(true),
+                boolean(false) => Ok(false),
+                integer(5) => Ok(true),
+                integer(0) => Ok(false),
+                integer(-5) => Ok(true),
+                float(5.3) => Ok(true),
+                float(0.0) => Ok(false),
+                float(-5.3) => Ok(true),
+                string("abc") => Ok(true),
+                string("") => Ok(false),
+        );
     }
 
     #[test]
     fn literal_to_integer() {
-        assert!(matches!(Literal::Null.as_integer(), Ok(None)));
-
-        assert!(matches!(
-            Literal::Boolean(true).as_integer(),
-            Err(TypeError::Conversion {
-                expected: "integer",
-                found: "boolean"
-            })
-        ));
-        assert!(matches!(
-            Literal::Boolean(false).as_integer(),
-            Err(TypeError::Conversion {
-                expected: "integer",
-                found: "boolean"
-            })
-        ));
-
-        assert!(matches!(
-            Literal::Number(Number::Integer(5)).as_integer(),
-            Ok(Some(5))
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Integer(-5)).as_integer(),
-            Ok(Some(-5))
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Integer(0)).as_integer(),
-            Ok(Some(0))
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Float(5.3)).as_integer(),
-            Ok(Some(5))
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Float(-5.3)).as_integer(),
-            Ok(Some(-5))
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Float(0.0)).as_integer(),
-            Ok(Some(0))
-        ));
-
-        assert!(matches!(
-            Literal::String("abc".into()).as_integer(),
-            Err(TypeError::Conversion {
-                expected: "integer",
-                found: "string"
-            })
-        ));
-        assert!(matches!(
-            Literal::String("".into()).as_integer(),
-            Err(TypeError::Conversion {
-                expected: "integer",
-                found: "string"
-            })
-        ));
+        test_literal_to!(
+            as_integer:
+                null => Ok(None),
+                boolean(true) => Err(TypeError::Conversion {
+                    expected: "integer",
+                    found: "boolean"
+                }),
+                boolean(false) => Err(TypeError::Conversion {
+                    expected: "integer",
+                    found: "boolean"
+                }),
+                integer(5) => Ok(Some(5)),
+                integer(0) => Ok(Some(0)),
+                integer(-5) => Ok(Some(-5)),
+                float(5.3) => Ok(Some(5)),
+                float(0.0) => Ok(Some(0)),
+                float(-5.3) => Ok(Some(-5)),
+                string("abc") => Err(TypeError::Conversion {
+                    expected: "integer",
+                    found: "string"
+                }),
+                string("") => Err(TypeError::Conversion {
+                    expected: "integer",
+                    found: "string"
+                }),
+        );
     }
 
     #[test]
     fn literal_to_non_null_integer() {
-        assert!(matches!(
-            Literal::Null.as_non_null_integer(),
-            Err(TypeError::Conversion {
-                expected: "integer",
-                found: "null"
-            })
-        ));
-
-        assert!(matches!(
-            Literal::Boolean(true).as_non_null_integer(),
-            Err(TypeError::Conversion {
-                expected: "integer",
-                found: "boolean"
-            })
-        ));
-        assert!(matches!(
-            Literal::Boolean(false).as_non_null_integer(),
-            Err(TypeError::Conversion {
-                expected: "integer",
-                found: "boolean"
-            })
-        ));
-
-        assert!(matches!(
-            Literal::Number(Number::Integer(5)).as_non_null_integer(),
-            Ok(5)
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Integer(-5)).as_non_null_integer(),
-            Ok(-5)
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Integer(0)).as_non_null_integer(),
-            Ok(0)
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Float(5.3)).as_non_null_integer(),
-            Ok(5)
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Float(-5.3)).as_non_null_integer(),
-            Ok(-5)
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Float(0.0)).as_non_null_integer(),
-            Ok(0)
-        ));
-
-        assert!(matches!(
-            Literal::String("abc".into()).as_non_null_integer(),
-            Err(TypeError::Conversion {
-                expected: "integer",
-                found: "string"
-            })
-        ));
-        assert!(matches!(
-            Literal::String("".into()).as_non_null_integer(),
-            Err(TypeError::Conversion {
-                expected: "integer",
-                found: "string"
-            })
-        ));
+        test_literal_to!(
+            as_non_null_integer:
+                null => Err(TypeError::Conversion {
+                    expected: "integer",
+                    found: "null"
+                }),
+                boolean(true) => Err(TypeError::Conversion {
+                    expected: "integer",
+                    found: "boolean"
+                }),
+                boolean(false) => Err(TypeError::Conversion {
+                    expected: "integer",
+                    found: "boolean"
+                }),
+                integer(5) => Ok(5),
+                integer(0) => Ok(0),
+                integer(-5) => Ok(-5),
+                float(5.3) => Ok(5),
+                float(0.0) => Ok(0),
+                float(-5.3) => Ok(-5),
+                string("abc") => Err(TypeError::Conversion {
+                    expected: "integer",
+                    found: "string"
+                }),
+                string("") => Err(TypeError::Conversion {
+                    expected: "integer",
+                    found: "string"
+                }),
+        );
     }
 
     #[test]
     fn literal_to_float() {
-        assert!(matches!(Literal::Null.as_float(), Ok(None)));
-
-        assert!(matches!(
-            Literal::Boolean(true).as_float(),
-            Err(TypeError::Conversion {
-                expected: "float",
-                found: "boolean"
-            })
-        ));
-        assert!(matches!(
-            Literal::Boolean(false).as_float(),
-            Err(TypeError::Conversion {
-                expected: "float",
-                found: "boolean"
-            })
-        ));
-
-        assert!(matches!(
-            Literal::Number(Number::Integer(5)).as_float(),
-            Ok(Some(n)) if n == 5.0
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Integer(-5)).as_float(),
-            Ok(Some(n)) if n == -5.0
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Integer(0)).as_float(),
-            Ok(Some(n)) if n == 0.0
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Float(5.3)).as_float(),
-            Ok(Some(n)) if n == 5.3
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Float(-5.3)).as_float(),
-            Ok(Some(n)) if n == -5.3
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Float(0.0)).as_float(),
-            Ok(Some(n)) if n == 0.0
-        ));
-
-        assert!(matches!(
-            Literal::String("abc".into()).as_float(),
-            Err(TypeError::Conversion {
-                expected: "float",
-                found: "string"
-            })
-        ));
-        assert!(matches!(
-            Literal::String("".into()).as_float(),
-            Err(TypeError::Conversion {
-                expected: "float",
-                found: "string"
-            })
-        ));
+        test_literal_to!(
+            as_float:
+                null => Ok(None),
+                boolean(true) => Err(TypeError::Conversion {
+                    expected: "float",
+                    found: "boolean"
+                }),
+                boolean(false) => Err(TypeError::Conversion {
+                    expected: "float",
+                    found: "boolean"
+                }),
+                integer(5) => Ok(Some(n)) if n == 5.0,
+                integer(0) => Ok(Some(n)) if n == 0.0,
+                integer(-5) => Ok(Some(n)) if n == -5.0,
+                float(5.3) => Ok(Some(n)) if n == 5.3,
+                float(0.0) => Ok(Some(n)) if n == 0.0,
+                float(-5.3) => Ok(Some(n)) if n == -5.3,
+                string("abc") => Err(TypeError::Conversion {
+                    expected: "float",
+                    found: "string"
+                }),
+                string("") => Err(TypeError::Conversion {
+                    expected: "float",
+                    found: "string"
+                }),
+        );
     }
 
     #[test]
     fn literal_to_non_null_float() {
-        assert!(matches!(
-            Literal::Null.as_non_null_float(),
-            Err(TypeError::Conversion {
-                expected: "float",
-                found: "null"
-            })
-        ));
-
-        assert!(matches!(
-            Literal::Boolean(true).as_non_null_float(),
-            Err(TypeError::Conversion {
-                expected: "float",
-                found: "boolean"
-            })
-        ));
-        assert!(matches!(
-            Literal::Boolean(false).as_non_null_float(),
-            Err(TypeError::Conversion {
-                expected: "float",
-                found: "boolean"
-            })
-        ));
-
-        assert!(matches!(
-            Literal::Number(Number::Integer(5)).as_non_null_float(),
-            Ok(n) if n == 5.0
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Integer(-5)).as_non_null_float(),
-            Ok(n) if n == -5.0
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Integer(0)).as_non_null_float(),
-            Ok(n) if n == 0.0
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Float(5.3)).as_non_null_float(),
-            Ok(n) if n == 5.3
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Float(-5.3)).as_non_null_float(),
-            Ok(n) if n == -5.3
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Float(0.0)).as_non_null_float(),
-            Ok(n) if n == 0.0
-        ));
-
-        assert!(matches!(
-            Literal::String("abc".into()).as_non_null_float(),
-            Err(TypeError::Conversion {
-                expected: "float",
-                found: "string"
-            })
-        ));
-        assert!(matches!(
-            Literal::String("".into()).as_non_null_float(),
-            Err(TypeError::Conversion {
-                expected: "float",
-                found: "string"
-            })
-        ));
+        test_literal_to!(
+            as_non_null_float:
+                null => Err(TypeError::Conversion {
+                    expected: "float",
+                    found: "null"
+                }),
+                boolean(true) => Err(TypeError::Conversion {
+                    expected: "float",
+                    found: "boolean"
+                }),
+                boolean(false) => Err(TypeError::Conversion {
+                    expected: "float",
+                    found: "boolean"
+                }),
+                integer(5) => Ok(n) if n == 5.0,
+                integer(0) => Ok(n) if n == 0.0,
+                integer(-5) => Ok(n) if n == -5.0,
+                float(5.3) => Ok(n) if n == 5.3,
+                float(0.0) => Ok(n) if n == 0.0,
+                float(-5.3) => Ok(n) if n == -5.3,
+                string("abc") => Err(TypeError::Conversion {
+                    expected: "float",
+                    found: "string"
+                }),
+                string("") => Err(TypeError::Conversion {
+                    expected: "float",
+                    found: "string"
+                }),
+        );
     }
 
     #[test]
     fn literal_to_string() {
-        assert!(matches!(Literal::Null.as_string(), Ok(None)));
-
-        assert!(matches!(
-            Literal::Boolean(true).as_string(),
-            Err(TypeError::Conversion {
-                expected: "string",
-                found: "boolean"
-            })
-        ));
-        assert!(matches!(
-            Literal::Boolean(false).as_string(),
-            Err(TypeError::Conversion {
-                expected: "string",
-                found: "boolean"
-            })
-        ));
-
-        assert!(matches!(
-            Literal::Number(Number::Integer(5)).as_string(),
-            Err(TypeError::Conversion {
-                expected: "string",
-                found: "integer"
-            })
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Integer(-5)).as_string(),
-            Err(TypeError::Conversion {
-                expected: "string",
-                found: "integer"
-            })
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Integer(0)).as_string(),
-            Err(TypeError::Conversion {
-                expected: "string",
-                found: "integer"
-            })
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Float(5.3)).as_string(),
-            Err(TypeError::Conversion {
-                expected: "string",
-                found: "float"
-            })
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Float(-5.3)).as_string(),
-            Err(TypeError::Conversion {
-                expected: "string",
-                found: "float"
-            })
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Float(0.0)).as_string(),
-            Err(TypeError::Conversion {
-                expected: "string",
-                found: "float"
-            })
-        ));
-
-        assert!(matches!(
-            Literal::String("abc".into()).as_string(),
-            Ok(Some(s)) if s == String::from("abc")
-        ));
-        assert!(matches!(
-            Literal::String(String::new()).as_string(),
-            Ok(Some(s)) if s == String::new()
-        ));
+        test_literal_to!(
+            as_string:
+                null => Ok(None),
+                boolean(true) => Err(TypeError::Conversion {
+                    expected: "string",
+                    found: "boolean"
+                }),
+                boolean(false) => Err(TypeError::Conversion {
+                    expected: "string",
+                    found: "boolean"
+                }),
+                integer(5) => Err(TypeError::Conversion {
+                    expected: "string",
+                    found: "integer"
+                }),
+                integer(0) => Err(TypeError::Conversion {
+                    expected: "string",
+                    found: "integer"
+                }),
+                integer(-5) => Err(TypeError::Conversion {
+                    expected: "string",
+                    found: "integer"
+                }),
+                float(5.3) => Err(TypeError::Conversion {
+                    expected: "string",
+                    found: "float"
+                }),
+                float(0.0) => Err(TypeError::Conversion {
+                    expected: "string",
+                    found: "float"
+                }),
+                float(-5.3) => Err(TypeError::Conversion {
+                    expected: "string",
+                    found: "float"
+                }),
+                string("abc") => Ok(Some("abc")),
+                string("") => Ok(Some("")),
+        );
     }
 
     #[test]
     fn literal_to_non_null_string() {
-        assert!(matches!(
-            Literal::Null.as_non_null_string(),
-            Err(TypeError::Conversion {
-                expected: "string",
-                found: "null"
-            })
-        ));
-
-        assert!(matches!(
-            Literal::Boolean(true).as_non_null_string(),
-            Err(TypeError::Conversion {
-                expected: "string",
-                found: "boolean"
-            })
-        ));
-        assert!(matches!(
-            Literal::Boolean(false).as_non_null_string(),
-            Err(TypeError::Conversion {
-                expected: "string",
-                found: "boolean"
-            })
-        ));
-
-        assert!(matches!(
-            Literal::Number(Number::Integer(5)).as_non_null_string(),
-            Err(TypeError::Conversion {
-                expected: "string",
-                found: "integer"
-            })
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Integer(-5)).as_non_null_string(),
-            Err(TypeError::Conversion {
-                expected: "string",
-                found: "integer"
-            })
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Integer(0)).as_non_null_string(),
-            Err(TypeError::Conversion {
-                expected: "string",
-                found: "integer"
-            })
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Float(5.3)).as_non_null_string(),
-            Err(TypeError::Conversion {
-                expected: "string",
-                found: "float"
-            })
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Float(-5.3)).as_non_null_string(),
-            Err(TypeError::Conversion {
-                expected: "string",
-                found: "float"
-            })
-        ));
-        assert!(matches!(
-            Literal::Number(Number::Float(0.0)).as_non_null_string(),
-            Err(TypeError::Conversion {
-                expected: "string",
-                found: "float"
-            })
-        ));
-
-        assert!(matches!(
-            Literal::String("abc".into()).as_non_null_string(),
-            Ok(s) if s == String::from("abc")
-        ));
-        assert!(matches!(
-            Literal::String(String::new()).as_non_null_string(),
-            Ok(s) if s == String::new()
-        ));
+        test_literal_to!(
+            as_non_null_string:
+                null => Err(TypeError::Conversion {
+                    expected: "string",
+                    found: "null"
+                }),
+                boolean(true) => Err(TypeError::Conversion {
+                    expected: "string",
+                    found: "boolean"
+                }),
+                boolean(false) => Err(TypeError::Conversion {
+                    expected: "string",
+                    found: "boolean"
+                }),
+                integer(5) => Err(TypeError::Conversion {
+                    expected: "string",
+                    found: "integer"
+                }),
+                integer(0) => Err(TypeError::Conversion {
+                    expected: "string",
+                    found: "integer"
+                }),
+                integer(-5) => Err(TypeError::Conversion {
+                    expected: "string",
+                    found: "integer"
+                }),
+                float(5.3) => Err(TypeError::Conversion {
+                    expected: "string",
+                    found: "float"
+                }),
+                float(0.0) => Err(TypeError::Conversion {
+                    expected: "string",
+                    found: "float"
+                }),
+                float(-5.3) => Err(TypeError::Conversion {
+                    expected: "string",
+                    found: "float"
+                }),
+                string("abc") => Ok("abc"),
+                string("") => Ok(""),
+        );
     }
 
     #[test]
