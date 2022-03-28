@@ -97,10 +97,14 @@ impl Value {
                 let rhs = rhs.evaluate(scope, functions, pixels)?;
                 Ok(comparator.evaluate(&lhs, &rhs)?)
             }
-            Value::Function { name, args } => functions
-                .get(name)
-                .ok_or_else(|| RuntimeError::NameError(name.to_owned()))?
-                .execute_with_args(&mut scope.nested(), args, functions, pixels),
+            Value::Function { name, args } => {
+                let function = functions
+                    .get(name)
+                    .ok_or_else(|| RuntimeError::NameError(name.to_owned()))?;
+
+                let args = function.associate_args(scope, args, functions, pixels)?;
+                function.evaluate(&mut scope.nested(args), functions, pixels)
+            }
         }
     }
 }

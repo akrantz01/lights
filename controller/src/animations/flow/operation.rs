@@ -227,7 +227,9 @@ impl Operation {
                 let function = functions
                     .get(name)
                     .ok_or_else(|| RuntimeError::NameError(name.to_owned()))?;
-                function.execute_with_args(&mut scope.nested(), args, functions, pixels)?;
+
+                let args = function.associate_args(scope, args, functions, pixels)?;
+                function.evaluate(&mut scope.nested(args), functions, pixels)?;
 
                 Ok(ReturnType::Continue)
             }

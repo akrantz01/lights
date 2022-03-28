@@ -18,10 +18,10 @@ impl<'s> Scope<'s> {
     }
 
     /// Creates a new scope with a reset local scope for nested function calls.
-    pub(crate) fn nested(&mut self) -> Scope {
+    pub(crate) fn nested(&mut self, locals: HashMap<String, Literal>) -> Scope {
         Scope {
             globals: self.globals,
-            locals: HashMap::new(),
+            locals,
         }
     }
 

@@ -80,7 +80,7 @@ impl Function {
     }
 
     /// Evaluate all the operations in the function
-    pub(crate) fn execute(
+    pub(crate) fn evaluate(
         &self,
         scope: &mut Scope,
         functions: &HashMap<String, Function>,
@@ -98,21 +98,22 @@ impl Function {
         Ok(Literal::Null)
     }
 
-    /// Execute a function with some arguments
-    pub(crate) fn execute_with_args(
+    /// Associate positional values with the function arguments
+    pub(crate) fn associate_args(
         &self,
         scope: &mut Scope,
-        args: &[Value],
+        values: &[Value],
         functions: &HashMap<String, Function>,
         pixels: &Pixels,
-    ) -> Result<Literal, RuntimeError> {
-        // Add the arguments to the current scope
-        for (name, arg) in zip(&self.args, args) {
+    ) -> Result<HashMap<String, Literal>, RuntimeError> {
+        let mut associated = HashMap::new();
+
+        for (name, arg) in zip(&self.args, values) {
             let value = arg.evaluate(scope, functions, pixels)?;
-            scope.set(name.to_owned(), value);
+            associated.insert(name.to_owned(), value);
         }
 
-        self.execute(scope, functions, pixels)
+        Ok(associated)
     }
 }
 
@@ -140,5 +141,452 @@ pub(crate) fn function_call_is_valid(
         Err(SyntaxError::UnknownFunction {
             name: name.to_owned(),
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        super::{
+            literal::{Literal, Number},
+            operation::Operation,
+            operators::{BinaryOperator, Comparator},
+            value::Value,
+        },
+        Function, RuntimeError,
+    };
+    use crate::animations::flow::operators::UnaryOperator;
+    use crate::evaluate;
+
+    #[test]
+    fn empty() {
+        let f = Function::from(vec![]);
+        evaluate!(f => Ok(Literal::Null));
+    }
+
+    #[test]
+    fn simple() {
+        let f = Function::from(vec![Operation::Return {
+            result: Value::Literal {
+                value: Literal::from(true),
+            },
+        }]);
+        evaluate!(f => Ok(Literal::Boolean(true)));
+    }
+
+    #[test]
+    fn early_exit() {
+        let f = Function::from(vec![
+            Operation::End,
+            Operation::Return {
+                result: Value::Literal {
+                    value: Literal::from(false),
+                },
+            },
+        ]);
+
+        evaluate!(f => Ok(Literal::Null));
+    }
+
+    #[test]
+    fn early_return() {
+        let f = Function::from(vec![
+            Operation::Return {
+                result: Value::Literal {
+                    value: Literal::from(true),
+                },
+            },
+            Operation::End,
+        ]);
+
+        evaluate!(f => Ok(Literal::Boolean(true)));
+    }
+
+    #[test]
+    fn invalid_break() {
+        let f = Function::from(vec![Operation::Break]);
+
+        evaluate!(f => Err(RuntimeError::StructuralError("break")));
+    }
+
+    #[test]
+    fn valid_break() {
+        let f = Function::from(vec![
+            // Iterate from 0 to 10
+            Operation::For {
+                start: Value::Literal {
+                    value: Literal::from(0),
+                },
+                end: Value::Literal {
+                    value: Literal::from(10),
+                },
+                index: String::from("i"),
+                operations: vec![
+                    // Check if sum == 5
+                    Operation::If {
+                        condition: Value::Comparison {
+                            comparator: Comparator::Equal,
+                            lhs: Box::new(Value::Variable {
+                                name: String::from("sum"),
+                            }),
+                            rhs: Box::new(Value::Literal {
+                                value: Literal::from(5),
+                            }),
+                        },
+                        // Break
+                        truthy: vec![Operation::Break],
+                        // Increment by one
+                        falsy: vec![Operation::Variable {
+                            name: String::from("sum"),
+                            value: Value::BinaryExpression {
+                                operator: BinaryOperator::Add,
+                                lhs: Box::new(Value::Variable {
+                                    name: String::from("sum"),
+                                }),
+                                rhs: Box::new(Value::Literal {
+                                    value: Literal::from(1),
+                                }),
+                            },
+                        }],
+                    },
+                ],
+            },
+            // Return sum
+            Operation::Return {
+                result: Value::Variable {
+                    name: String::from("sum"),
+                },
+            },
+        ]);
+
+        evaluate!(
+            f => Ok(Literal::Number(Number::Integer(5))),
+            with globals
+                "sum" => 0,
+        );
+    }
+
+    #[test]
+    fn local_variables() {
+        let f = Function::from(vec![
+            // Create a variable
+            Operation::Variable {
+                name: String::from("hello"),
+                value: Value::Literal {
+                    value: Literal::from(true),
+                },
+            },
+            // Modify it
+            Operation::Variable {
+                name: String::from("hello"),
+                value: Value::UnaryExpression {
+                    operator: UnaryOperator::BitwiseNot,
+                    value: Box::new(Value::Variable {
+                        name: String::from("hello"),
+                    }),
+                },
+            },
+            // Read it
+            Operation::Return {
+                result: Value::Variable {
+                    name: String::from("hello"),
+                },
+            },
+        ]);
+
+        evaluate!(f => Ok(Literal::Boolean(false)));
+    }
+
+    #[test]
+    fn global_variables() {
+        let f = Function::from(vec![Operation::Return {
+            result: Value::BinaryExpression {
+                operator: BinaryOperator::Divide,
+                lhs: Box::new(Value::Variable {
+                    name: String::from("f"),
+                }),
+                rhs: Box::new(Value::Literal {
+                    value: Literal::from(2),
+                }),
+            },
+        }]);
+
+        evaluate!(
+            f => Ok(Literal::Number(Number::Float(f))) if f == 2.5,
+            with globals
+                "f" => 5.0,
+        );
+    }
+
+    #[test]
+    fn local_and_global_variables() {
+        let f = Function::from(vec![
+            Operation::If {
+                // If value > 20
+                condition: Value::Comparison {
+                    comparator: Comparator::GreaterThan,
+                    lhs: Box::new(Value::Variable {
+                        name: String::from("value"),
+                    }),
+                    rhs: Box::new(Value::Literal {
+                        value: Literal::from(20),
+                    }),
+                },
+                // result = value % 9
+                truthy: vec![Operation::Variable {
+                    name: String::from("result"),
+                    value: Value::BinaryExpression {
+                        operator: BinaryOperator::Modulo,
+                        lhs: Box::new(Value::Variable {
+                            name: String::from("value"),
+                        }),
+                        rhs: Box::new(Value::Literal {
+                            value: Literal::from(9),
+                        }),
+                    },
+                }],
+                // result = 2
+                falsy: vec![Operation::Variable {
+                    name: String::from("result"),
+                    value: Value::Literal {
+                        value: Literal::from(2),
+                    },
+                }],
+            },
+            // result = value ** result
+            Operation::Variable {
+                name: String::from("result"),
+                value: Value::BinaryExpression {
+                    operator: BinaryOperator::Power,
+                    lhs: Box::new(Value::Variable {
+                        name: String::from("value"),
+                    }),
+                    rhs: Box::new(Value::Variable {
+                        name: String::from("result"),
+                    }),
+                },
+            },
+            // Return result
+            Operation::Return {
+                result: Value::Variable {
+                    name: String::from("result"),
+                },
+            },
+        ]);
+
+        evaluate!(
+            f => Ok(Literal::Number(Number::Integer(5489031744))),
+            with globals
+                "value" => 42,
+        );
+    }
+
+    #[test]
+    fn nested_calls() {
+        let six = Function::from(vec![Operation::Return {
+            result: Value::Literal {
+                value: Literal::from(6),
+            },
+        }]);
+        let seven = Function::from(vec![Operation::Return {
+            result: Value::Literal {
+                value: Literal::from(7),
+            },
+        }]);
+        let f = Function::from(vec![Operation::Return {
+            result: Value::BinaryExpression {
+                operator: BinaryOperator::Multiply,
+                lhs: Box::new(Value::Function {
+                    name: String::from("seven"),
+                    args: Vec::new(),
+                }),
+                rhs: Box::new(Value::Function {
+                    name: String::from("six"),
+                    args: Vec::new(),
+                }),
+            },
+        }]);
+
+        evaluate!(
+            f => Ok(Literal::Number(Number::Integer(42))),
+            with functions
+                "six" => six,
+                "seven" => seven,
+        );
+    }
+
+    #[test]
+    fn with_arguments() {
+        let args = vec![String::from("arg")];
+        let operations = vec![Operation::Return {
+            result: Value::Variable {
+                name: String::from("arg"),
+            },
+        }];
+        let takes_args = Function::from((args, operations));
+
+        let f = Function::from(vec![Operation::Return {
+            result: Value::Function {
+                name: String::from("takes-args"),
+                args: vec![Value::Literal {
+                    value: Literal::from(true),
+                }],
+            },
+        }]);
+
+        evaluate!(
+            f => Ok(Literal::Boolean(true)),
+            with functions
+                "takes-args" => takes_args,
+        );
+    }
+
+    #[test]
+    fn with_arguments_and_globals() {
+        let args = vec![String::from("arg")];
+        let operations = vec![
+            Operation::Variable {
+                name: String::from("global"),
+                value: Value::Literal {
+                    value: Literal::from(8),
+                },
+            },
+            Operation::Return {
+                result: Value::Variable {
+                    name: String::from("arg"),
+                },
+            },
+        ];
+        let takes_args = Function::from((args, operations));
+
+        let f = Function::from(vec![Operation::Return {
+            result: Value::Function {
+                name: String::from("takes-args"),
+                args: vec![Value::Literal {
+                    value: Literal::from(true),
+                }],
+            },
+        }]);
+
+        let scope = evaluate!(
+            f => Ok(Literal::Boolean(true)),
+            with globals
+                "global" => None::<bool>;
+            with functions
+                "takes-args" => takes_args,
+        );
+        assert_eq!(scope.get("global"), Some(&Literal::from(8)));
+    }
+
+    #[test]
+    fn with_arguments_locals_and_globals() {
+        let args = vec![String::from("arg")];
+        let operations = vec![
+            Operation::Variable {
+                name: String::from("global"),
+                value: Value::Literal {
+                    value: Literal::from(8),
+                },
+            },
+            Operation::Variable {
+                name: String::from("local"),
+                value: Value::Literal {
+                    value: Literal::from("callee"),
+                },
+            },
+            Operation::Return {
+                result: Value::Variable {
+                    name: String::from("arg"),
+                },
+            },
+        ];
+        let takes_args = Function::from((args, operations));
+
+        let f = Function::from(vec![
+            Operation::Variable {
+                name: String::from("local"),
+                value: Value::Literal {
+                    value: Literal::from("caller"),
+                },
+            },
+            Operation::Return {
+                result: Value::Function {
+                    name: String::from("takes-args"),
+                    args: vec![Value::Literal {
+                        value: Literal::from(true),
+                    }],
+                },
+            },
+        ]);
+
+        let scope = evaluate!(
+            f => Ok(Literal::Boolean(true)),
+            with globals
+                "global" => None::<bool>;
+            with functions
+                "takes-args" => takes_args,
+        );
+        assert_eq!(scope.get("global"), Some(&Literal::from(8)));
+        assert_eq!(scope.get("local"), Some(&Literal::from("caller")));
+    }
+
+    #[test]
+    fn recursive() {
+        let args = vec![String::from("n")];
+        let operations = vec![Operation::If {
+            // n == 0
+            condition: Value::Comparison {
+                comparator: Comparator::Equal,
+                lhs: Box::new(Value::Variable {
+                    name: String::from("n"),
+                }),
+                rhs: Box::new(Value::Literal {
+                    value: Literal::from(0),
+                }),
+            },
+            // return 1
+            truthy: vec![Operation::Return {
+                result: Value::Literal {
+                    value: Literal::from(1),
+                },
+            }],
+            // return n * factorial(n - 1)
+            falsy: vec![Operation::Return {
+                result: Value::BinaryExpression {
+                    operator: BinaryOperator::Multiply,
+                    lhs: Box::new(Value::Variable {
+                        name: String::from("n"),
+                    }),
+                    rhs: Box::new(Value::Function {
+                        name: String::from("factorial"),
+                        args: vec![Value::BinaryExpression {
+                            operator: BinaryOperator::Subtract,
+                            lhs: Box::new(Value::Variable {
+                                name: String::from("n"),
+                            }),
+                            rhs: Box::new(Value::Literal {
+                                value: Literal::from(1),
+                            }),
+                        }],
+                    }),
+                },
+            }],
+        }];
+        let factorial = Function::from((args, operations));
+
+        let f = Function::from(vec![Operation::Return {
+            result: Value::Function {
+                name: String::from("factorial"),
+                args: vec![Value::Literal {
+                    value: Literal::from(5),
+                }],
+            },
+        }]);
+
+        evaluate!(
+            f => Ok(Literal::Number(Number::Integer(120))),
+            with functions
+                "factorial" => factorial,
+        );
     }
 }

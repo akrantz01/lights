@@ -88,7 +88,7 @@ impl Animation for Flow {
         let mut scope = Scope::new(&mut globals);
 
         self.frame
-            .execute(&mut scope, &self.functions, &self.pixels)
+            .evaluate(&mut scope, &self.functions, &self.pixels)
             .map_err(|e| Box::new(e))?;
 
         Ok(())
