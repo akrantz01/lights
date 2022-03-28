@@ -468,7 +468,7 @@ impl Number {
         match self {
             Number::Integer(i) => Ok(Number::Integer(!i)),
             Number::Float(_) => Err(TypeError::UnaryOperator {
-                operator: "negate",
+                operator: "bitwise not",
                 kind: self.kind(),
             }),
         }
@@ -817,7 +817,7 @@ mod tests {
         );
     }
 
-    macro_rules! test_literal_to {
+    macro_rules! test_literal_unary {
         (
             $method:ident:
                 null => $null:pat_param $( if $null_guard:expr )?,
@@ -832,20 +832,20 @@ mod tests {
                 string("abc") => $str_contents:pat_param $( if $str_contents_guard:expr )?,
                 string("") => $str_empty:pat_param $( if $str_empty_guard:expr )?,
         ) => {
-            test_literal_to!(@inner Literal::Null, $method, $null, $( $null_guard )?);
+            test_literal_unary!(@inner Literal::Null, $method, $null, $( $null_guard )?);
 
-            test_literal_to!(@inner Literal::Boolean(true), $method, $bool_true, $( $bool_true_guard )?);
-            test_literal_to!(@inner Literal::Boolean(false), $method, $bool_false, $( $bool_false_guard )?);
+            test_literal_unary!(@inner Literal::Boolean(true), $method, $bool_true, $( $bool_true_guard )?);
+            test_literal_unary!(@inner Literal::Boolean(false), $method, $bool_false, $( $bool_false_guard )?);
 
-            test_literal_to!(@inner Literal::Number(Number::Integer(5)), $method, $int_pos, $( $int_pos_guard )?);
-            test_literal_to!(@inner Literal::Number(Number::Integer(0)), $method, $int_zero, $( $int_zero_guard )?);
-            test_literal_to!(@inner Literal::Number(Number::Integer(-5)), $method, $int_neg, $( $int_neg_guard )?);
-            test_literal_to!(@inner Literal::Number(Number::Float(5.3)), $method, $float_pos, $( $float_pos_guard )?);
-            test_literal_to!(@inner Literal::Number(Number::Float(0.0)), $method, $float_zero, $( $float_zero_guard )?);
-            test_literal_to!(@inner Literal::Number(Number::Float(-5.3)), $method, $float_neg, $( $float_neg_guard )?);
+            test_literal_unary!(@inner Literal::Number(Number::Integer(5)), $method, $int_pos, $( $int_pos_guard )?);
+            test_literal_unary!(@inner Literal::Number(Number::Integer(0)), $method, $int_zero, $( $int_zero_guard )?);
+            test_literal_unary!(@inner Literal::Number(Number::Integer(-5)), $method, $int_neg, $( $int_neg_guard )?);
+            test_literal_unary!(@inner Literal::Number(Number::Float(5.3)), $method, $float_pos, $( $float_pos_guard )?);
+            test_literal_unary!(@inner Literal::Number(Number::Float(0.0)), $method, $float_zero, $( $float_zero_guard )?);
+            test_literal_unary!(@inner Literal::Number(Number::Float(-5.3)), $method, $float_neg, $( $float_neg_guard )?);
 
-            test_literal_to!(@inner Literal::String(String::from("abc")), $method, $str_contents, $( $str_contents_guard )?);
-            test_literal_to!(@inner Literal::String(String::new()), $method, $str_empty, $( $str_empty_guard )?);
+            test_literal_unary!(@inner Literal::String(String::from("abc")), $method, $str_contents, $( $str_contents_guard )?);
+            test_literal_unary!(@inner Literal::String(String::new()), $method, $str_empty, $( $str_empty_guard )?);
         };
         (@inner $source:expr, $method:ident, $expected:pat_param, $( $guard:expr )?) => {
             assert!(matches!($source.$method(), $expected $( if $guard )?));
@@ -854,7 +854,7 @@ mod tests {
 
     #[test]
     fn literal_to_boolean() {
-        test_literal_to!(
+        test_literal_unary!(
             as_boolean:
                 null => Ok(false),
                 boolean(true) => Ok(true),
@@ -872,7 +872,7 @@ mod tests {
 
     #[test]
     fn literal_to_integer() {
-        test_literal_to!(
+        test_literal_unary!(
             as_integer:
                 null => Ok(None),
                 boolean(true) => Err(TypeError::Conversion {
@@ -902,7 +902,7 @@ mod tests {
 
     #[test]
     fn literal_to_non_null_integer() {
-        test_literal_to!(
+        test_literal_unary!(
             as_non_null_integer:
                 null => Err(TypeError::Conversion {
                     expected: "integer",
@@ -935,7 +935,7 @@ mod tests {
 
     #[test]
     fn literal_to_float() {
-        test_literal_to!(
+        test_literal_unary!(
             as_float:
                 null => Ok(None),
                 boolean(true) => Err(TypeError::Conversion {
@@ -965,7 +965,7 @@ mod tests {
 
     #[test]
     fn literal_to_non_null_float() {
-        test_literal_to!(
+        test_literal_unary!(
             as_non_null_float:
                 null => Err(TypeError::Conversion {
                     expected: "float",
@@ -998,7 +998,7 @@ mod tests {
 
     #[test]
     fn literal_to_string() {
-        test_literal_to!(
+        test_literal_unary!(
             as_string:
                 null => Ok(None),
                 boolean(true) => Err(TypeError::Conversion {
@@ -1040,7 +1040,7 @@ mod tests {
 
     #[test]
     fn literal_to_non_null_string() {
-        test_literal_to!(
+        test_literal_unary!(
             as_non_null_string:
                 null => Err(TypeError::Conversion {
                     expected: "string",
@@ -1082,6 +1082,44 @@ mod tests {
                 string("") => Ok(""),
         );
     }
+
+    #[test]
+    fn literal_neg() {
+        test_literal_unary!(
+            try_neg:
+                null => Err(TypeError::UnaryOperator { operator: "negate", kind: "null" }),
+                boolean(true) => Err(TypeError::UnaryOperator { operator: "negate", kind: "boolean" }),
+                boolean(false) => Err(TypeError::UnaryOperator { operator: "negate", kind: "boolean" }),
+                integer(5) => Ok(Literal::Number(Number::Integer(-5))),
+                integer(0) => Ok(Literal::Number(Number::Integer(0))),
+                integer(-5) => Ok(Literal::Number(Number::Integer(5))),
+                float(5.3) => Ok(Literal::Number(Number::Float(f))) if f == -5.3,
+                float(0.0) => Ok(Literal::Number(Number::Float(f))) if f == 0.0,
+                float(-5.3) => Ok(Literal::Number(Number::Float(f))) if f == 5.3,
+                string("abc") => Err(TypeError::UnaryOperator { operator: "negate", kind: "string" }),
+                string("") => Err(TypeError::UnaryOperator { operator: "negate", kind: "string" }),
+        );
+    }
+
+    #[test]
+    fn literal_not() {
+        test_literal_unary!(
+            try_not:
+                null => Err(TypeError::UnaryOperator { operator: "bitwise not", kind: "null" }),
+                boolean(true) => Ok(Literal::Boolean(false)),
+                boolean(false) => Ok(Literal::Boolean(true)),
+                integer(5) => Ok(Literal::Number(Number::Integer(-6))),
+                integer(0) => Ok(Literal::Number(Number::Integer(-1))),
+                integer(-5) => Ok(Literal::Number(Number::Integer(4))),
+                float(5.3) => Err(TypeError::UnaryOperator { operator: "bitwise not", kind: "float" }),
+                float(0.0) => Err(TypeError::UnaryOperator { operator: "bitwise not", kind: "float" }),
+                float(-5.3) => Err(TypeError::UnaryOperator { operator: "bitwise not", kind: "float" }),
+                string("abc") => Err(TypeError::UnaryOperator { operator: "bitwise not", kind: "string" }),
+                string("") => Err(TypeError::UnaryOperator { operator: "bitwise not", kind: "string" }),
+        );
+    }
+
+    // TODO: add tests for binary operators
 
     #[test]
     fn number_operations_on_float_and_float() {
