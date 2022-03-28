@@ -18,6 +18,9 @@ use std::{
 #[serde(rename_all = "lowercase", tag = "op")]
 pub(crate) enum Operation {
     // Structural operations
+    /// Break stops the execution of the innermost loop. It can only be used within the context
+    /// of for loops.
+    Break,
     /// The ending point for the flow. Multiple [`Operation::End`]s can exist in a flow,
     /// however, every flow must always terminate with an [`Operation::End`].
     End,
@@ -84,7 +87,7 @@ impl Operation {
     ) -> Result<(), SyntaxError> {
         match self {
             // Nothing to do here
-            Operation::End | Operation::Show | Operation::Sleep { .. } => Ok(()),
+            Operation::End | Operation::Break | Operation::Show | Operation::Sleep { .. } => Ok(()),
 
             // Check operations only using values
             Operation::Return { result: value } | Operation::Brightness { value } => {
@@ -157,6 +160,7 @@ impl Operation {
         pixels: &Pixels,
     ) -> Result<ReturnType, RuntimeError> {
         match self {
+            Operation::Break => Ok(ReturnType::Break),
             Operation::End => Ok(ReturnType::End),
             Operation::Return { result } => Ok(ReturnType::Return(
                 result.evaluate(scope, functions, pixels)?,
@@ -172,16 +176,14 @@ impl Operation {
                     for op in truthy {
                         match op.evaluate(scope, functions, pixels)? {
                             ReturnType::Continue => {}
-                            ReturnType::End => break,
-                            ReturnType::Return(value) => return Ok(ReturnType::Return(value)),
+                            r => return Ok(r),
                         }
                     }
                 } else {
                     for op in falsy {
                         match op.evaluate(scope, functions, pixels)? {
                             ReturnType::Continue => {}
-                            ReturnType::End => break,
-                            ReturnType::Return(value) => return Ok(ReturnType::Return(value)),
+                            r => return Ok(r),
                         }
                     }
                 }
@@ -201,14 +203,14 @@ impl Operation {
                     .evaluate(scope, functions, pixels)?
                     .as_non_null_integer()?;
 
-                for i in start..end {
+                'iter: for i in start..end {
                     scope.set(index.to_owned(), i.into());
 
                     for op in operations {
                         match op.evaluate(scope, functions, pixels)? {
+                            ReturnType::Break => break 'iter,
                             ReturnType::Continue => {}
-                            ReturnType::End => break,
-                            ReturnType::Return(value) => return Ok(ReturnType::Return(value)),
+                            r => return Ok(r),
                         }
                     }
                 }
@@ -297,6 +299,7 @@ impl Operation {
     /// Get the name of the operation
     pub(crate) fn name(&self) -> &'static str {
         match self {
+            Operation::Break => "break",
             Operation::End => "end",
             Operation::Return { .. } => "return",
             Operation::If { .. } => "if",
@@ -315,7 +318,306 @@ impl Operation {
 /// A control value used by operations
 #[derive(Debug)]
 pub(crate) enum ReturnType {
+    Break,
     Continue,
     Return(Literal),
     End,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        super::{
+            literal::{Literal, Number},
+            operators::{BinaryOperator, Comparator},
+        },
+        Function, Operation, ReturnType, RuntimeError, Value,
+    };
+    use crate::evaluate;
+    use std::time::Instant;
+
+    #[test]
+    fn end() {
+        evaluate!(Operation::End => Ok(ReturnType::End));
+    }
+
+    #[test]
+    fn r#break() {
+        evaluate!(Operation::Break => Ok(ReturnType::Break));
+    }
+
+    #[test]
+    fn r#return() {
+        let op = Operation::Return {
+            result: Value::Literal {
+                value: Literal::from(true),
+            },
+        };
+
+        evaluate!(op => Ok(ReturnType::Return(Literal::Boolean(true))));
+    }
+
+    #[test]
+    fn if_truthy() {
+        let op = Operation::If {
+            condition: Value::Literal {
+                value: Literal::from(true),
+            },
+            truthy: vec![Operation::Return {
+                result: Value::Literal {
+                    value: Literal::from("truthy"),
+                },
+            }],
+            falsy: vec![Operation::Return {
+                result: Value::Literal {
+                    value: Literal::from("falsy"),
+                },
+            }],
+        };
+
+        evaluate!(op => Ok(ReturnType::Return(Literal::String(s))) if s == "truthy");
+    }
+
+    #[test]
+    fn if_falsy() {
+        let op = Operation::If {
+            condition: Value::Literal {
+                value: Literal::from(false),
+            },
+            truthy: vec![Operation::Return {
+                result: Value::Literal {
+                    value: Literal::from("truthy"),
+                },
+            }],
+            falsy: vec![Operation::Return {
+                result: Value::Literal {
+                    value: Literal::from("falsy"),
+                },
+            }],
+        };
+
+        evaluate!(op => Ok(ReturnType::Return(Literal::String(s))) if s == "falsy");
+    }
+
+    #[test]
+    fn for_simple() {
+        let op = Operation::For {
+            start: Value::Literal {
+                value: Literal::from(1),
+            },
+            end: Value::Literal {
+                value: Literal::from(10),
+            },
+            index: String::from("i"),
+            operations: vec![Operation::Variable {
+                name: String::from("factorial"),
+                value: Value::BinaryExpression {
+                    operator: BinaryOperator::Multiply,
+                    lhs: Box::new(Value::Variable {
+                        name: String::from("i"),
+                    }),
+                    rhs: Box::new(Value::Variable {
+                        name: String::from("factorial"),
+                    }),
+                },
+            }],
+        };
+
+        let scope = evaluate!(
+            op => Ok(ReturnType::Continue),
+            with globals
+                "factorial" => 1,
+        );
+
+        assert_eq!(scope.get("factorial"), Some(&Literal::from(362880)));
+    }
+
+    #[test]
+    fn for_break() {
+        let op = Operation::For {
+            start: Value::Literal {
+                value: Literal::from(0),
+            },
+            end: Value::Literal {
+                value: Literal::from(10),
+            },
+            index: String::from("i"),
+            operations: vec![
+                Operation::Variable {
+                    name: String::from("sum"),
+                    value: Value::BinaryExpression {
+                        operator: BinaryOperator::Add,
+                        lhs: Box::new(Value::Variable {
+                            name: String::from("sum"),
+                        }),
+                        rhs: Box::new(Value::Literal {
+                            value: Literal::from(1),
+                        }),
+                    },
+                },
+                Operation::If {
+                    condition: Value::Comparison {
+                        comparator: Comparator::Equal,
+                        lhs: Box::new(Value::Variable {
+                            name: String::from("sum"),
+                        }),
+                        rhs: Box::new(Value::Literal {
+                            value: Literal::from(5),
+                        }),
+                    },
+                    truthy: vec![Operation::Break],
+                    falsy: vec![],
+                },
+            ],
+        };
+
+        let scope = evaluate!(
+            op => Ok(ReturnType::Continue),
+            with globals
+                "sum" => 0,
+        );
+
+        assert_eq!(scope.get("sum"), Some(&Literal::from(5)));
+    }
+
+    #[test]
+    fn for_return() {
+        let op = Operation::For {
+            start: Value::Literal {
+                value: Literal::from(0),
+            },
+            end: Value::Literal {
+                value: Literal::from(10),
+            },
+            index: String::from("i"),
+            operations: vec![Operation::If {
+                condition: Value::Comparison {
+                    comparator: Comparator::Equal,
+                    lhs: Box::new(Value::Variable {
+                        name: String::from("i"),
+                    }),
+                    rhs: Box::new(Value::Literal {
+                        value: Literal::from(5),
+                    }),
+                },
+                truthy: vec![Operation::Return {
+                    result: Value::Variable {
+                        name: String::from("i"),
+                    },
+                }],
+                falsy: vec![],
+            }],
+        };
+
+        evaluate!(op => Ok(ReturnType::Return(Literal::Number(Number::Integer(5)))));
+    }
+
+    #[test]
+    fn variable() {
+        let op = Operation::Variable {
+            name: String::from("testing"),
+            value: Value::Literal {
+                value: Literal::from(true),
+            },
+        };
+
+        let scope = evaluate!(op => Ok(ReturnType::Continue));
+        assert_eq!(scope.get("testing"), Some(&Literal::Boolean(true)));
+    }
+
+    #[test]
+    fn function_empty() {
+        let function = Function::from(Vec::new());
+        let op = Operation::Function {
+            name: String::from("empty"),
+            args: Vec::new(),
+        };
+
+        evaluate!(
+            op => Ok(ReturnType::Continue),
+            with functions
+                "empty" => function,
+        );
+    }
+
+    #[test]
+    fn function_simple() {
+        let function = Function::from(vec![Operation::Variable {
+            name: String::from("return"),
+            value: Value::Literal {
+                value: Literal::from(true),
+            },
+        }]);
+        let op = Operation::Function {
+            name: String::from("simple"),
+            args: Vec::new(),
+        };
+
+        let scope = evaluate!(
+            op => Ok(ReturnType::Continue),
+            with globals
+                "return" => false;
+            with functions
+                "simple" => function,
+        );
+        assert_eq!(scope.get("return"), Some(&Literal::Boolean(true)));
+    }
+
+    #[test]
+    fn function_with_args() {
+        let args = vec![String::from("v"), String::from("unused")];
+        let operations = vec![Operation::Variable {
+            name: String::from("return"),
+            value: Value::Variable {
+                name: String::from("v"),
+            },
+        }];
+        let function = Function::from((args, operations));
+
+        let op = Operation::Function {
+            name: String::from("args"),
+            args: vec![
+                Value::Literal {
+                    value: Literal::from(true),
+                },
+                Value::Literal {
+                    value: Literal::Null,
+                },
+            ],
+        };
+
+        let scope = evaluate!(
+            op => Ok(ReturnType::Continue),
+            with globals
+                "return" => Literal::Null;
+            with functions
+                "args" => function,
+        );
+        assert_eq!(scope.get("return"), Some(&Literal::from(true)));
+    }
+
+    #[test]
+    fn nonexistent_function() {
+        let op = Operation::Function {
+            name: String::from("nonexistent"),
+            args: Vec::new(),
+        };
+
+        evaluate!(op => Err(RuntimeError::NameError(s)) if s == "nonexistent");
+    }
+
+    #[test]
+    fn sleep() {
+        let op = Operation::Sleep {
+            duration: Value::Literal {
+                value: Literal::from(500), // 500ms
+            },
+        };
+
+        let start = Instant::now();
+
+        evaluate!(op => Ok(ReturnType::Continue));
+
+        assert_eq!(start.elapsed().as_millis(), 500);
+    }
 }

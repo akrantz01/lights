@@ -85,6 +85,7 @@ impl Function {
     ) -> Result<Literal, RuntimeError> {
         for op in &self.operations {
             match op.evaluate(scope, functions, pixels)? {
+                ReturnType::Break => return Err(RuntimeError::StructuralError("break")),
                 ReturnType::Continue => {}
                 ReturnType::End => break,
                 ReturnType::Return(value) => return Ok(value),

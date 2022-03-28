@@ -33,6 +33,8 @@ pub enum RuntimeError {
         #[source]
         source: Box<dyn Error>,
     },
+    #[error("operation '{0}' not allowed here")]
+    StructuralError(&'static str),
 }
 
 #[derive(Debug, Error)]

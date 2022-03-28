@@ -38,4 +38,23 @@ impl<'s> Scope<'s> {
             self.locals.insert(key, value);
         }
     }
+
+    /// Convert the scope to a map for inspection
+    #[cfg(test)]
+    pub(crate) fn to_map(&self) -> HashMap<String, Literal> {
+        let mut owned = HashMap::new();
+
+        owned.extend(
+            self.globals
+                .iter()
+                .map(|(k, v)| (k.to_owned(), v.to_owned())),
+        );
+        owned.extend(
+            self.locals
+                .iter()
+                .map(|(k, v)| (k.to_owned(), v.to_owned())),
+        );
+
+        owned
+    }
 }
