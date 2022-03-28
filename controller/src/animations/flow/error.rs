@@ -5,6 +5,8 @@ use thiserror::Error;
 pub enum SyntaxError {
     #[error("the main function cannot return a value")]
     InvalidReturn,
+    #[error("cannot break from outside a loop")]
+    InvalidBreak,
     #[error("the main function must have an explicit end")]
     ExpectedEnd,
     #[error("variable {name:?} referenced before assignment")]

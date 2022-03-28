@@ -69,6 +69,9 @@ impl Function {
             if !can_return && matches!(operation, &Operation::Return { .. }) {
                 return Err(SyntaxError::InvalidReturn);
             }
+            if matches!(operation, &Operation::Break) {
+                return Err(SyntaxError::InvalidBreak);
+            }
 
             operation.validate(functions, &mut variables)?;
         }
