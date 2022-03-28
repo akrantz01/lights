@@ -112,10 +112,14 @@ impl Value {
 #[cfg(test)]
 mod tests {
     use super::{
-        super::{error::TypeError, literal::Number, operation::Operation},
+        super::{
+            error::{SyntaxError, TypeError},
+            literal::Number,
+            operation::Operation,
+        },
         BinaryOperator, Comparator, Function, Literal, RuntimeError, UnaryOperator, Value,
     };
-    use crate::evaluate;
+    use crate::{evaluate, validate};
 
     #[test]
     fn evaluate_literal() {
@@ -417,5 +421,131 @@ mod tests {
         };
 
         evaluate!(value => Err(RuntimeError::NameError(s)) if s == "nonexistent");
+    }
+
+    #[test]
+    fn validate_literal() {
+        let value = Value::Literal {
+            value: Literal::Null,
+        };
+
+        validate!(value => Ok(()));
+    }
+
+    #[test]
+    fn validate_variable() {
+        let value = Value::Variable {
+            name: String::from("testing"),
+        };
+
+        validate!(
+            value => Ok(()),
+            with variables = ["testing"]
+        );
+    }
+
+    #[test]
+    fn validate_nonexistent_variable() {
+        let value = Value::Variable {
+            name: String::from("nonexistent"),
+        };
+
+        validate!(value => Err(SyntaxError::UnknownVariable {name}) if name == "nonexistent");
+    }
+
+    #[test]
+    fn validate_unary_expression() {
+        let value = Value::UnaryExpression {
+            operator: UnaryOperator::BitwiseNot,
+            value: Box::new(Value::Literal {
+                value: Literal::from(true),
+            }),
+        };
+
+        validate!(value => Ok(()));
+    }
+
+    #[test]
+    fn validate_binary_expression() {
+        let value = Value::BinaryExpression {
+            operator: BinaryOperator::Add,
+            lhs: Box::new(Value::Literal {
+                value: Literal::from("abc"),
+            }),
+            rhs: Box::new(Value::Literal {
+                value: Literal::from(5.3),
+            }),
+        };
+
+        validate!(value => Ok(()));
+    }
+
+    #[test]
+    fn validate_function() {
+        let value = Value::Function {
+            name: String::from("function"),
+            args: Vec::new(),
+        };
+
+        validate!(
+            value => Ok(()),
+            with functions = {
+                "function" => 0
+            }
+        );
+    }
+
+    #[test]
+    fn validate_function_with_args() {
+        let value = Value::Function {
+            name: String::from("function"),
+            args: vec![
+                Value::Literal {
+                    value: Literal::Null,
+                },
+                Value::Literal {
+                    value: Literal::from(false),
+                },
+            ],
+        };
+
+        validate!(
+            value => Ok(()),
+            with functions = {
+                "function" => 2
+            }
+        );
+    }
+
+    #[test]
+    fn validate_nonexistent_function() {
+        let value = Value::Function {
+            name: String::from("nonexistent"),
+            args: Vec::new(),
+        };
+
+        validate!(value => Err(SyntaxError::UnknownFunction {name}) if name == "nonexistent");
+    }
+
+    #[test]
+    fn validate_mismatch_args_function() {
+        let value = Value::Function {
+            name: String::from("function"),
+            args: vec![
+                Value::Literal {
+                    value: Literal::Null,
+                },
+                Value::Literal {
+                    value: Literal::from(false),
+                },
+            ],
+        };
+
+        validate!(
+            value => Err(SyntaxError::MismatchArguments {name, expected: 1, actual: 2}) if name == "function",
+            with functions = {
+                "function" => 1
+            }
+        );
     }
 }

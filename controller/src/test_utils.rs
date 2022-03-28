@@ -1,4 +1,4 @@
-/// Sets up the necessary scope and functions for evaluating a value
+/// Sets up the necessary scope and functions for evaluating an expression
 #[macro_export]
 macro_rules! evaluate {
     ($evaluable:expr => $expected:pat_param $( if $guard:expr )?) => {
@@ -87,6 +87,78 @@ macro_rules! evaluate {
             assert!(matches!(actual, $expected $( if $guard )?));
 
             scope.to_map()
+        }
+    };
+}
+
+/// Sets up the necessary variables and functions for validating an expression
+#[macro_export]
+macro_rules! validate {
+    ($validatable:expr => $expected:pat_param $( if $guard:expr )?) => {
+        {
+            let mut variables = ::std::collections::HashSet::new();
+            validate!(
+                @inner $validatable, $expected, $( $guard )?,
+                ::std::collections::HashMap::new(), variables
+            )
+        }
+    };
+    (
+        $validatable:expr => $expected:pat_param $( if $guard:expr )?,
+        with variables = [ $( $variable:expr ),+ ]
+    ) => {
+        {
+            let mut variables = ::std::collections::HashSet::new();
+            $( variables.insert($variable.into()); )+
+
+            validate!(
+                @inner $validatable, $expected, $( $guard )?,
+                ::std::collections::HashMap::new(), variables
+            )
+        }
+    };
+    (
+        $validatable:expr => $expected:pat_param $( if $guard:expr )?,
+        with functions = { $( $function_name:expr => $function_arity:expr ),+ }
+    ) => {
+        {
+            let mut functions = ::std::collections::HashMap::new();
+            $( functions.insert($function_name.into(), $function_arity); )+
+
+            let mut variables = ::std::collections::HashSet::new();
+            validate!(
+                @inner $validatable, $expected, $( $guard )?,
+                functions, variables
+            )
+        }
+    };
+    (
+        $validatable:expr => $expected:pat_param $( if $guard:expr )?,
+        with variables = [ $( $variable:expr ),+ ];
+        with functions = { $( $function_name:expr => $function_arity:expr ),+ }
+    ) => {
+        {
+            let mut variables = ::std::collections::HashSet::new();
+            $( variables.insert($variable.into()); )+
+
+            let mut functions = ::std::collections::HashMap::new();
+            $( functions.insert($function_name.into(), $function_arity); )+
+
+            validate!(
+                @inner $validatable, $expected, $( $guard )?,
+                functions, variables
+            )
+        }
+    };
+    (
+        @inner $validatable:expr, $expected:pat_param, $( $guard:expr )?,
+        $functions:expr, $variables:expr
+    ) => {
+        {
+            let actual = $validatable.validate(&$functions, &mut $variables);
+            assert!(matches!(actual, $expected $( if $guard )?));
+
+            $variables.clone()
         }
     };
 }
