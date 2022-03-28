@@ -26,6 +26,12 @@ impl From<Vec<Operation>> for Function {
     }
 }
 
+impl From<(Vec<String>, Vec<Operation>)> for Function {
+    fn from((args, operations): (Vec<String>, Vec<Operation>)) -> Self {
+        Self { args, operations }
+    }
+}
+
 impl Function {
     /// Get the number of arguments required for the function
     pub(crate) fn num_args(&self) -> usize {

@@ -19,7 +19,7 @@ impl Comparator {
         let ordering = lhs.try_partial_cmp(rhs)?;
 
         let result = match self {
-            Comparator::Equal => matches!(ordering, Some(Ordering::Greater)),
+            Comparator::Equal => matches!(ordering, Some(Ordering::Equal)),
             Comparator::GreaterThan => matches!(ordering, Some(Ordering::Greater)),
             Comparator::LessThan => matches!(ordering, Some(Ordering::Less)),
             Comparator::GreaterThanOrEqual => {

@@ -57,6 +57,13 @@ impl Pixels {
         }
     }
 
+    /// Create a new mocked connection that does nothing.
+    #[cfg(test)]
+    pub fn new_mocked() -> Self {
+        let (tx, _) = mpsc::sync_channel(5);
+        Self(tx)
+    }
+
     /// Send an action to the manager
     fn send(&self, action: Action) {
         if let Err(err) = self.0.send(action) {

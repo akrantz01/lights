@@ -104,3 +104,366 @@ impl Value {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        super::{error::TypeError, literal::Number, operation::Operation},
+        BinaryOperator, Comparator, Function, Literal, Pixels, RuntimeError, Scope, UnaryOperator,
+        Value,
+    };
+
+    // Sets up the necessary scope and functions for evaluating a value
+    macro_rules! evaluate {
+        ($value:expr => $expected:pat_param $( if $guard:expr )?) => {
+            let mut globals = ::std::collections::HashMap::new();
+            evaluate!(@inner $value, $expected, $( $guard )?, globals, ::std::collections::HashMap::new());
+        };
+        (
+            $value:expr => $expected:pat_param $( if $guard:expr )?,
+            with globals
+                $( $variable_name:expr => $variable_value:expr, )+
+        ) => {
+            let mut globals = ::std::collections::HashMap::new();
+            $( globals.insert($variable_name.into(), $variable_value.into()); )+
+
+            evaluate!(@inner $value, $expected, $( $guard )?, globals, ::std::collections::HashMap::new());
+        };
+        (
+            $value:expr => $expected:pat_param $( if $guard:expr )?,
+            with functions
+                $( $function_name:expr => $function_value:expr, )+
+        ) => {
+            let mut globals = ::std::collections::HashMap::new();
+
+            let mut functions = ::std::collections::HashMap::new();
+            $( functions.insert($function_name.into(), $function_value); )+
+
+            evaluate!(@inner $value, $expected, $( $guard )?, globals, functions);
+        };
+        (
+            $value:expr => $expected:pat_param $( if $guard:expr )?,
+            with globals
+                $( $variable_name:expr => $variable_value:expr, )+
+            with functions
+                $( $function_name:expr => $function_value:expr, )+
+        ) => {
+            let mut globals = ::std::collections::HashMap::new();
+            $( globals.insert($variable_name.into(), $variable_value.into()); )+
+
+            let mut functions = ::std::collections::HashMap::new();
+            $( functions.insert($function_name.into(), $function_value); )+
+
+            evaluate!(@inner $value, $expected, $( $guard )?, globals, functions);
+        };
+        (@inner $value:expr, $expected:pat_param, $( $guard:expr )?, $globals:expr, $functions:expr) => {
+            let mut scope = Scope::new(&mut $globals);
+            let pixels = Pixels::new_mocked();
+
+            let actual = $value.evaluate(&mut scope, &$functions, &pixels);
+            assert!(matches!(actual, $expected $( if $guard )?));
+        };
+    }
+
+    #[test]
+    fn evaluate_literal() {
+        let value = Value::Literal {
+            value: Literal::from(56),
+        };
+        evaluate!(value => Ok(Literal::Number(Number::Integer(56))));
+    }
+
+    #[test]
+    fn evaluate_missing_variable() {
+        let value = Value::Variable {
+            name: String::from("i-dont-exist"),
+        };
+        evaluate!(value => Err(RuntimeError::NameError(n)) if n == "i-dont-exist");
+    }
+
+    #[test]
+    fn evaluate_variable() {
+        let value = Value::Variable {
+            name: String::from("something"),
+        };
+        evaluate!(
+            value => Ok(Literal::Boolean(true)),
+            with globals
+                "something" => true,
+        );
+    }
+
+    #[test]
+    fn evaluate_simple_unary_expression() {
+        // Equivalent to -73.4
+        let value = Value::UnaryExpression {
+            operator: UnaryOperator::Negate,
+            value: Box::new(Value::Literal {
+                value: Literal::from(73.4),
+            }),
+        };
+        evaluate!(value => Ok(Literal::Number(Number::Float(f))) if f == -73.4);
+    }
+
+    #[test]
+    fn evaluate_nested_unary_expression() {
+        // Equivalent to ~true
+        let value = Value::UnaryExpression {
+            operator: UnaryOperator::BitwiseNot,
+            value: Box::new(Value::Variable {
+                name: String::from("boolean"),
+            }),
+        };
+
+        evaluate!(
+            value => Ok(Literal::Boolean(false)),
+            with globals
+                "boolean" => true,
+        );
+    }
+
+    #[test]
+    fn evaluate_failing_unary_expression() {
+        // Equivalent to -null
+        let value = Value::UnaryExpression {
+            operator: UnaryOperator::Negate,
+            value: Box::new(Value::Literal {
+                value: Literal::Null,
+            }),
+        };
+
+        evaluate!(
+            value => Err(RuntimeError::TypeError(TypeError::UnaryOperator {
+                kind: "null",
+                operator: "negate",
+            }))
+        );
+    }
+
+    #[test]
+    fn evaluate_simple_binary_expression() {
+        // Equivalent to "hello " + "world"
+        let value = Value::BinaryExpression {
+            operator: BinaryOperator::Add,
+            lhs: Box::new(Value::Literal {
+                value: Literal::from("hello "),
+            }),
+            rhs: Box::new(Value::Literal {
+                value: Literal::from("world"),
+            }),
+        };
+
+        evaluate!(value => Ok(Literal::String(s)) if s == "hello world");
+    }
+
+    #[test]
+    fn evaluate_nested_binary_expression() {
+        // Equivalent to (a - 6) * ~b
+        let value = Value::BinaryExpression {
+            operator: BinaryOperator::Multiply,
+            lhs: Box::new(Value::BinaryExpression {
+                operator: BinaryOperator::Subtract,
+                lhs: Box::new(Value::Variable {
+                    name: String::from("a"),
+                }),
+                rhs: Box::new(Value::Literal {
+                    value: Literal::from(6),
+                }),
+            }),
+            rhs: Box::new(Value::UnaryExpression {
+                operator: UnaryOperator::BitwiseNot,
+                value: Box::new(Value::Variable {
+                    name: String::from("b"),
+                }),
+            }),
+        };
+
+        evaluate!(
+            value => Ok(Literal::Number(Number::Integer(-104))),
+            with globals
+                "a" => 32,
+                "b" => 3,
+        );
+    }
+
+    #[test]
+    fn evaluate_failing_binary_expression() {
+        // Equivalent to 5.6 | null
+        let value = Value::BinaryExpression {
+            operator: BinaryOperator::BitwiseOr,
+            lhs: Box::new(Value::Literal {
+                value: Literal::from(5.6),
+            }),
+            rhs: Box::new(Value::Literal {
+                value: Literal::Null,
+            }),
+        };
+
+        evaluate!(
+            value => Err(RuntimeError::TypeError(TypeError::BinaryOperator {
+                operator: "bitwise or",
+                a: "float",
+                b: "null",
+            }))
+        );
+    }
+
+    #[test]
+    fn evaluate_simple_comparison() {
+        let value = Value::Comparison {
+            comparator: Comparator::Equal,
+            lhs: Box::new(Value::Literal {
+                value: Literal::from(6),
+            }),
+            rhs: Box::new(Value::Literal {
+                value: Literal::from(6),
+            }),
+        };
+
+        evaluate!(value => Ok(Literal::Boolean(true)));
+    }
+
+    #[test]
+    fn evaluate_nested_comparison() {
+        let value = Value::Comparison {
+            comparator: Comparator::GreaterThanOrEqual,
+            lhs: Box::new(Value::BinaryExpression {
+                operator: BinaryOperator::Modulo,
+                lhs: Box::new(Value::Literal {
+                    value: Literal::from(9),
+                }),
+                rhs: Box::new(Value::Variable {
+                    name: String::from("a"),
+                }),
+            }),
+            rhs: Box::new(Value::Literal {
+                value: Literal::from(6),
+            }),
+        };
+
+        evaluate!(
+            value => Ok(Literal::Boolean(false)),
+            with globals
+                "a" => 5,
+        );
+    }
+
+    #[test]
+    fn evaluate_failing_comparison() {
+        let value = Value::Comparison {
+            comparator: Comparator::LessThan,
+            lhs: Box::new(Value::Literal {
+                value: Literal::from("abc"),
+            }),
+            rhs: Box::new(Value::Literal {
+                value: Literal::from(5),
+            }),
+        };
+
+        evaluate!(
+            value => Err(RuntimeError::TypeError(TypeError::Comparison {
+                a: "string",
+                b: "integer",
+            }))
+        );
+    }
+
+    #[test]
+    fn evaluate_empty_function() {
+        let function = Function::from(vec![]);
+        let value = Value::Function {
+            name: String::from("empty"),
+            args: Vec::new(),
+        };
+
+        evaluate!(
+            value => Ok(Literal::Null),
+            with functions
+                "empty" => function,
+        );
+    }
+
+    #[test]
+    fn evaluate_simple_function() {
+        let function = Function::from(vec![Operation::Return {
+            result: Value::Literal {
+                value: Literal::from(true),
+            },
+        }]);
+
+        let value = Value::Function {
+            name: String::from("simple"),
+            args: Vec::new(),
+        };
+
+        evaluate!(
+            value => Ok(Literal::Boolean(true)),
+            with functions
+                "simple" => function,
+        );
+    }
+
+    #[test]
+    fn evaluate_function_with_args() {
+        let args = vec![String::from("v"), String::from("unused")];
+        let operations = vec![Operation::Return {
+            result: Value::Variable {
+                name: String::from("v"),
+            },
+        }];
+        let function = Function::from((args, operations));
+
+        let value = Value::Function {
+            name: String::from("i-have-args"),
+            args: vec![
+                Value::Literal {
+                    value: Literal::from("value"),
+                },
+                Value::Literal {
+                    value: Literal::Null,
+                },
+            ],
+        };
+
+        evaluate!(
+            value => Ok(Literal::String(s)) if s == "value",
+            with functions
+                "i-have-args" => function,
+        );
+    }
+
+    #[test]
+    fn evaluate_nested_function() {
+        let function = Function::from(vec![Operation::Return {
+            result: Value::Literal {
+                value: Literal::from(6),
+            },
+        }]);
+        let value = Value::BinaryExpression {
+            operator: BinaryOperator::Divide,
+            lhs: Box::new(Value::Function {
+                name: String::from("six"),
+                args: Vec::new(),
+            }),
+            rhs: Box::new(Value::Literal {
+                value: Literal::from(2.0),
+            }),
+        };
+
+        evaluate!(
+            value => Ok(Literal::Number(Number::Float(f))) if f == 3.0,
+            with functions
+                "six" => function,
+        );
+    }
+
+    #[test]
+    fn evaluate_nonexistent_function() {
+        let value = Value::Function {
+            name: String::from("nonexistent"),
+            args: Vec::new(),
+        };
+
+        evaluate!(value => Err(RuntimeError::NameError(s)) if s == "nonexistent");
+    }
+}
