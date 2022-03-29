@@ -17,16 +17,18 @@ import (
 
 // Router registers all the methods for handling schedules
 func Router(v *validator.Validator) func(r chi.Router) {
+	m := auth.Middleware(v, auth.PermissionEditSchedules)
+
 	return func(r chi.Router) {
 		r.Get("/", list)
-		r.With(auth.Middleware(v)).Post("/", create)
+		r.With(m).Post("/", create)
 
 		r.Route("/{id}", func(r chi.Router) {
 			r.Get("/", read)
-			r.With(auth.Middleware(v)).Patch("/", update)
-			r.With(auth.Middleware(v)).Delete("/", remove)
+			r.With(m).Patch("/", update)
+			r.With(m).Delete("/", remove)
 
-			r.With(auth.Middleware(v)).Put("/toggle", toggle)
+			r.With(m).Put("/toggle", toggle)
 		})
 	}
 }
