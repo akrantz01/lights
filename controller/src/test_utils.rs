@@ -156,7 +156,7 @@ macro_rules! validate {
     ) => {
         {
             let actual = $validatable.validate(&$functions, &mut $variables);
-            assert!(matches!(actual, $expected $( if $guard )?));
+            assert!(matches!(dbg!(actual), $expected $( if $guard )?));
 
             $variables.clone()
         }

@@ -87,7 +87,7 @@ impl Operation {
     ) -> Result<(), SyntaxError> {
         match self {
             // Nothing to do here
-            Operation::End | Operation::Break | Operation::Show | Operation::Sleep { .. } => Ok(()),
+            Operation::End | Operation::Break | Operation::Show => Ok(()),
 
             // Check operations only using values
             Operation::Return { result: value } | Operation::Brightness { value } => {
@@ -107,6 +107,7 @@ impl Operation {
                 .and(red.validate(functions, variables))
                 .and(blue.validate(functions, variables))
                 .and(green.validate(functions, variables)),
+            Operation::Sleep { duration } => duration.validate(functions, variables),
 
             // Register any new variables, ensuring their value cannot be used before they are defined
             Operation::Variable { name, value } => {
@@ -127,12 +128,24 @@ impl Operation {
                 falsy,
             } => {
                 condition.validate(functions, variables)?;
+
+                // We need to split variables to prevent variables leaking between the branches
+
+                let mut truthy_variables = variables.clone();
                 for operation in truthy {
-                    operation.validate(functions, variables)?;
+                    operation.validate(functions, &mut truthy_variables)?;
                 }
+
+                let mut falsy_variables = variables.clone();
                 for operation in falsy {
-                    operation.validate(functions, variables)?;
+                    operation.validate(functions, &mut falsy_variables)?;
                 }
+
+                // Merge the defined variables back together, assumes that any variables defined
+                // in one branch are defined in the next branch
+                variables.extend(truthy_variables);
+                variables.extend(falsy_variables);
+
                 Ok(())
             }
             Operation::For {
@@ -335,22 +348,23 @@ mod tests {
         },
         Function, Operation, Pixels, ReturnType, RuntimeError, Value,
     };
-    use crate::evaluate;
+    use crate::animations::flow::SyntaxError;
+    use crate::{evaluate, validate};
     use faux::when;
     use std::time::Instant;
 
     #[test]
-    fn end() {
+    fn evaluate_end() {
         evaluate!(Operation::End => Ok(ReturnType::End));
     }
 
     #[test]
-    fn r#break() {
+    fn evaluate_break() {
         evaluate!(Operation::Break => Ok(ReturnType::Break));
     }
 
     #[test]
-    fn r#return() {
+    fn evaluate_return() {
         let op = Operation::Return {
             result: Value::Literal {
                 value: Literal::from(true),
@@ -361,7 +375,7 @@ mod tests {
     }
 
     #[test]
-    fn if_truthy() {
+    fn evaluate_if_truthy() {
         let op = Operation::If {
             condition: Value::Literal {
                 value: Literal::from(true),
@@ -382,7 +396,7 @@ mod tests {
     }
 
     #[test]
-    fn if_falsy() {
+    fn evaluate_if_falsy() {
         let op = Operation::If {
             condition: Value::Literal {
                 value: Literal::from(false),
@@ -403,7 +417,7 @@ mod tests {
     }
 
     #[test]
-    fn for_simple() {
+    fn evaluate_for_simple() {
         let op = Operation::For {
             start: Value::Literal {
                 value: Literal::from(1),
@@ -436,7 +450,7 @@ mod tests {
     }
 
     #[test]
-    fn for_break() {
+    fn evaluate_for_break() {
         let op = Operation::For {
             start: Value::Literal {
                 value: Literal::from(0),
@@ -484,7 +498,7 @@ mod tests {
     }
 
     #[test]
-    fn for_return() {
+    fn evaluate_for_return() {
         let op = Operation::For {
             start: Value::Literal {
                 value: Literal::from(0),
@@ -516,7 +530,7 @@ mod tests {
     }
 
     #[test]
-    fn variable() {
+    fn evaluate_variable() {
         let op = Operation::Variable {
             name: String::from("testing"),
             value: Value::Literal {
@@ -529,7 +543,7 @@ mod tests {
     }
 
     #[test]
-    fn function_empty() {
+    fn evaluate_function_empty() {
         let function = Function::from(Vec::new());
         let op = Operation::Function {
             name: String::from("empty"),
@@ -544,7 +558,7 @@ mod tests {
     }
 
     #[test]
-    fn function_simple() {
+    fn evaluate_function_simple() {
         let function = Function::from(vec![Operation::Variable {
             name: String::from("return"),
             value: Value::Literal {
@@ -567,7 +581,7 @@ mod tests {
     }
 
     #[test]
-    fn function_with_args() {
+    fn evaluate_function_with_args() {
         let args = vec![String::from("v"), String::from("unused")];
         let operations = vec![Operation::Variable {
             name: String::from("return"),
@@ -600,7 +614,7 @@ mod tests {
     }
 
     #[test]
-    fn nonexistent_function() {
+    fn evaluate_nonexistent_function() {
         let op = Operation::Function {
             name: String::from("nonexistent"),
             args: Vec::new(),
@@ -610,7 +624,7 @@ mod tests {
     }
 
     #[test]
-    fn brightness() {
+    fn evaluate_brightness() {
         let mut pixels = Pixels::faux();
         when!(pixels.brightness(8)).once().then(|_| ());
 
@@ -627,7 +641,7 @@ mod tests {
     }
 
     #[test]
-    fn fill() {
+    fn evaluate_fill() {
         let mut pixels = Pixels::faux();
         when!(pixels.fill(255, 0, 0)).once().then(|_| ());
 
@@ -650,7 +664,7 @@ mod tests {
     }
 
     #[test]
-    fn set() {
+    fn evaluate_set() {
         let mut pixels = Pixels::faux();
         when!(pixels.set(54, 0, 255, 0)).once().then(|_| ());
 
@@ -676,7 +690,7 @@ mod tests {
     }
 
     #[test]
-    fn show() {
+    fn evaluate_show() {
         let mut pixels = Pixels::faux();
         when!(pixels.show()).once().then(|_| ());
 
@@ -687,7 +701,7 @@ mod tests {
     }
 
     #[test]
-    fn sleep() {
+    fn evaluate_sleep() {
         let op = Operation::Sleep {
             duration: Value::Literal {
                 value: Literal::from(500), // 500ms
@@ -699,5 +713,239 @@ mod tests {
         evaluate!(op => Ok(ReturnType::Continue));
 
         assert_eq!(start.elapsed().as_millis(), 500);
+    }
+
+    #[test]
+    fn validate_end() {
+        validate!(Operation::End => Ok(()));
+    }
+
+    #[test]
+    fn validate_break() {
+        validate!(Operation::Break => Ok(()));
+    }
+
+    #[test]
+    fn validate_return() {
+        let op = Operation::Return {
+            result: Value::Literal {
+                value: Literal::from(false),
+            },
+        };
+
+        validate!(op => Ok(()));
+    }
+
+    #[test]
+    fn validate_if() {
+        let op = Operation::If {
+            condition: Value::Literal {
+                value: Literal::from(true),
+            },
+            truthy: vec![Operation::Break],
+            falsy: vec![Operation::Show],
+        };
+
+        validate!(op => Ok(()));
+    }
+
+    #[test]
+    fn validate_if_invalid_arm() {
+        let op = Operation::If {
+            condition: Value::Literal {
+                value: Literal::from(true),
+            },
+            truthy: vec![Operation::Variable {
+                name: String::from("unknown"),
+                value: Value::Literal {
+                    value: Literal::from(8),
+                },
+            }],
+            falsy: vec![Operation::Sleep {
+                duration: Value::Variable {
+                    name: String::from("unknown"),
+                },
+            }],
+        };
+
+        validate!(op => Err(SyntaxError::UnknownVariable {name}) if name == "unknown");
+    }
+
+    #[test]
+    fn validate_for() {
+        let op = Operation::For {
+            start: Value::Literal {
+                value: Literal::from(0),
+            },
+            end: Value::Literal {
+                value: Literal::from(10),
+            },
+            index: String::from("i"),
+            operations: vec![Operation::Return {
+                result: Value::Variable {
+                    name: String::from("i"),
+                },
+            }],
+        };
+
+        validate!(op => Ok(()));
+    }
+
+    #[test]
+    fn validate_variable() {
+        let op = Operation::Variable {
+            name: String::from("var"),
+            value: Value::Literal {
+                value: Literal::Null,
+            },
+        };
+
+        let variables = validate!(op => Ok(()));
+        assert!(variables.contains("var"));
+    }
+
+    #[test]
+    fn validate_variable_modify_self() {
+        let op = Operation::Variable {
+            name: String::from("self"),
+            value: Value::Variable {
+                name: String::from("self"),
+            },
+        };
+
+        validate!(op => Err(SyntaxError::UnknownVariable {name}) if name == "self");
+    }
+
+    #[test]
+    fn validate_function() {
+        let op = Operation::Function {
+            name: String::from("function"),
+            args: Vec::new(),
+        };
+
+        validate!(
+            op => Ok(()),
+            with functions = {
+                "function" => 0
+            }
+        );
+    }
+
+    #[test]
+    fn validate_function_with_args() {
+        let op = Operation::Function {
+            name: String::from("function"),
+            args: vec![
+                Value::Literal {
+                    value: Literal::Null,
+                },
+                Value::Literal {
+                    value: Literal::from(false),
+                },
+            ],
+        };
+
+        validate!(
+            op => Ok(()),
+            with functions = {
+                "function" => 2
+            }
+        );
+    }
+
+    #[test]
+    fn validate_nonexistent_function() {
+        let op = Operation::Function {
+            name: String::from("nonexistent"),
+            args: Vec::new(),
+        };
+
+        validate!(op => Err(SyntaxError::UnknownFunction {name}) if name == "nonexistent");
+    }
+
+    #[test]
+    fn validate_mismatch_args_function() {
+        let op = Operation::Function {
+            name: String::from("function"),
+            args: vec![
+                Value::Literal {
+                    value: Literal::Null,
+                },
+                Value::Literal {
+                    value: Literal::from(false),
+                },
+            ],
+        };
+
+        validate!(
+            op => Err(SyntaxError::MismatchArguments {name, expected: 1, actual: 2}) if name == "function",
+            with functions = {
+                "function" => 1
+            }
+        );
+    }
+
+    #[test]
+    fn validate_brightness() {
+        let op = Operation::Brightness {
+            value: Value::Literal {
+                value: Literal::from(5),
+            },
+        };
+
+        validate!(op => Ok(()));
+    }
+
+    #[test]
+    fn validate_fill() {
+        let op = Operation::Fill {
+            red: Value::Literal {
+                value: Literal::from(255),
+            },
+            green: Value::Literal {
+                value: Literal::from(54),
+            },
+            blue: Value::Literal {
+                value: Literal::from(98),
+            },
+        };
+
+        validate!(op => Ok(()));
+    }
+
+    #[test]
+    fn validate_set() {
+        let op = Operation::Set {
+            index: Value::Literal {
+                value: Literal::from(9),
+            },
+            red: Value::Literal {
+                value: Literal::from(255),
+            },
+            green: Value::Literal {
+                value: Literal::from(54),
+            },
+            blue: Value::Literal {
+                value: Literal::from(98),
+            },
+        };
+
+        validate!(op => Ok(()));
+    }
+
+    #[test]
+    fn validate_show() {
+        validate!(Operation::Show => Ok(()));
+    }
+
+    #[test]
+    fn validate_sleep() {
+        let op = Operation::Sleep {
+            duration: Value::Literal {
+                value: Literal::Null,
+            },
+        };
+
+        validate!(op => Ok(()));
     }
 }
