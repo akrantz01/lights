@@ -11,14 +11,6 @@ import (
 
 var logger = zap.L().Named("controller")
 
-// AnimationKind denotes the type of animation to register
-type AnimationKind int32
-
-const (
-	AnimationWASM AnimationKind = iota + 1
-	AnimationFlow
-)
-
 // Set changes the color of pixels at the given indexes
 func (c *Controller) Set(ctx context.Context, indexes []uint32, color database.Color) {
 	_, err := c.inner.Set(ctx, &pb.SetArgs{
@@ -93,7 +85,7 @@ func (c *Controller) StopAnimation(ctx context.Context) {
 }
 
 // RegisterAnimation creates a new animation on the controller and compiles it
-func (c *Controller) RegisterAnimation(ctx context.Context, id string, data []byte, kind AnimationKind) bool {
+func (c *Controller) RegisterAnimation(ctx context.Context, id string, data []byte, kind database.AnimationType) bool {
 	result, err := c.inner.RegisterAnimation(ctx, &pb.RegisterAnimationArgs{
 		Id:   id,
 		Data: data,

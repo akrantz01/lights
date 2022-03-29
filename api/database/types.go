@@ -1,5 +1,12 @@
 package database
 
+type AnimationType int32
+
+const (
+	AnimationTypeWasm AnimationType = iota + 1
+	AnimationTypeFlow
+)
+
 type Animation struct {
 	Id   string `json:"id"`
 	Name string `json:"name"`
