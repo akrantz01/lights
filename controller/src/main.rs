@@ -11,8 +11,6 @@ mod errors;
 mod interface;
 mod lights;
 mod pixels;
-#[cfg(test)]
-mod test_utils;
 
 use animations::Animator;
 use config::Config;

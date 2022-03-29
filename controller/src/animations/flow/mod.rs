@@ -15,6 +15,8 @@ mod literal;
 mod operation;
 mod operators;
 mod scope;
+#[cfg(test)]
+mod test_utils;
 mod value;
 
 pub use error::SyntaxError;
