@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import grpc
 from os import environ
 from tester_pb2 import (
+    AnimationKind,
     BrightnessArgs,
     Color,
     Empty,
@@ -14,8 +15,6 @@ from tester_pb2 import (
 )
 from tester_pb2_grpc import ControllerStub
 import typing as t
-
-from lights_controller import SETTINGS
 
 load_dotenv()
 
@@ -225,10 +224,10 @@ def stop(obj: ControllerStub):
 
 @animations.command(help="Register a new animation")
 @click.argument("name", required=True)
-@click.argument("wasm", required=True, type=click.File("rb"))
+@click.argument("data", required=True, type=click.File("rb"))
 @click.pass_obj
-def register(obj: ControllerStub, name: str, wasm: t.BinaryIO):
-    result = obj.RegisterAnimation(RegisterAnimationArgs(id=name, wasm=wasm.read()))
+def register(obj: ControllerStub, name: str, data: t.BinaryIO):
+    result = obj.RegisterAnimation(RegisterAnimationArgs(id=name, data=data.read(), kind=AnimationKind.WASM))
     if not result.success:
         click.echo("Registration unsuccessful")
 
