@@ -32,6 +32,7 @@ impl<'s> Scope<'s> {
 
     /// Set the value of a variable
     pub(crate) fn set(&mut self, key: String, value: Literal) {
+        #[allow(clippy::map_entry)]
         if self.globals.contains_key(&key) {
             self.globals.insert(key, value);
         } else {

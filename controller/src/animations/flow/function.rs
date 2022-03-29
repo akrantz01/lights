@@ -107,7 +107,7 @@ impl Function {
     ) -> Result<Literal, RuntimeError> {
         for op in &self.operations {
             match op.evaluate(scope, functions, pixels)? {
-                ReturnType::Break => return Err(RuntimeError::StructuralError("break")),
+                ReturnType::Break => return Err(RuntimeError::Structural("break")),
                 ReturnType::Continue => {}
                 ReturnType::End => break,
                 ReturnType::Return(value) => return Ok(value),
@@ -141,7 +141,7 @@ pub(crate) fn function_call_is_valid(
     known_variables: &HashSet<&str>,
     known_functions: &HashMap<&str, usize>,
     name: &str,
-    args: &Vec<Value>,
+    args: &[Value],
 ) -> Result<(), SyntaxError> {
     if let Some(arg_count) = known_functions.get(name) {
         if *arg_count == args.len() {
@@ -230,7 +230,7 @@ mod tests {
     fn invalid_break() {
         let f = Function::from(vec![Operation::Break]);
 
-        evaluate!(f => Err(RuntimeError::StructuralError("break")));
+        evaluate!(f => Err(RuntimeError::Structural("break")));
         validate!(f => Err(SyntaxError::InvalidBreak));
     }
 

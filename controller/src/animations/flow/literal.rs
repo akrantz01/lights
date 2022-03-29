@@ -2,7 +2,6 @@ use super::error::TypeError;
 use serde::{Deserialize, Serialize};
 use std::{
     cmp::Ordering,
-    iter::repeat,
     ops::{Add, Div, Mul, Neg, Rem, Sub},
     time::Duration,
 };
@@ -27,7 +26,7 @@ impl Literal {
                 Number::Integer(i) => Ok(*i != 0),
                 Number::Float(f) => Ok(*f != 0.0),
             },
-            Literal::String(s) => Ok(s.len() != 0),
+            Literal::String(s) => Ok(!s.is_empty()),
         }
     }
 
@@ -50,29 +49,6 @@ impl Literal {
     pub(crate) fn as_non_null_integer(&self) -> Result<i64, TypeError> {
         self.as_integer()?.ok_or(TypeError::Conversion {
             expected: "integer",
-            found: "null",
-        })
-    }
-
-    /// Cast the literal to a float
-    pub(crate) fn as_float(&self) -> Result<Option<f64>, TypeError> {
-        match self {
-            Literal::Null => Ok(None),
-            Literal::Number(n) => match n {
-                Number::Integer(i) => Ok(Some(*i as f64)),
-                Number::Float(f) => Ok(Some(*f)),
-            },
-            _ => Err(TypeError::Conversion {
-                expected: "float",
-                found: self.kind(),
-            }),
-        }
-    }
-
-    /// Cast the literal to a non-null integer
-    pub(crate) fn as_non_null_float(&self) -> Result<f64, TypeError> {
-        self.as_float()?.ok_or(TypeError::Conversion {
-            expected: "float",
             found: "null",
         })
     }
@@ -105,7 +81,7 @@ impl Literal {
             (Literal::String(a), Literal::String(b)) => Ok(a.partial_cmp(b)),
             (Literal::Number(a), Literal::Number(b)) => Ok(a.partial_cmp(b)),
             (Literal::Boolean(a), b) => Ok(a.partial_cmp(&b.as_boolean()?)),
-            (a, Literal::Boolean(b)) => Ok(a.as_boolean()?.partial_cmp(&b)),
+            (a, Literal::Boolean(b)) => Ok(a.as_boolean()?.partial_cmp(b)),
             (a, b) => Err(TypeError::Comparison {
                 a: a.kind(),
                 b: b.kind(),
@@ -169,7 +145,7 @@ impl Literal {
         match (self, other) {
             (Literal::Number(a), Literal::Number(b)) => Ok(Literal::Number(a * b)),
             (Literal::String(a), Literal::Number(Number::Integer(b))) => {
-                Ok(Literal::String(repeat(a).take(b as usize).collect()))
+                Ok(Literal::String(a.repeat(b as usize)))
             }
             (a, b) => Err(TypeError::BinaryOperator {
                 operator: "multiply",
@@ -347,7 +323,7 @@ impl Literal {
         // format matches ([0-9]*(\.[0-9]*)?[a-z]+)+
         let raw = self.as_non_null_string()?.to_lowercase();
 
-        if raw.len() == 0 {
+        if raw.is_empty() {
             return Err(DurationParseError::InvalidDuration);
         } else if raw == "0" {
             return Ok(Duration::from_millis(0));
@@ -356,14 +332,9 @@ impl Literal {
         let mut nanos: u64 = 0;
 
         let mut i = 0;
-        loop {
-            let c = match raw.chars().nth(i) {
-                Some(c) => c,
-                None => break,
-            };
-
+        while let Some(c) = raw.chars().nth(i) {
             // Next character must be [0-9.]
-            if !(c == '.' || '0' <= c && c <= '9') {
+            if !(c == '.' || ('0'..='9').contains(&c)) {
                 return Err(DurationParseError::InvalidDuration);
             }
 
@@ -375,13 +346,13 @@ impl Literal {
                 .collect::<String>();
             i += num.len();
 
-            let pre = num.len() != 0;
+            let pre = !num.is_empty();
             let v = num
                 .parse::<u64>()
                 .map_err(|_| DurationParseError::InvalidDuration)?;
 
             // Consume (\.[0-9]*)?
-            let (post, f, scale) = if matches!(raw.chars().skip(i).next(), Some('.')) {
+            let (post, f, scale) = if matches!(raw.chars().nth(i), Some('.')) {
                 let num = raw
                     .chars()
                     .skip(i + 1)
@@ -392,7 +363,7 @@ impl Literal {
                 let f = num.parse::<u64>().unwrap();
                 let scale = (10 * num.len()) as u64;
 
-                (num.len() != 0, f, scale)
+                (!num.is_empty(), f, scale)
             } else {
                 (false, 0, 0)
             };
@@ -409,17 +380,17 @@ impl Literal {
                 .collect::<String>();
             i += u.len();
 
-            if u.len() == 0 {
+            if u.is_empty() {
                 return Err(DurationParseError::MissingUnit);
             }
 
             let unit: u64 = match u.as_str() {
                 "ns" => 1,
-                "us" | "µs" | "μs" => 1 * 1000, // Accepts u, µ (U+00B5), μ (U+03BC)
-                "ms" => 1 * 1000 * 1000,
-                "s" => 1 * 1000 * 1000 * 1000,
-                "m" => 1 * 1000 * 1000 * 1000 * 60,
-                "h" => 1 * 1000 * 1000 * 1000 * 60 * 60,
+                "us" | "µs" | "μs" => 1000, // Accepts u, µ (U+00B5), μ (U+03BC)
+                "ms" => 1000 * 1000,
+                "s" => 1000 * 1000 * 1000,
+                "m" => 1000 * 1000 * 1000 * 60,
+                "h" => 1000 * 1000 * 1000 * 60 * 60,
                 _ => return Err(DurationParseError::UnknownUnit(u)),
             };
 
@@ -447,7 +418,7 @@ impl Literal {
             }
         }
 
-        if nanos > 1 << 63 - 1 {
+        if nanos > (1 << 63) - 1 {
             Err(DurationParseError::InvalidDuration)
         } else {
             Ok(Duration::from_nanos(nanos))
@@ -928,69 +899,6 @@ mod tests {
                 }),
                 string("") => Err(TypeError::Conversion {
                     expected: "integer",
-                    found: "string"
-                }),
-        );
-    }
-
-    #[test]
-    fn literal_to_float() {
-        test_literal_unary!(
-            as_float:
-                null => Ok(None),
-                boolean(true) => Err(TypeError::Conversion {
-                    expected: "float",
-                    found: "boolean"
-                }),
-                boolean(false) => Err(TypeError::Conversion {
-                    expected: "float",
-                    found: "boolean"
-                }),
-                integer(5) => Ok(Some(n)) if n == 5.0,
-                integer(0) => Ok(Some(n)) if n == 0.0,
-                integer(-5) => Ok(Some(n)) if n == -5.0,
-                float(5.3) => Ok(Some(n)) if n == 5.3,
-                float(0.0) => Ok(Some(n)) if n == 0.0,
-                float(-5.3) => Ok(Some(n)) if n == -5.3,
-                string("abc") => Err(TypeError::Conversion {
-                    expected: "float",
-                    found: "string"
-                }),
-                string("") => Err(TypeError::Conversion {
-                    expected: "float",
-                    found: "string"
-                }),
-        );
-    }
-
-    #[test]
-    fn literal_to_non_null_float() {
-        test_literal_unary!(
-            as_non_null_float:
-                null => Err(TypeError::Conversion {
-                    expected: "float",
-                    found: "null"
-                }),
-                boolean(true) => Err(TypeError::Conversion {
-                    expected: "float",
-                    found: "boolean"
-                }),
-                boolean(false) => Err(TypeError::Conversion {
-                    expected: "float",
-                    found: "boolean"
-                }),
-                integer(5) => Ok(n) if n == 5.0,
-                integer(0) => Ok(n) if n == 0.0,
-                integer(-5) => Ok(n) if n == -5.0,
-                float(5.3) => Ok(n) if n == 5.3,
-                float(0.0) => Ok(n) if n == 0.0,
-                float(-5.3) => Ok(n) if n == -5.3,
-                string("abc") => Err(TypeError::Conversion {
-                    expected: "float",
-                    found: "string"
-                }),
-                string("") => Err(TypeError::Conversion {
-                    expected: "float",
                     found: "string"
                 }),
         );

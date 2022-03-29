@@ -91,7 +91,7 @@ impl Animation for Flow {
 
         self.entrypoint
             .evaluate(&mut scope, &self.functions, &self.pixels)
-            .map_err(|e| Box::new(e))?;
+            .map_err(Box::new)?;
 
         Ok(())
     }

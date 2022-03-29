@@ -28,17 +28,17 @@ pub enum SyntaxError {
 #[derive(Debug, Error)]
 pub enum RuntimeError {
     #[error("variable '{0}' referenced before assignment")]
-    NameError(String),
+    Name(String),
     #[error(transparent)]
-    TypeError(#[from] TypeError),
+    Type(#[from] TypeError),
     #[error("invalid format for '{to}': {source}")]
-    FormatError {
+    Format {
         to: &'static str,
         #[source]
         source: Box<dyn Error>,
     },
     #[error("operation '{0}' not allowed here")]
-    StructuralError(&'static str),
+    Structural(&'static str),
 }
 
 #[derive(Debug, Error)]

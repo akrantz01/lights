@@ -77,7 +77,7 @@ impl Value {
             Value::Variable { name } => scope
                 .get(name)
                 .cloned()
-                .ok_or_else(|| RuntimeError::NameError(name.to_owned())),
+                .ok_or_else(|| RuntimeError::Name(name.to_owned())),
             Value::Literal { value } => Ok(value.clone()),
             Value::UnaryExpression { operator, value } => {
                 let value = value.evaluate(scope, functions, pixels)?;
@@ -100,7 +100,7 @@ impl Value {
             Value::Function { name, args } => {
                 let function = functions
                     .get(name)
-                    .ok_or_else(|| RuntimeError::NameError(name.to_owned()))?;
+                    .ok_or_else(|| RuntimeError::Name(name.to_owned()))?;
 
                 let args = function.associate_args(scope, args, functions, pixels)?;
                 function.evaluate(&mut scope.nested(args), functions, pixels)
@@ -134,7 +134,7 @@ mod tests {
         let value = Value::Variable {
             name: String::from("i-dont-exist"),
         };
-        evaluate!(value => Err(RuntimeError::NameError(n)) if n == "i-dont-exist");
+        evaluate!(value => Err(RuntimeError::Name(n)) if n == "i-dont-exist");
     }
 
     #[test]
@@ -189,7 +189,7 @@ mod tests {
         };
 
         evaluate!(
-            value => Err(RuntimeError::TypeError(TypeError::UnaryOperator {
+            value => Err(RuntimeError::Type(TypeError::UnaryOperator {
                 kind: "null",
                 operator: "negate",
             }))
@@ -256,7 +256,7 @@ mod tests {
         };
 
         evaluate!(
-            value => Err(RuntimeError::TypeError(TypeError::BinaryOperator {
+            value => Err(RuntimeError::Type(TypeError::BinaryOperator {
                 operator: "bitwise or",
                 a: "float",
                 b: "null",
@@ -317,7 +317,7 @@ mod tests {
         };
 
         evaluate!(
-            value => Err(RuntimeError::TypeError(TypeError::Comparison {
+            value => Err(RuntimeError::Type(TypeError::Comparison {
                 a: "string",
                 b: "integer",
             }))
@@ -420,7 +420,7 @@ mod tests {
             args: Vec::new(),
         };
 
-        evaluate!(value => Err(RuntimeError::NameError(s)) if s == "nonexistent");
+        evaluate!(value => Err(RuntimeError::Name(s)) if s == "nonexistent");
     }
 
     #[test]

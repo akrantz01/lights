@@ -239,7 +239,7 @@ impl Operation {
             Operation::Function { name, args } => {
                 let function = functions
                     .get(name)
-                    .ok_or_else(|| RuntimeError::NameError(name.to_owned()))?;
+                    .ok_or_else(|| RuntimeError::Name(name.to_owned()))?;
 
                 let args = function.associate_args(scope, args, functions, pixels)?;
                 function.evaluate(&mut scope.nested(args), functions, pixels)?;
@@ -300,7 +300,7 @@ impl Operation {
                 let duration = duration
                     .evaluate(scope, functions, pixels)?
                     .try_into()
-                    .map_err(|e| RuntimeError::FormatError {
+                    .map_err(|e| RuntimeError::Format {
                         to: "duration",
                         source: Box::new(e),
                     })?;
@@ -620,7 +620,7 @@ mod tests {
             args: Vec::new(),
         };
 
-        evaluate!(op => Err(RuntimeError::NameError(s)) if s == "nonexistent");
+        evaluate!(op => Err(RuntimeError::Name(s)) if s == "nonexistent");
     }
 
     #[test]
