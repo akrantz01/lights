@@ -27,7 +27,7 @@ use scope::Scope;
 pub(crate) struct Flow {
     globals: Mutex<HashMap<String, Literal>>,
     functions: HashMap<String, Function>,
-    frame: Function,
+    entrypoint: Function,
     pixels: Pixels,
 }
 
@@ -68,7 +68,7 @@ impl Animation for Flow {
         let borrowed = BorrowedAst {
             functions: &self.functions,
             globals: &globals,
-            operations: self.frame.as_operations(),
+            operations: self.entrypoint.as_operations(),
         };
         Ok(serde_json::to_vec(&borrowed)?)
     }
@@ -87,7 +87,7 @@ impl Animation for Flow {
         let mut globals = self.globals.lock().unwrap();
         let mut scope = Scope::new(&mut globals);
 
-        self.frame
+        self.entrypoint
             .evaluate(&mut scope, &self.functions, &self.pixels)
             .map_err(|e| Box::new(e))?;
 
@@ -101,7 +101,7 @@ impl Flow {
         Flow {
             globals: Mutex::new(ast.globals),
             functions: ast.functions,
-            frame: ast.operations.into(),
+            entrypoint: ast.operations.into(),
             pixels,
         }
     }
@@ -120,12 +120,13 @@ impl Flow {
 
         // Validate each supporting function
         for (name, f) in &self.functions {
-            f.validate(&functions, &global_variables, true)?;
+            f.validate(&functions, &global_variables)?;
             debug!(%name, "validated function")
         }
 
         // Finally validate the frame function
-        self.frame.validate(&functions, &global_variables, false)
+        self.entrypoint
+            .validate_entrypoint(&functions, &global_variables)
     }
 }
 

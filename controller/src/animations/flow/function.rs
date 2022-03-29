@@ -48,7 +48,6 @@ impl Function {
         &'s self,
         functions: &HashMap<&str, usize>,
         globals: &HashSet<&'s str>,
-        can_return: bool,
     ) -> Result<(), SyntaxError> {
         // Track the known variables
         let mut variables = self.args.iter().map(String::as_str).collect::<HashSet<_>>();
@@ -60,20 +59,40 @@ impl Function {
             return Err(SyntaxError::NonUniqueArguments);
         }
 
+        for operation in &self.operations {
+            match operation {
+                Operation::Break => return Err(SyntaxError::InvalidBreak),
+                op => op.validate(functions, &mut variables)?,
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Check that an entry point function is syntactically valid. This differs from
+    /// [`Function::validate`] by disallowing function arguments, returning, and requires that the
+    /// last operation must be an [`Operation::End`].
+    pub(crate) fn validate_entrypoint<'s>(
+        &'s self,
+        functions: &HashMap<&str, usize>,
+        globals: &HashSet<&'s str>,
+    ) -> Result<(), SyntaxError> {
+        if self.num_args() != 0 {
+            return Err(SyntaxError::InvalidEntrypoint);
+        }
+
         // Ensure the last operation is always End for the frame function
-        if !can_return && !matches!(self.operations.last(), Some(&Operation::End)) {
+        if !matches!(self.operations.last(), Some(&Operation::End)) {
             return Err(SyntaxError::ExpectedEnd);
         }
 
+        let mut variables = globals.clone();
         for operation in &self.operations {
-            if !can_return && matches!(operation, &Operation::Return { .. }) {
-                return Err(SyntaxError::InvalidReturn);
+            match operation {
+                Operation::Return { .. } => return Err(SyntaxError::InvalidReturn),
+                Operation::Break => return Err(SyntaxError::InvalidBreak),
+                op => op.validate(functions, &mut variables)?,
             }
-            if matches!(operation, &Operation::Break) {
-                return Err(SyntaxError::InvalidBreak);
-            }
-
-            operation.validate(functions, &mut variables)?;
         }
 
         Ok(())
@@ -150,18 +169,19 @@ mod tests {
         super::{
             literal::{Literal, Number},
             operation::Operation,
-            operators::{BinaryOperator, Comparator},
+            operators::{BinaryOperator, Comparator, UnaryOperator},
             value::Value,
         },
-        Function, RuntimeError,
+        Function, RuntimeError, SyntaxError,
     };
-    use crate::animations::flow::operators::UnaryOperator;
-    use crate::evaluate;
+    use crate::{evaluate, validate};
 
     #[test]
     fn empty() {
         let f = Function::from(vec![]);
+
         evaluate!(f => Ok(Literal::Null));
+        validate!(f => Ok(()));
     }
 
     #[test]
@@ -171,7 +191,9 @@ mod tests {
                 value: Literal::from(true),
             },
         }]);
+
         evaluate!(f => Ok(Literal::Boolean(true)));
+        validate!(f => Ok(()));
     }
 
     #[test]
@@ -186,6 +208,7 @@ mod tests {
         ]);
 
         evaluate!(f => Ok(Literal::Null));
+        validate!(f => Ok(()));
     }
 
     #[test]
@@ -200,6 +223,7 @@ mod tests {
         ]);
 
         evaluate!(f => Ok(Literal::Boolean(true)));
+        validate!(f => Ok(()));
     }
 
     #[test]
@@ -207,6 +231,7 @@ mod tests {
         let f = Function::from(vec![Operation::Break]);
 
         evaluate!(f => Err(RuntimeError::StructuralError("break")));
+        validate!(f => Err(SyntaxError::InvalidBreak));
     }
 
     #[test]
@@ -264,6 +289,10 @@ mod tests {
             with globals
                 "sum" => 0,
         );
+        validate!(
+            f => Ok(()),
+            with variables = ["sum"]
+        );
     }
 
     #[test]
@@ -295,6 +324,7 @@ mod tests {
         ]);
 
         evaluate!(f => Ok(Literal::Boolean(false)));
+        validate!(f => Ok(()));
     }
 
     #[test]
@@ -315,6 +345,10 @@ mod tests {
             f => Ok(Literal::Number(Number::Float(f))) if f == 2.5,
             with globals
                 "f" => 5.0,
+        );
+        validate!(
+            f => Ok(()),
+            with variables = ["f"]
         );
     }
 
@@ -379,6 +413,10 @@ mod tests {
             with globals
                 "value" => 42,
         );
+        validate!(
+            f => Ok(()),
+            with variables = ["value"]
+        );
     }
 
     #[test]
@@ -413,6 +451,13 @@ mod tests {
                 "six" => six,
                 "seven" => seven,
         );
+        validate!(
+            f => Ok(()),
+            with functions = {
+                "six" => 0,
+                "seven" => 0
+            }
+        );
     }
 
     #[test]
@@ -438,6 +483,12 @@ mod tests {
             f => Ok(Literal::Boolean(true)),
             with functions
                 "takes-args" => takes_args,
+        );
+        validate!(
+            f => Ok(()),
+            with functions = {
+                "takes-args" => 1
+            }
         );
     }
 
@@ -476,6 +527,13 @@ mod tests {
                 "takes-args" => takes_args,
         );
         assert_eq!(scope.get("global"), Some(&Literal::from(8)));
+        validate!(
+            f => Ok(()),
+            with variables = ["global"];
+            with functions = {
+                "takes-args" => 1
+            }
+        );
     }
 
     #[test]
@@ -528,6 +586,14 @@ mod tests {
         );
         assert_eq!(scope.get("global"), Some(&Literal::from(8)));
         assert_eq!(scope.get("local"), Some(&Literal::from("caller")));
+
+        validate!(
+            f => Ok(()),
+            with variables = ["global"];
+            with functions = {
+                "takes-args" => 1
+            }
+        );
     }
 
     #[test]
@@ -588,5 +654,46 @@ mod tests {
             with functions
                 "factorial" => factorial,
         );
+        validate!(
+            f => Ok(()),
+            with functions = {
+                "factorial" => 1
+            }
+        );
+    }
+
+    #[test]
+    fn invalid_entrypoint_with_args() {
+        let f = Function::from((vec![String::from("a"), String::from("b")], vec![]));
+
+        validate!(f => Err(SyntaxError::InvalidEntrypoint), using validate_entrypoint);
+    }
+
+    #[test]
+    fn invalid_entrypoint_no_end() {
+        let f = Function::from(vec![]);
+
+        validate!(f => Err(SyntaxError::ExpectedEnd), using validate_entrypoint);
+    }
+
+    #[test]
+    fn invalid_entrypoint_return() {
+        let f = Function::from(vec![
+            Operation::Return {
+                result: Value::Literal {
+                    value: Literal::from(true),
+                },
+            },
+            Operation::End,
+        ]);
+
+        validate!(f => Err(SyntaxError::InvalidReturn), using validate_entrypoint);
+    }
+
+    #[test]
+    fn invalid_entrypoint_break() {
+        let f = Function::from(vec![Operation::Break, Operation::End]);
+
+        validate!(f => Err(SyntaxError::InvalidBreak), using validate_entrypoint);
     }
 }

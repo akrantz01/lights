@@ -99,7 +99,19 @@ macro_rules! validate {
             let mut variables = ::std::collections::HashSet::new();
             validate!(
                 @inner $validatable, $expected, $( $guard )?,
-                ::std::collections::HashMap::new(), variables
+                ::std::collections::HashMap::new(), variables, validate
+            )
+        }
+    };
+    (
+        $validatable:expr => $expected:pat_param $( if $guard:expr )?,
+        using $method:ident
+    ) => {
+        {
+            let mut variables = ::std::collections::HashSet::new();
+            validate!(
+                @inner $validatable, $expected, $( $guard )?,
+                ::std::collections::HashMap::new(), variables, $method
             )
         }
     };
@@ -113,7 +125,7 @@ macro_rules! validate {
 
             validate!(
                 @inner $validatable, $expected, $( $guard )?,
-                ::std::collections::HashMap::new(), variables
+                ::std::collections::HashMap::new(), variables, validate
             )
         }
     };
@@ -128,7 +140,7 @@ macro_rules! validate {
             let mut variables = ::std::collections::HashSet::new();
             validate!(
                 @inner $validatable, $expected, $( $guard )?,
-                functions, variables
+                functions, variables, validate
             )
         }
     };
@@ -146,17 +158,17 @@ macro_rules! validate {
 
             validate!(
                 @inner $validatable, $expected, $( $guard )?,
-                functions, variables
+                functions, variables, validate
             )
         }
     };
     (
         @inner $validatable:expr, $expected:pat_param, $( $guard:expr )?,
-        $functions:expr, $variables:expr
+        $functions:expr, $variables:expr, $using:ident
     ) => {
         {
-            let actual = $validatable.validate(&$functions, &mut $variables);
-            assert!(matches!(dbg!(actual), $expected $( if $guard )?));
+            let actual = $validatable.$using(&$functions, &mut $variables);
+            assert!(matches!(actual, $expected $( if $guard )?));
 
             $variables.clone()
         }

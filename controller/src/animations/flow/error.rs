@@ -21,6 +21,8 @@ pub enum SyntaxError {
     },
     #[error("all function arguments must have unique names")]
     NonUniqueArguments,
+    #[error("the entrypoint cannot take any arguments")]
+    InvalidEntrypoint,
 }
 
 #[derive(Debug, Error)]
