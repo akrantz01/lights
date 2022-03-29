@@ -10,8 +10,8 @@ import (
 const animationPrefix = "animation-"
 
 // ListAnimations retrieves a list of all known animations from the database
-func (d *Database) ListAnimations() ([]Animation, error) {
-	var animations []Animation
+func (d *Database) ListAnimations() ([]PartialAnimation, error) {
+	var animations []PartialAnimation
 
 	err := d.db.View(func(txn *badger.Txn) error {
 		iterator := txn.NewIterator(badger.DefaultIteratorOptions)
@@ -29,7 +29,7 @@ func (d *Database) ListAnimations() ([]Animation, error) {
 					return err
 				}
 
-				var animation Animation
+				var animation PartialAnimation
 				if err := bson.Unmarshal(value, &animation); err != nil {
 					return err
 				}
@@ -58,7 +58,6 @@ func (d *Database) AddAnimation(animation Animation) error {
 }
 
 // GetAnimation retrieves all the details about an animation
-// Currently this is equivalent to an existence check
 func (d *Database) GetAnimation(id string) (Animation, error) {
 	key := buildKey(animationPrefix, id)
 

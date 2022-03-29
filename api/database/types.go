@@ -8,8 +8,28 @@ const (
 )
 
 type Animation struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
+	Id   string        `json:"id"`
+	Name string        `json:"name"`
+	Kind AnimationType `json:"kind"`
+
+	// Flow is only populated when Kind == AnimationTypeFlow. It stores the raw graph representation, not the AST
+	// to reduce the necessary compute as the AST is only used by the controller when updating and running the flow.
+	Flow interface{} `json:"flow,omitempty"`
+}
+
+// AsPartial converts a full animation into its partial representation
+func (a Animation) AsPartial() PartialAnimation {
+	return PartialAnimation{
+		Id:   a.Id,
+		Name: a.Name,
+		Kind: a.Kind,
+	}
+}
+
+type PartialAnimation struct {
+	Id   string        `json:"id"`
+	Name string        `json:"name"`
+	Kind AnimationType `json:"kind"`
 }
 
 type Color struct {
