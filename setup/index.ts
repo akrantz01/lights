@@ -14,7 +14,7 @@ const SCOPES = {
 
 // Create the API permissions
 const api = new ResourceServer("api", {
-  allowOfflineAccess: false,
+  allowOfflineAccess: true,
   name: "Lights",
   identifier: "https://lights.krantz.dev",
   signingAlg: "RS256",
