@@ -17,7 +17,7 @@ import (
 
 // Router registers all the methods for handling animations
 func Router(v *validator.Validator) func(r chi.Router) {
-	m := auth.Middleware(v, auth.PermissionEditAnimations)
+	m := auth.Middleware(v, auth.PermissionEdit)
 
 	return func(r chi.Router) {
 		r.Get("/", list)

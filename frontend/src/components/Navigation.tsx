@@ -1,11 +1,11 @@
-import { useAuth0 } from '@auth0/auth0-react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
-import { LightBulbIcon, MenuIcon, RefreshIcon, UserIcon, XIcon } from '@heroicons/react/outline';
+import { LightBulbIcon, MenuIcon, UserIcon, XIcon } from '@heroicons/react/outline';
 import { Link, LinkGetProps, useLocation } from '@reach/router';
 import classNames from 'classnames';
 import React, { Fragment, MouseEvent } from 'react';
 
-import { logout, useDispatch } from '../store';
+import { buildAuthorizationUrl } from '../oauth';
+import { logout, useDispatch, useProfile } from '../store';
 import StatusIndicator from './StatusIndicator';
 
 interface NavItem {
@@ -24,19 +24,18 @@ const navigation: NavItem[] = [
   { name: 'New Schedule', href: '/new/schedule', hidden: true },
   { name: 'New Preset', href: '/new/preset', hidden: true },
   { name: 'New Animation', href: '/new/animation', hidden: true },
+  { name: 'Logging in...', href: '/oauth/callback', hidden: true },
 ];
 
 const ProfilePicture = (): JSX.Element => {
-  const { isAuthenticated, user, isLoading } = useAuth0();
+  const profile = useProfile();
 
-  if (isLoading) return <RefreshIcon className="h-8 w-8 rounded-full text-gray-500 animate-spin" />;
-  else if (isAuthenticated && user?.picture)
-    return <img className="h-8 w-8 rounded-full" src={user?.picture} alt="user profile picture" />;
+  if (profile?.avatar) return <img className="h-8 w-8 rounded-full" src={profile.avatar} alt="user profile picture" />;
   else return <UserIcon className="h-8 w-8 rounded-full text-gray-500" />;
 };
 
 const Navigation = (): JSX.Element => {
-  const { loginWithRedirect, logout: auth0Logout, user, isAuthenticated } = useAuth0();
+  const profile = useProfile();
   const dispatch = useDispatch();
   const { pathname } = useLocation();
 
@@ -59,10 +58,11 @@ const Navigation = (): JSX.Element => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (isAuthenticated) {
-      dispatch(logout);
-      auth0Logout({ returnTo: window.location.origin });
-    } else await loginWithRedirect();
+    if (profile) dispatch(logout);
+    else {
+      const url = await buildAuthorizationUrl();
+      window.location.assign(url);
+    }
   };
 
   return (
@@ -126,10 +126,10 @@ const Navigation = (): JSX.Element => {
                           leaveTo="transform opacity-0 scale-95"
                         >
                           <Menu.Items className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
-                            {isAuthenticated && (
+                            {profile && (
                               <Menu.Item>
                                 <span className="block px-4 py-2 text-sm text-gray-700 w-full text-left">
-                                  {user?.name}
+                                  {profile.name}
                                 </span>
                               </Menu.Item>
                             )}
@@ -139,7 +139,7 @@ const Navigation = (): JSX.Element => {
                                 onClick={authAction}
                                 className="block px-4 py-2 text-sm text-gray-700 w-full text-left hover:bg-gray-200"
                               >
-                                Sign {isAuthenticated ? 'out' : 'in'}
+                                Sign {profile ? 'out' : 'in'}
                               </button>
                             </Menu.Item>
                           </Menu.Items>
@@ -186,8 +186,8 @@ const Navigation = (): JSX.Element => {
                       <ProfilePicture />
                     </div>
                     <div className="ml-3">
-                      <div className="text-base font-medium text-white">{user?.name}</div>
-                      <div className="text-sm font-medium text-gray-400">{user?.email}</div>
+                      <div className="text-base font-medium text-white">{profile?.name}</div>
+                      <div className="text-sm font-medium text-gray-400">{profile?.email}</div>
                     </div>
                   </div>
                   <div className="mt-3 px-2 space-y-1">
@@ -196,7 +196,7 @@ const Navigation = (): JSX.Element => {
                       onClick={authAction}
                       className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700"
                     >
-                      Sign {isAuthenticated ? 'out' : 'in'}
+                      Sign {profile ? 'out' : 'in'}
                     </button>
                   </div>
                 </div>

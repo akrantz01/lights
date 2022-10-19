@@ -10,7 +10,7 @@ import (
 )
 
 type CustomClaims struct {
-	Permissions []string `json:"permissions"`
+	Permissions []string `json:"groups"`
 }
 
 // Validate does no validation as we just want to get the token claims
@@ -23,7 +23,7 @@ func NewValidator(issuer *url.URL) (*validator.Validator, error) {
 	customClaims := func() validator.CustomClaims {
 		return &CustomClaims{}
 	}
-	
+
 	provider := jwks.NewCachingProvider(issuer, 5*time.Minute)
 	return validator.New(provider.KeyFunc, validator.RS256, issuer.String(), []string{"https://lights.krantz.dev"}, validator.WithCustomClaims(customClaims))
 }

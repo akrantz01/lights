@@ -109,7 +109,7 @@ func (c *Client) reader(actions chan rpc.Callable, db *database.Database, stripL
 			} else {
 				claims := validatedClaims.(*validator.ValidatedClaims).CustomClaims.(*auth.CustomClaims)
 				permissions = auth.NewPermissions(claims.Permissions)
-				c.send <- NewAuthenticationStatus(claims.Permissions)
+				c.send <- NewAuthenticationStatus(permissions.AsSlice())
 			}
 
 		// Logout the user

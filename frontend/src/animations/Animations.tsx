@@ -24,7 +24,7 @@ const Animations: React.FC<RouteComponentProps> = () => {
   const [deleteSelection, setDeleteSelection] = useState('');
 
   const canStart = useSelector(hasPermission(Scope.CONTROL_LIGHTS));
-  const canEdit = useSelector(hasPermission(Scope.EDIT_ANIMATIONS));
+  const canEdit = useSelector(hasPermission(Scope.EDIT));
 
   const { data: animations, isLoading, isFetching, refetch } = useListAnimationsQuery();
   const [removeAnimation] = useRemoveAnimationMutation();

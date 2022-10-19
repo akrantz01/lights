@@ -12,7 +12,7 @@ const Schedules: React.FC<RouteComponentProps> = () => {
   const [toggleSchedule] = useToggleScheduleMutation();
   const { data: schedules, isLoading, isFetching, refetch } = useListSchedulesQuery();
 
-  const canEdit = useSelector(hasPermission(Scope.EDIT_SCHEDULES));
+  const canEdit = useSelector(hasPermission(Scope.EDIT));
 
   return (
     <Card>

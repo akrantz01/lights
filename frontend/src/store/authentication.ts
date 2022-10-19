@@ -1,10 +1,8 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 export enum Scope {
-  CONTROL_LIGHTS = 'control:lights',
-  EDIT_ANIMATIONS = 'edit:animations',
-  EDIT_PRESETS = 'edit:presets',
-  EDIT_SCHEDULES = 'edit:schedules',
+  CONTROL_LIGHTS = 'lights-control',
+  EDIT = 'lights-edit',
 }
 
 export interface ProfileState {
