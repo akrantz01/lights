@@ -18,6 +18,7 @@ const Animations = React.lazy(() => import('./animations/Animations'));
 const NewAnimation = React.lazy(() => import('./animations/NewAnimation'));
 const Dashboard = React.lazy(() => import('./dashboard/Dashboard'));
 const NotFound = React.lazy(() => import('./NotFound'));
+const OpenIDConnectCallback = React.lazy(() => import('./OpenIDConnectCallback'));
 const NewPreset = React.lazy(() => import('./presets/NewPreset'));
 const PresetDetail = React.lazy(() => import('./presets/PresetDetail'));
 const Presets = React.lazy(() => import('./presets/Presets'));
@@ -61,6 +62,8 @@ ReactDOM.render(
                 <Schedules path="/schedules" />
                 <ScheduleDetail path="/schedules/:name" />
                 <NewSchedule path="/new/schedule" />
+
+                <OpenIDConnectCallback path="/oauth/callback" />
 
                 <NotFound default />
               </Router>

@@ -2,7 +2,7 @@ import { configureStore, createSelector } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 
 import api from './api';
-import authenticationReducer, { Scope, setToken } from './authentication';
+import authenticationReducer, { Scope, setProfile, setToken } from './authentication';
 import displayReducer from './display';
 import errorLogger from './errors';
 import { login as serverLogin, logout as serverLogout } from './server';
@@ -43,6 +43,7 @@ export const login = (token: string) => (dispatch: Dispatch) => {
 
 // Create composite action for logging out
 export const logout = (dispatch: Dispatch) => {
+  dispatch(setProfile(undefined));
   dispatch(setToken(undefined));
   dispatch(serverLogout());
 };
@@ -66,8 +67,8 @@ export {
   useToggleScheduleMutation,
   useRemoveScheduleMutation,
 } from './api';
-export { Scope, setToken } from './authentication';
-export { useDispatch, useSelector } from './hooks';
+export { Scope, setProfile, setToken } from './authentication';
+export { useDispatch, useProfile, useSelector } from './hooks';
 export {
   applyPreset,
   setPixels,

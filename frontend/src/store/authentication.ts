@@ -7,8 +7,15 @@ export enum Scope {
   EDIT_SCHEDULES = 'edit:schedules',
 }
 
+export interface ProfileState {
+  avatar?: string;
+  email: string;
+  name: string;
+}
+
 interface AuthenticationState {
   permissions: Scope[];
+  profile?: ProfileState;
   token?: string;
 }
 
@@ -23,6 +30,9 @@ export const authenticationSlice = createSlice({
     setPermissions: (state, action: PayloadAction<Scope[]>) => {
       state.permissions = action.payload;
     },
+    setProfile: (state, action: PayloadAction<ProfileState | undefined>) => {
+      state.profile = action.payload;
+    },
     setToken: (state, action: PayloadAction<string | undefined>) => {
       state.token = action.payload;
     },
@@ -30,4 +40,4 @@ export const authenticationSlice = createSlice({
 });
 
 export default authenticationSlice.reducer;
-export const { setToken } = authenticationSlice.actions;
+export const { setProfile, setToken } = authenticationSlice.actions;
