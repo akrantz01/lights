@@ -1,9 +1,8 @@
-import { RefreshIcon } from '@heroicons/react/outline';
 import { RouteComponentProps, useNavigate } from '@reach/router';
 import React, { useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 
-import Card from './components/Card';
+import SuspenseLoading from './components/SuspenseLoading';
 import { handleCallback } from './oauth';
 import { useDispatch } from './store';
 
@@ -23,13 +22,7 @@ const OpenIDConnectCallback: React.FC<RouteComponentProps> = () => {
     })();
   }, []);
 
-  return (
-    <Card>
-      <div className="flex justify-center py-16">
-        <RefreshIcon className="h-32 w-32 rounded-full text-gray-500 animate-spin" />
-      </div>
-    </Card>
-  );
+  return <SuspenseLoading />;
 };
 
 export default OpenIDConnectCallback;
