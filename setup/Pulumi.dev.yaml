@@ -1,7 +1,0 @@
-config:
-  auth0:clientId:
-    secure: AAABAGusJ5K1XFwQJdf4m4AhaKBO8NMhARmx8V0yblIUZpCAjaX52dOth/wCBQcWJ/VpI13P7K2SqPpSxbFuFQ==
-  auth0:clientSecret:
-    secure: AAABAPkoVaR+bzfsF5a+JpApZYh1dBnDFdRNQuKllXgGS6BFpmPYWs9Ndw9Sk6RKMZsZs7gDOv1A9BRKz0+MpgCybQkVac8OQ8+2l3ezITsSjGvcyUOuT2dZ3a4X+ojQ
-  auth0:domain: krantz-dev.us.auth0.com
-  lights:domain: lights.krantz.dev
