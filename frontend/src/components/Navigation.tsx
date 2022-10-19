@@ -4,7 +4,7 @@ import { Link, LinkGetProps, useLocation } from '@reach/router';
 import classNames from 'classnames';
 import React, { Fragment, MouseEvent } from 'react';
 
-import { buildAuthorizationUrl } from '../oauth';
+import { buildAuthorizationUrl, logout as oauthLogout } from '../oauth';
 import { logout, useDispatch, useProfile } from '../store';
 import StatusIndicator from './StatusIndicator';
 
@@ -58,8 +58,10 @@ const Navigation = (): JSX.Element => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (profile) dispatch(logout);
-    else {
+    if (profile) {
+      oauthLogout();
+      dispatch(logout);
+    } else {
       const url = await buildAuthorizationUrl();
       window.location.assign(url);
     }

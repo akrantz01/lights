@@ -151,14 +151,54 @@ export async function handleCallback(dispatch: Dispatch): Promise<void> {
   if (!transaction.verifier || (transaction.state && transaction.state !== state)) throw new Error('Invalid state');
 
   const result = await getToken(code ?? '', transaction.verifier);
-  const verified = verify({ idToken: result.id_token, issuer: DOMAIN, audience: CLIENT_ID, nonce: transaction.nonce });
+  const { token, parsed } = verify({
+    idToken: result.id_token,
+    issuer: DOMAIN,
+    audience: CLIENT_ID,
+    nonce: transaction.nonce,
+  });
 
-  dispatch(
-    setProfile({
-      avatar: buildAvatarURL(verified.parsed.claims.email),
-      name: verified.parsed.claims.name,
-      email: verified.parsed.claims.email,
-    }),
-  );
-  dispatch(login(verified.token));
+  const profile = {
+    avatar: buildAvatarURL(parsed.claims.email),
+    name: parsed.claims.name,
+    email: parsed.claims.email,
+  };
+
+  dispatch(setProfile(profile));
+  dispatch(login(token));
+
+  cacheToken({
+    token,
+    expiration: parsed.claims.exp * 1000, // convert to milliseconds
+    profile,
+  });
+}
+
+interface CachedToken {
+  token: string;
+  expiration: number;
+  profile: {
+    avatar: string;
+    name: string;
+    email: string;
+  };
+}
+
+const cacheToken = (item: CachedToken) => localStorage.setItem('cached-token', JSON.stringify(item));
+export function fetchCachedToken(): CachedToken | undefined {
+  const item = localStorage.getItem('cached-token');
+  if (!item) return undefined;
+
+  const contents = JSON.parse(item) as CachedToken;
+  if (Date.now() > contents.expiration) {
+    localStorage.removeItem('cached-token');
+    return undefined;
+  }
+
+  return contents;
+}
+
+export function logout() {
+  // Wipeout the cached token
+  localStorage.removeItem('cached-token');
 }
