@@ -2,7 +2,7 @@ import { configureStore, createSelector } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 
 import api from './api';
-import authenticationReducer, { ProfileState, Scope, setProfile, setToken } from './authentication';
+import authenticationReducer, { Scope, setProfile, setToken } from './authentication';
 import displayReducer from './display';
 import errorLogger from './errors';
 import { login as serverLogin, logout as serverLogout } from './server';
@@ -36,8 +36,7 @@ export const hasPermission = (scope: Scope): Selector<boolean> =>
   );
 
 // Create composite action for logging in
-export const login = (token: string, profile: ProfileState) => (dispatch: Dispatch) => {
-  dispatch(setProfile(profile));
+export const login = (token: string) => (dispatch: Dispatch) => {
   dispatch(setToken(token));
   dispatch(serverLogin(token));
 };
@@ -68,7 +67,7 @@ export {
   useToggleScheduleMutation,
   useRemoveScheduleMutation,
 } from './api';
-export { Scope, setToken } from './authentication';
+export { Scope, setProfile, setToken } from './authentication';
 export { useDispatch, useProfile, useSelector } from './hooks';
 export {
   applyPreset,

@@ -2,7 +2,7 @@ import Hex from 'crypto-js/enc-hex';
 import md5 from 'crypto-js/md5';
 
 import { verify } from './jwt';
-import { Dispatch, login } from './store';
+import { Dispatch, login, setProfile } from './store';
 
 const AUDIENCE = 'https://lights.krantz.dev';
 const CHARSET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_~.';
@@ -154,10 +154,11 @@ export async function handleCallback(dispatch: Dispatch): Promise<void> {
   const verified = verify({ idToken: result.id_token, issuer: DOMAIN, audience: CLIENT_ID, nonce: transaction.nonce });
 
   dispatch(
-    login(verified.token, {
+    setProfile({
       avatar: buildAvatarURL(verified.parsed.claims.email),
       name: verified.parsed.claims.name,
       email: verified.parsed.claims.email,
     }),
   );
+  dispatch(login(verified.token));
 }

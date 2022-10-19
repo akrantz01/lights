@@ -1,4 +1,3 @@
-import { Auth0Provider } from '@auth0/auth0-react';
 import { LocationProvider, Router } from '@reach/router';
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
@@ -9,7 +8,7 @@ import AuthHandler from './components/AuthHandler';
 import Layout from './components/Layout';
 import SuspenseLoading from './components/SuspenseLoading';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
-import { Scope, connect, store } from './store';
+import { connect, store } from './store';
 
 import 'flatpickr/dist/flatpickr.min.css';
 import './index.css';
@@ -26,51 +25,38 @@ const NewSchedule = React.lazy(() => import('./schedules/NewSchedule'));
 const ScheduleDetail = React.lazy(() => import('./schedules/ScheduleDetail'));
 const Schedules = React.lazy(() => import('./schedules/Schedules'));
 
-const AUTH0_DOMAIN = process.env.REACT_APP_AUTH0_DOMAIN || '';
-const AUTH0_CLIENT_ID = process.env.REACT_APP_AUTH0_CLIENT_ID || '';
-
 // Connect to the websocket API
 store.dispatch(connect());
 
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
-      <Auth0Provider
-        domain={AUTH0_DOMAIN}
-        clientId={AUTH0_CLIENT_ID}
-        redirectUri={window.location.origin}
-        cacheLocation="localstorage"
-        audience="https://lights.krantz.dev"
-        scope={Object.values(Scope).join(' ')}
-        useRefreshTokens
-      >
-        <AuthHandler />
-        <LocationProvider>
-          <Toaster position="top-right" toastOptions={{ duration: 2500 }} />
-          <Layout>
-            <Suspense fallback={<SuspenseLoading />}>
-              <Router>
-                <Dashboard path="/" />
+      <AuthHandler />
+      <LocationProvider>
+        <Toaster position="top-right" toastOptions={{ duration: 2500 }} />
+        <Layout>
+          <Suspense fallback={<SuspenseLoading />}>
+            <Router>
+              <Dashboard path="/" />
 
-                <Animations path="/animations" />
-                <NewAnimation path="/new/animation" />
+              <Animations path="/animations" />
+              <NewAnimation path="/new/animation" />
 
-                <Presets path="/presets" />
-                <PresetDetail path="/presets/:name" />
-                <NewPreset path="/new/preset" />
+              <Presets path="/presets" />
+              <PresetDetail path="/presets/:name" />
+              <NewPreset path="/new/preset" />
 
-                <Schedules path="/schedules" />
-                <ScheduleDetail path="/schedules/:name" />
-                <NewSchedule path="/new/schedule" />
+              <Schedules path="/schedules" />
+              <ScheduleDetail path="/schedules/:name" />
+              <NewSchedule path="/new/schedule" />
 
-                <OpenIDConnectCallback path="/oauth/callback" />
+              <OpenIDConnectCallback path="/oauth/callback" />
 
-                <NotFound default />
-              </Router>
-            </Suspense>
-          </Layout>
-        </LocationProvider>
-      </Auth0Provider>
+              <NotFound default />
+            </Router>
+          </Suspense>
+        </Layout>
+      </LocationProvider>
     </Provider>
   </React.StrictMode>,
   document.getElementById('root'),
