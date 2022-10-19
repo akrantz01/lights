@@ -14,7 +14,7 @@ const NewPreset: React.FC<RouteComponentProps> = () => {
   const length = useSelector((state) => state.strip.length);
   const [createPreset, { isLoading, isUninitialized, isError }] = useCreatePresetMutation();
 
-  const canCreate = useSelector(hasPermission(Scope.EDIT_PRESETS));
+  const canCreate = useSelector(hasPermission(Scope.EDIT));
 
   // Track form state
   const [name, setName] = useState('');

@@ -1,14 +1,19 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 export enum Scope {
-  CONTROL_LIGHTS = 'control:lights',
-  EDIT_ANIMATIONS = 'edit:animations',
-  EDIT_PRESETS = 'edit:presets',
-  EDIT_SCHEDULES = 'edit:schedules',
+  CONTROL_LIGHTS = 'lights-control',
+  EDIT = 'lights-edit',
+}
+
+export interface ProfileState {
+  avatar?: string;
+  email: string;
+  name: string;
 }
 
 interface AuthenticationState {
   permissions: Scope[];
+  profile?: ProfileState;
   token?: string;
 }
 
@@ -23,6 +28,9 @@ export const authenticationSlice = createSlice({
     setPermissions: (state, action: PayloadAction<Scope[]>) => {
       state.permissions = action.payload;
     },
+    setProfile: (state, action: PayloadAction<ProfileState | undefined>) => {
+      state.profile = action.payload;
+    },
     setToken: (state, action: PayloadAction<string | undefined>) => {
       state.token = action.payload;
     },
@@ -30,4 +38,4 @@ export const authenticationSlice = createSlice({
 });
 
 export default authenticationSlice.reducer;
-export const { setToken } = authenticationSlice.actions;
+export const { setProfile, setToken } = authenticationSlice.actions;

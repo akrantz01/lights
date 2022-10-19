@@ -24,7 +24,7 @@ const NewSchedule: React.FC<RouteComponentProps> = (): JSX.Element => {
   const { data: animations, isLoading: isAnimationsLoading } = useListAnimationsQuery();
   const { data: presets, isLoading: isPresetsLoading } = useListPresetsQuery();
 
-  const canCreate = useSelector(hasPermission(Scope.EDIT_SCHEDULES));
+  const canCreate = useSelector(hasPermission(Scope.EDIT));
 
   // Track form state
   const [name, setName] = useState('');

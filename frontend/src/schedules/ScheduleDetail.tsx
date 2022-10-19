@@ -54,7 +54,7 @@ const ScheduleDetail = ({ name }: Props): JSX.Element => {
 
   const navigate = useNavigate();
 
-  const canEdit = useSelector(hasPermission(Scope.EDIT_SCHEDULES));
+  const canEdit = useSelector(hasPermission(Scope.EDIT));
 
   const { data, isLoading } = useGetScheduleQuery(name);
   const [updateSchedule] = useUpdateScheduleMutation();

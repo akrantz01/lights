@@ -3,13 +3,11 @@ package auth
 type Permission string
 
 const (
-	PermissionEditAnimations Permission = "edit:animations"
-	PermissionEditPresets               = "edit:presets"
-	PermissionEditSchedules             = "edit:schedules"
-	PermissionControlLights             = "control:lights"
+	PermissionEdit          Permission = "lights-edit"
+	PermissionControlLights            = "lights-control"
 )
 
-var knownPermissions = []Permission{PermissionEditAnimations, PermissionEditPresets, PermissionEditSchedules, PermissionControlLights}
+var knownPermissions = []Permission{PermissionEdit, PermissionControlLights}
 
 // Permissions denotes which permissions a given user has
 type Permissions map[Permission]bool
@@ -38,4 +36,14 @@ func (p *Permissions) Has(permission Permission) bool {
 
 	exists, ok := (*p)[permission]
 	return ok && exists
+}
+
+// AsSlice converts the assigned permissions to a string slice for transport
+func (p *Permissions) AsSlice() []string {
+	var rawPermissions []string
+	for permission := range *p {
+		rawPermissions = append(rawPermissions, string(permission))
+	}
+
+	return rawPermissions
 }

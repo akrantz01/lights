@@ -12,7 +12,7 @@ const NewAnimation: React.FC<RouteComponentProps> = (): JSX.Element => {
   const navigate = useNavigate();
   const [createAnimation, { isLoading, isUninitialized, isError }] = useCreateAnimationMutation();
 
-  const canCreate = useSelector(hasPermission(Scope.EDIT_ANIMATIONS));
+  const canCreate = useSelector(hasPermission(Scope.EDIT));
 
   // Track form state
   const [name, setName] = useState('');

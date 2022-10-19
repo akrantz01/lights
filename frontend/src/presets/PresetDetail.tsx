@@ -34,7 +34,7 @@ const PresetDetail = ({ name }: Props): JSX.Element => {
   const [deletePreset, { isLoading: isDeleteLoading }] = useRemovePresetMutation();
 
   const canApply = useSelector(hasPermission(Scope.CONTROL_LIGHTS));
-  const canEdit = useSelector(hasPermission(Scope.EDIT_PRESETS));
+  const canEdit = useSelector(hasPermission(Scope.EDIT));
 
   // Track the state of the modals
   const [alertOpen, setAlertOpen] = useState(false);

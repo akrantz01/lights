@@ -14,7 +14,7 @@ const Presets: React.FC<RouteComponentProps> = () => {
   const currentPreset = useSelector((state) => state.display.preset || '');
 
   const canApply = useSelector(hasPermission(Scope.CONTROL_LIGHTS));
-  const canCreate = useSelector(hasPermission(Scope.EDIT_PRESETS));
+  const canCreate = useSelector(hasPermission(Scope.EDIT));
 
   const apply = (name: string) => (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();

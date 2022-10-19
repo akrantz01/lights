@@ -16,7 +16,7 @@ import (
 
 // Router registers all the methods for handling presets
 func Router(v *validator.Validator) func(r chi.Router) {
-	m := auth.Middleware(v, auth.PermissionEditPresets)
+	m := auth.Middleware(v, auth.PermissionEdit)
 
 	return func(r chi.Router) {
 		r.Get("/", list)
