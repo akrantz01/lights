@@ -35,6 +35,46 @@ jobs:
           name: lights-api.linux-${{ matrix.arch }}
           path: ${{ github.workspace }}/api/lights-api.linux-${{ matrix.arch }}
 
+  build-controller:
+    name: Build Controller
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch:
+          # TODO: add cross compilation to aarch64
+          - x86_64
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          target: ${{ matrix.arch }}
+      - uses: actions/cache@v3
+        id: cache-llvm
+        with:
+          path: ./llvm
+          key: llvm-12
+      - uses: KyleMayes/install-llvm-action@v1
+        with:
+          version: 12.0
+          cached: ${{ steps.cache-llvm.outputs.cache-hit }}
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            controller/target/
+          key: ${{ runner.os }}-cargo-controller-${{ hashFiles('controller/Cargo.lock') }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-controller-${{ hashFiles('controller/Cargo.lock') }}-
+      - run: cargo build --release --target ${{ matrix.arch }}-linux-unknown-gnu
+        working-directory: controller
+      - uses: actions/upload-artifact@v3
+        with:
+          name: lights-controller.linux-${{ matrix.arch }}
+
   build-animation:
     name: Build Animation
     runs-on: ubuntu-latest
