@@ -36,7 +36,7 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('controller/Cargo.lock') }}
-          restore-key: |
+          restore-keys: |
             ${{ runner.os }}-cargo-${{ hashFiles('controller/Cargo.lock') }}-
       - uses: actions-rs/cargo@v1
         with:
@@ -57,7 +57,7 @@ jobs:
         with:
           node-version-file: frontend/.nvmrc
           cache: yarn
-          cache-dependency-file: frontend/yarn.lock
+          cache-dependency-path: frontend/yarn.lock
       - run: yarn install --frozen-lockfile
         working-directory: frontend
       - run: yarn lint
@@ -89,7 +89,7 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('sample-animations/${{ matrix.animation }}/Cargo.lock') }}-${{ github.run_id }}
-          restore-key: |
+          restore-keys: |
             ${{ runner.os }}-cargo-${{ hashFiles('sample-animations/${{ matrix.animation }}/Cargo.lock') }}-
       - uses: actions-rs/cargo@v1
         with:
