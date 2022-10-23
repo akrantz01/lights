@@ -48,7 +48,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
-          target: ${{ matrix.arch }}
+          target: ${{ matrix.arch }}-linux-unknown-gnu
       - uses: actions/cache@v3
         id: cache-llvm
         with:
