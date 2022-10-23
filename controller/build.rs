@@ -5,6 +5,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build_client(false)
         .build_server(true)
         .format(true)
+        .type_attribute(".", "#[derive(Eq)]")
         .compile(&["../lights.proto"], &[".."])?;
 
     Ok(())
