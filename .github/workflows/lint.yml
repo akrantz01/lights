@@ -28,6 +28,15 @@ jobs:
           toolchain: stable
           components: rustfmt, clippy
       - uses: actions/cache@v3
+        id: cache-llvm
+        with:
+          path: ./llvm
+          key: llvm-12
+      - uses: KyleMayes/install-llvm-action@v1
+        with:
+          version: 12.0
+          cached: ${{ steps.cache-llvm.outputs.cache-hit }}
+      - uses: actions/cache@v3
         with:
           path: |
             ~/.cargo/bin/
