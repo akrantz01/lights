@@ -3,7 +3,7 @@ package logging
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -32,7 +32,7 @@ func Request(logger *zap.Logger) func(next http.Handler) http.Handler {
 			defer func() {
 				var respBody []byte
 				if ww.Status() >= 400 {
-					respBody, _ = ioutil.ReadAll(buf)
+					respBody, _ = io.ReadAll(buf)
 				}
 				entry.Write(ww.Status(), ww.BytesWritten(), ww.Header(), time.Since(start), respBody)
 			}()
@@ -46,6 +46,7 @@ type requestLogger struct {
 	Logger *zap.Logger
 }
 
+//nolint:ireturn
 func (l *requestLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
 	entry := &RequestLoggerEntry{}
 	entry.Logger = l.Logger.With(
@@ -74,7 +75,6 @@ func (l *RequestLoggerEntry) Write(status, bytes int, headers http.Header, elaps
 		logFunc := logLevelForStatus(logger, status)
 		logFunc("finished processing request")
 	}
-
 }
 
 func (l *RequestLoggerEntry) Panic(v interface{}, stack []byte) {

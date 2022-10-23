@@ -1,0 +1,112 @@
+on:
+  - push
+
+jobs:
+  api:
+    name: Lint API
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version-file: api/go.mod
+          check-latest: true
+          cache: true
+          cache-dependency-path: api/go.sum
+      - uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.50.0
+          working-directory: api
+
+  controller:
+    name: Lint Controller
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          components: rustfmt, clippy
+      - uses: actions/cache@v3
+        id: cache-llvm
+        with:
+          path: ./llvm
+          key: llvm-12
+      - uses: KyleMayes/install-llvm-action@v1
+        with:
+          version: 12.0
+          cached: ${{ steps.cache-llvm.outputs.cache-hit }}
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            controller/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('controller/Cargo.lock') }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-${{ hashFiles('controller/Cargo.lock') }}-
+      - uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --check --manifest-path controller/Cargo.toml
+      - uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: clippy - controller
+          args: --manifest-path controller/Cargo.toml
+
+  frontend:
+    name: Lint Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: frontend/.nvmrc
+          cache: yarn
+          cache-dependency-path: frontend/yarn.lock
+      - run: yarn install --frozen-lockfile
+        working-directory: frontend
+      - run: yarn lint
+        working-directory: frontend
+
+
+  animations:
+    name: Lint Animation
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        animation:
+          - rainbow
+          - simple
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          components: rustfmt, clippy
+          target: wasm32-unknown-unknown
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            sample-animations/${{ matrix.animation }}/target/
+          key: ${{ runner.os }}-cargo-${{ matrix.animation }}-${{ hashFiles('sample-animations/${{ matrix.animation }}/Cargo.lock') }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-${{ matrix.animation }}-${{ hashFiles('sample-animations/${{ matrix.animation }}/Cargo.lock') }}-
+      - uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --check --manifest-path sample-animations/${{ matrix.animation }}/Cargo.toml
+      - uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: clippy - animations - ${{ matrix.animation }}
+          args: --manifest-path sample-animations/${{ matrix.animation }}/Cargo.toml

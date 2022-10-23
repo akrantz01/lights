@@ -8,8 +8,6 @@ import (
 	"github.com/dgraph-io/badger/v3/options"
 )
 
-const databaseContextKey = "badger-database-key"
-
 var ErrNotFound = badger.ErrKeyNotFound
 
 type Database struct {
@@ -43,11 +41,13 @@ func (d *Database) Close() error {
 	return d.db.Close()
 }
 
+type databaseContextKey struct{}
+
 // WithDatabase attaches a database connection to the request context
 func WithDatabase(db *Database) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx := context.WithValue(r.Context(), databaseContextKey, db)
+			ctx := context.WithValue(r.Context(), databaseContextKey{}, db)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
@@ -55,5 +55,5 @@ func WithDatabase(db *Database) func(next http.Handler) http.Handler {
 
 // GetDatabase retrieves a connection to the database
 func GetDatabase(ctx context.Context) *Database {
-	return ctx.Value(databaseContextKey).(*Database)
+	return ctx.Value(databaseContextKey{}).(*Database)
 }

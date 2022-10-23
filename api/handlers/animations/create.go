@@ -1,7 +1,8 @@
 package animations
 
 import (
-	"io/ioutil"
+	"errors"
+	"io"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -27,7 +28,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	file, err := handlers.OpenFormFile(r, "wasm")
-	if err == http.ErrMissingFile {
+	if errors.Is(err, http.ErrMissingFile) {
 		handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("wasm file must be present"))
 		return
 	} else if err != nil {
@@ -38,7 +39,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	// Read the file
-	wasm, err := ioutil.ReadAll(file)
+	wasm, err := io.ReadAll(file)
 	if err != nil {
 		handlers.Respond(w, handlers.AsFatal())
 		l.Error("failed to read file", zap.Error(err))
@@ -48,10 +49,10 @@ func create(w http.ResponseWriter, r *http.Request) {
 	animation := database.Animation{
 		Name: name,
 	}
-	database.GenerateId(&animation)
+	database.GenerateID(&animation)
 
 	// Trigger the create action and wait for response
-	method, success := rpc.NewAddAnimation(animation.Id, wasm)
+	method, success := rpc.NewAddAnimation(animation.ID, wasm)
 	actions <- method
 	if !<-success {
 		handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("invalid WASM payload"))

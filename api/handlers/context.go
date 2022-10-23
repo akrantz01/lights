@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-const requestContextKey = "request-context-key"
+type requestContextKey struct{}
 
 // RequestContext contains arbitrary values to be attached to the request
 type RequestContext struct {
@@ -20,7 +20,7 @@ func WithRequestContext(length uint16) func(next http.Handler) http.Handler {
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx := context.WithValue(r.Context(), requestContextKey, rc)
+			ctx := context.WithValue(r.Context(), requestContextKey{}, rc)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
@@ -28,5 +28,5 @@ func WithRequestContext(length uint16) func(next http.Handler) http.Handler {
 
 // GetStripLength retrieves the strip length from the request context
 func GetStripLength(ctx context.Context) uint16 {
-	return ctx.Value(requestContextKey).(RequestContext).StripLength
+	return ctx.Value(requestContextKey{}).(RequestContext).StripLength
 }

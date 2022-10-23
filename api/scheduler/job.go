@@ -1,6 +1,8 @@
 package scheduler
 
 import (
+	"errors"
+
 	"go.uber.org/zap"
 
 	"github.com/akrantz01/lights/api/database"
@@ -14,7 +16,7 @@ func handler(name string, db *database.Database, actions chan rpc.Callable, broa
 
 	// Get the schedule
 	schedule, err := db.GetSchedule(name)
-	if err == database.ErrNotFound {
+	if errors.Is(err, database.ErrNotFound) {
 		logger.Warn("schedule no longer exists")
 		return
 	} else if err != nil {
@@ -29,7 +31,7 @@ func handler(name string, db *database.Database, actions chan rpc.Callable, broa
 		broadcast <- ws.NewFilledPixels(*schedule.Color, 8)
 	case database.ScheduleTypePreset:
 		preset, err := db.GetPreset(*schedule.Preset)
-		if err == database.ErrNotFound {
+		if errors.Is(err, database.ErrNotFound) {
 			logger.Warn("preset no longer exists", zap.String("preset", *schedule.Preset))
 			return
 		} else if err != nil {

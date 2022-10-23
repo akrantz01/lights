@@ -2,6 +2,7 @@ package database
 
 import (
 	"encoding/binary"
+	"errors"
 
 	"github.com/dgraph-io/badger/v3"
 )
@@ -25,7 +26,7 @@ func (d *Database) GetColor() (Color, error) {
 	err := d.db.View(func(txn *badger.Txn) error {
 		// Attempt to fetch the item, returning the default if not found
 		item, err := txn.Get([]byte("color"))
-		if err == badger.ErrKeyNotFound {
+		if errors.Is(err, badger.ErrKeyNotFound) {
 			return nil
 		} else if err != nil {
 			return err
@@ -72,7 +73,7 @@ func (d *Database) GetBrightness() (uint8, error) {
 	err := d.db.View(func(txn *badger.Txn) error {
 		// Attempt to fetch the item, returning the default if not found
 		item, err := txn.Get([]byte("brightness"))
-		if err == badger.ErrKeyNotFound {
+		if errors.Is(err, badger.ErrKeyNotFound) {
 			return nil
 		} else if err != nil {
 			return err
@@ -104,7 +105,7 @@ func (d *Database) GetState() (bool, error) {
 	err := d.db.View(func(txn *badger.Txn) error {
 		// Attempt to fetch the item, returning the default if not found
 		item, err := txn.Get([]byte("state"))
-		if err == badger.ErrKeyNotFound {
+		if errors.Is(err, badger.ErrKeyNotFound) {
 			return nil
 		} else if err != nil {
 			return err
@@ -141,7 +142,7 @@ func (d *Database) GetPixelMode() (PixelMode, error) {
 
 	err := d.db.View(func(txn *badger.Txn) error {
 		item, err := txn.Get([]byte("pixel-mode"))
-		if err == badger.ErrKeyNotFound {
+		if errors.Is(err, badger.ErrKeyNotFound) {
 			return nil
 		} else if err != nil {
 			return err

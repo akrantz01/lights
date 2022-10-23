@@ -9,12 +9,12 @@ import (
 
 // StartAnimation queues an animation to be started
 type StartAnimation struct {
-	Id string
+	ID string
 }
 
 func NewStartAnimation(id string) StartAnimation {
 	return StartAnimation{
-		Id: id,
+		ID: id,
 	}
 }
 
@@ -23,17 +23,13 @@ func (sa StartAnimation) Type() string {
 }
 
 func (sa StartAnimation) Execute(ctx context.Context, db *database.Database, controller *lights.Controller) error {
-	controller.StartAnimation(ctx, sa.Id)
+	controller.StartAnimation(ctx, sa.ID)
 
 	// Update the current database state
 	if err := db.SetPixelMode(database.PixelModeAnimation); err != nil {
 		return err
 	}
-	if err := db.SetCurrentAnimation(sa.Id); err != nil {
-		return err
-	}
-
-	return nil
+	return db.SetCurrentAnimation(sa.ID)
 }
 
 // StopAnimation halts the current animation
@@ -51,16 +47,12 @@ func (sa StopAnimation) Execute(ctx context.Context, db *database.Database, cont
 	controller.StopAnimation(ctx)
 
 	// Update the database state
-	if err := db.SetCurrentAnimation(""); err != nil {
-		return err
-	}
-
-	return nil
+	return db.SetCurrentAnimation("")
 }
 
 // AddAnimation registers an animation with the controller
 type AddAnimation struct {
-	Id       string
+	ID       string
 	Wasm     []byte
 	Response chan bool
 }
@@ -68,7 +60,7 @@ type AddAnimation struct {
 func NewAddAnimation(id string, wasm []byte) (AddAnimation, chan bool) {
 	success := make(chan bool)
 	return AddAnimation{
-		Id:       id,
+		ID:       id,
 		Wasm:     wasm,
 		Response: success,
 	}, success
@@ -79,7 +71,7 @@ func (aa AddAnimation) Type() string {
 }
 
 func (aa AddAnimation) Execute(ctx context.Context, _ *database.Database, controller *lights.Controller) error {
-	success := controller.RegisterAnimation(ctx, aa.Id, aa.Wasm)
+	success := controller.RegisterAnimation(ctx, aa.ID, aa.Wasm)
 	aa.Response <- success
 
 	return nil
@@ -87,12 +79,12 @@ func (aa AddAnimation) Execute(ctx context.Context, _ *database.Database, contro
 
 // RemoveAnimation deletes an animation from the controller
 type RemoveAnimation struct {
-	Id string
+	ID string
 }
 
 func NewRemoveAnimation(id string) RemoveAnimation {
 	return RemoveAnimation{
-		Id: id,
+		ID: id,
 	}
 }
 
@@ -101,12 +93,8 @@ func (ra RemoveAnimation) Type() string {
 }
 
 func (ra RemoveAnimation) Execute(ctx context.Context, db *database.Database, controller *lights.Controller) error {
-	controller.UnregisterAnimation(ctx, ra.Id)
+	controller.UnregisterAnimation(ctx, ra.ID)
 
 	// Remove animation from database
-	if err := db.RemoveAnimation(ra.Id); err != nil {
-		return err
-	}
-
-	return nil
+	return db.RemoveAnimation(ra.ID)
 }

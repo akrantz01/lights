@@ -2,6 +2,7 @@ package database
 
 import (
 	"encoding/binary"
+	"errors"
 
 	"github.com/dgraph-io/badger/v3"
 )
@@ -18,7 +19,7 @@ func (d *Database) GetPixels() ([]Color, error) {
 
 			// Fetch the item
 			item, err := txn.Get([]byte{'p', encoded[0], encoded[1]})
-			if err == badger.ErrKeyNotFound {
+			if errors.Is(err, badger.ErrKeyNotFound) {
 				continue
 			} else if err != nil {
 				return err

@@ -31,9 +31,5 @@ func (cb ChangeBrightness) Execute(ctx context.Context, db *database.Database, c
 	}
 
 	// Mark the strip as on if the brightness is non-zero
-	if err := db.SetState(cb.Brightness != 0); err != nil {
-		return err
-	}
-
-	return nil
+	return db.SetState(cb.Brightness != 0)
 }

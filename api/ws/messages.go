@@ -28,8 +28,8 @@ const (
 	MessageCurrentBrightness = "strip/setBrightness"
 	// MessageSetBrightness changes the current brightness of the lights
 	MessageSetBrightness = "server/strip/setBrightness"
-	// MessageModifiedPixels notifies clients of changes to individual pixels on the strip. Once received by the client, the
-	// client shall automatically switch to pixel modification mode.
+	// MessageModifiedPixels notifies clients of changes to individual pixels on the strip. Once received by the client,
+	// the client shall automatically switch to pixel modification mode.
 	MessageModifiedPixels = "display/setPixelsByIndex"
 	// MessageSetPixels is used to set arbitrary pixels to a given color
 	MessageSetPixels = "server/display/setPixels"
@@ -213,7 +213,7 @@ type PresetUsed struct {
 	Payload PresetUsedPayload `json:"payload"`
 }
 type PresetUsedPayload struct {
-	Id     string           `json:"id"`
+	ID     string           `json:"id"`
 	Pixels []database.Color `json:"pixels"`
 }
 
@@ -221,7 +221,7 @@ func NewPresetUsed(preset database.Preset) PresetUsed {
 	return PresetUsed{
 		Type: MessagePresetUsed,
 		Payload: PresetUsedPayload{
-			Id:     preset.Id,
+			ID:     preset.ID,
 			Pixels: preset.Pixels,
 		},
 	}
@@ -229,7 +229,7 @@ func NewPresetUsed(preset database.Preset) PresetUsed {
 
 // ApplyPreset is received when a client wishes to apply a preset to the strip
 type ApplyPreset struct {
-	Id string `json:"payload"`
+	ID string `json:"payload"`
 }
 
 // AnimationStarted is used to broadcast the newly started animation
@@ -247,7 +247,7 @@ func NewAnimationStarted(id string) AnimationStarted {
 
 // StartAnimation is received when a client wishes to run a registered animation
 type StartAnimation struct {
-	Id string `json:"payload"`
+	ID string `json:"payload"`
 }
 
 // AnimationStopped is used to broadcast that the current animation was stopped

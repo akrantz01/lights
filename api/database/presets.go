@@ -52,7 +52,7 @@ func (d *Database) AddPreset(preset Preset) error {
 		return err
 	}
 
-	key := buildKey(presetPrefix, preset.Id)
+	key := buildKey(presetPrefix, preset.ID)
 	return d.db.Update(func(txn *badger.Txn) error {
 		return txn.Set(key, encoded)
 	})

@@ -45,9 +45,5 @@ func (ap ApplyPreset) Execute(ctx context.Context, db *database.Database, contro
 	}
 
 	// Mark the strip as being on
-	if err := db.SetState(true); err != nil {
-		return err
-	}
-
-	return nil
+	return db.SetState(true)
 }

@@ -1,6 +1,7 @@
 package animations
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/auth0/go-jwt-middleware/v2/validator"
@@ -54,7 +55,7 @@ func read(w http.ResponseWriter, r *http.Request) {
 	l := logging.GetLogger(r.Context(), "animations:read").With(zap.String("id", id))
 
 	animation, err := db.GetAnimation(id)
-	if err == database.ErrNotFound {
+	if errors.Is(err, database.ErrNotFound) {
 		handlers.Respond(w, handlers.WithStatus(404), handlers.WithError("not found"))
 	} else if err != nil {
 		handlers.Respond(w, handlers.AsFatal())

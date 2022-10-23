@@ -22,7 +22,13 @@ type Scheduler struct {
 }
 
 // New creates and starts a new scheduler using the given timezone
-func New(timezoneName string, length uint16, db *database.Database, actions chan rpc.Callable, broadcast chan interface{}) (*Scheduler, error) {
+func New(
+	timezoneName string,
+	length uint16,
+	db *database.Database,
+	actions chan rpc.Callable,
+	broadcast chan interface{},
+) (*Scheduler, error) {
 	// Load the timezone and create the scheduler
 	tz, err := time.LoadLocation(timezoneName)
 	if err != nil {
@@ -117,7 +123,7 @@ func (s *Scheduler) LoadFromDatabase() error {
 			continue
 		}
 
-		if err := s.Add(schedule.Id, schedule.At, schedule.Repeats); err != nil {
+		if err := s.Add(schedule.ID, schedule.At, schedule.Repeats); err != nil {
 			return err
 		}
 	}
