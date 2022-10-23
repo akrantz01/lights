@@ -1866,10 +1866,10 @@
   dependencies:
     "@types/react" "^17"
 
-"@types/react-flatpickr@3.8.6":
-  version "3.8.6"
-  resolved "https://registry.yarnpkg.com/@types/react-flatpickr/-/react-flatpickr-3.8.6.tgz#5ecd5ba47d4f32a20d9045b41e047e6e16cc2e69"
-  integrity sha512-EhlqO1P0jnlTyYMHgaXRcuWxBqdVtmepl5j9FxoZS8jBxyx1z6AN8K4/WyYS4ijiMsBNDGyagjRXQbAfgvao4w==
+"@types/react-flatpickr@3.8.7":
+  version "3.8.7"
+  resolved "https://registry.yarnpkg.com/@types/react-flatpickr/-/react-flatpickr-3.8.7.tgz#dffd457b623c643d17e1693af50fc08c667d6855"
+  integrity sha512-sIRN1WxcVjPjlYdqhDqWjdznFIb21Z1ab0prETuzW6j/xpOXMDCBI6/xtxTgaWF0hhKTqO7U1RRbaxbjyS3e5w==
   dependencies:
     "@types/react" "*"
     flatpickr "^4.0.6"
@@ -7400,10 +7400,10 @@ react-error-overlay@^6.0.10:
   resolved "https://registry.yarnpkg.com/react-error-overlay/-/react-error-overlay-6.0.10.tgz#0fe26db4fa85d9dbb8624729580e90e7159a59a6"
   integrity sha512-mKR90fX7Pm5seCOfz8q9F+66VCc1PGsWSBxKbITjfKVQHMNF2zudxHnMdJiB1fRCb+XsbQV9sO9DCkgsMQgBIA==
 
-react-flatpickr@3.10.7:
-  version "3.10.7"
-  resolved "https://registry.yarnpkg.com/react-flatpickr/-/react-flatpickr-3.10.7.tgz#bca6da2a1ccf23bb884881e2a1723073f0bfb391"
-  integrity sha512-dJ7cZAayefqWJnX4Xe8Piy13oK2h4aeGCH9tz+D2iSNh+kbezUAWVMVCKdTqjsNBqTMS4v0DkfMy2CP2atNCTQ==
+react-flatpickr@3.10.13:
+  version "3.10.13"
+  resolved "https://registry.yarnpkg.com/react-flatpickr/-/react-flatpickr-3.10.13.tgz#5b9d8f35f84e43f342fb0f0334b78a8dcd7d67c4"
+  integrity sha512-4m+K1K8jhvRFI8J/AHmQfA5hLALzhebEtEK8mLevXjX24MV3u502crzBn+EGFIBOfNUtrL5PId9FsGwgtuz/og==
   dependencies:
     flatpickr "^4.6.2"
     prop-types "^15.5.10"
