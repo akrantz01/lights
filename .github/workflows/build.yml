@@ -74,6 +74,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: lights-controller.linux-${{ matrix.arch }}
+          path: ${{ github.workspace }}/controller/target/${{ matrix.arch }}/release/controller
 
   build-animation:
     name: Build Animation
