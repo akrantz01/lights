@@ -14,7 +14,7 @@ cranelift = ["wasmer/cranelift"]
 [dependencies]
 tokio = { version = "1.17.0", features = ["fs", "macros", "parking_lot", "rt-multi-thread", "signal", "sync"] }
 
-color-eyre = { version = "0.6.0", default-features = false, features = ["track-caller"] }
+color-eyre = { version = "0.6.2", default-features = false, features = ["track-caller"] }
 dotenv = "0.15.0"
 eyre = "0.6.8"
 thiserror = "1.0"
