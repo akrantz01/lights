@@ -44,7 +44,7 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('controller/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-${{ hashFiles('controller/Cargo.lock') }}-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-cargo-${{ hashFiles('controller/Cargo.lock') }}-
       - uses: actions-rs/cargo@v1
@@ -97,9 +97,9 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('sample-animations/${{ matrix.animation }}/Cargo.lock') }}-${{ github.run_id }}
+          key: ${{ runner.os }}-cargo-${{ matrix.animation }}-${{ hashFiles('sample-animations/${{ matrix.animation }}/Cargo.lock') }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-cargo-${{ hashFiles('sample-animations/${{ matrix.animation }}/Cargo.lock') }}-
+            ${{ runner.os }}-cargo-${{ matrix.animation }}-${{ hashFiles('sample-animations/${{ matrix.animation }}/Cargo.lock') }}-
       - uses: actions-rs/cargo@v1
         with:
           command: fmt
