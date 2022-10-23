@@ -47,3 +47,18 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           name: clippy - controller
           args: --manifest-path controller/Cargo.toml
+
+  frontend:
+    name: Lint Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: frontend/.nvmrc
+          cache: yarn
+          cache-dependency-file: frontend/yarn.lock
+      - run: yarn install --frozen-lockfile
+        working-directory: frontend
+      - run: yarn lint
+        working-directory: frontend
