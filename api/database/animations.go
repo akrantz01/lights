@@ -1,6 +1,7 @@
 package database
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/dgraph-io/badger/v3"
@@ -51,7 +52,7 @@ func (d *Database) AddAnimation(animation Animation) error {
 		return err
 	}
 
-	key := buildKey(animationPrefix, animation.Id)
+	key := buildKey(animationPrefix, animation.ID)
 	return d.db.Update(func(txn *badger.Txn) error {
 		return txn.Set(key, encoded)
 	})
@@ -100,7 +101,7 @@ func (d *Database) GetCurrentAnimation() (string, error) {
 
 	err := d.db.View(func(txn *badger.Txn) error {
 		item, err := txn.Get([]byte("current-animation"))
-		if err == badger.ErrKeyNotFound {
+		if errors.Is(err, badger.ErrKeyNotFound) {
 			return nil
 		} else if err != nil {
 			return err

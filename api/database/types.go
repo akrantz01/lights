@@ -1,7 +1,7 @@
 package database
 
 type Animation struct {
-	Id   string `json:"id"`
+	ID   string `json:"id"`
 	Name string `json:"name"`
 }
 
@@ -12,7 +12,7 @@ type Color struct {
 }
 
 type Preset struct {
-	Id         string  `json:"id"`
+	ID         string  `json:"id"`
 	Name       string  `json:"name"`
 	Pixels     []Color `json:"pixels"`
 	Brightness uint8   `json:"brightness"`
@@ -21,18 +21,18 @@ type Preset struct {
 // AsPartial converts a full preset into its partial representation
 func (p Preset) AsPartial() PartialPreset {
 	return PartialPreset{
-		Id:   p.Id,
+		ID:   p.ID,
 		Name: p.Name,
 	}
 }
 
 type PartialPreset struct {
-	Id   string `json:"id"`
+	ID   string `json:"id"`
 	Name string `json:"name"`
 }
 
 type PartialSchedule struct {
-	Id      string          `json:"id"`
+	ID      string          `json:"id"`
 	Name    string          `json:"name"`
 	Enabled bool            `json:"enabled"`
 	At      string          `json:"at"`
@@ -40,7 +40,7 @@ type PartialSchedule struct {
 }
 
 type Schedule struct {
-	Id        string          `json:"id"`
+	ID        string          `json:"id"`
 	Name      string          `json:"name"`
 	Enabled   bool            `json:"enabled"`
 	At        string          `json:"at"`
@@ -54,7 +54,7 @@ type Schedule struct {
 // AsPartial converts a full schedule into its partial representation
 func (s Schedule) AsPartial() PartialSchedule {
 	return PartialSchedule{
-		Id:      s.Id,
+		ID:      s.ID,
 		Name:    s.Name,
 		Enabled: s.Enabled,
 		At:      s.At,

@@ -2,6 +2,7 @@ package presets
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -30,7 +31,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 
 	// Ensure the preset exists
 	preset, err := db.GetPreset(id)
-	if err == database.ErrNotFound {
+	if errors.Is(err, database.ErrNotFound) {
 		handlers.Respond(w, handlers.WithStatus(404), handlers.WithError("not found"))
 		return
 	} else if err != nil {
@@ -53,28 +54,28 @@ func update(w http.ResponseWriter, r *http.Request) {
 		if len(*updatedFields.Name) == 0 {
 			handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("name length must be greater than 0"))
 			return
-		} else {
-			preset.Name = *updatedFields.Name
-			fields["name"] = *updatedFields.Name
 		}
+
+		preset.Name = *updatedFields.Name
+		fields["name"] = *updatedFields.Name
 	}
 	if pixels := len(updatedFields.Pixels); pixels != 0 {
-		if pixels == int(length) {
-			preset.Pixels = updatedFields.Pixels
-			fields["pixels"] = updatedFields.Pixels
-		} else {
+		if pixels != int(length) {
 			handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("mismatch pixel length"))
 			return
 		}
+
+		preset.Pixels = updatedFields.Pixels
+		fields["pixels"] = updatedFields.Pixels
 	}
 	if updatedFields.Brightness != nil {
-		if *updatedFields.Brightness <= 100 {
-			preset.Brightness = *updatedFields.Brightness
-			fields["brightness"] = *updatedFields.Brightness
-		} else {
+		if *updatedFields.Brightness > 100 {
 			handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("brightness cannot exceed 100"))
 			return
 		}
+
+		preset.Brightness = *updatedFields.Brightness
+		fields["brightness"] = *updatedFields.Brightness
 	}
 
 	// Save the changes

@@ -1,6 +1,7 @@
 package schedules
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -24,7 +25,7 @@ func toggle(w http.ResponseWriter, r *http.Request) {
 
 	// Ensure the schedule exists
 	schedule, err := db.GetSchedule(id)
-	if err == database.ErrNotFound {
+	if errors.Is(err, database.ErrNotFound) {
 		handlers.Respond(w, handlers.WithStatus(404), handlers.WithError("not found"))
 		return
 	} else if err != nil {

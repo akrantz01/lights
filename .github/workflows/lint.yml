@@ -1,0 +1,18 @@
+on:
+  - push
+
+jobs:
+  api:
+    name: Lint API
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version-file: api/go.sum
+          check-latest: true
+          cache: true
+      - uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.50.0
+          working-directory: api

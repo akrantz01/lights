@@ -25,5 +25,11 @@ func NewValidator(issuer *url.URL) (*validator.Validator, error) {
 	}
 
 	provider := jwks.NewCachingProvider(issuer, 5*time.Minute)
-	return validator.New(provider.KeyFunc, validator.RS256, issuer.String(), []string{"https://lights.krantz.dev"}, validator.WithCustomClaims(customClaims))
+	return validator.New(
+		provider.KeyFunc,
+		validator.RS256,
+		issuer.String(),
+		[]string{"https://lights.krantz.dev"},
+		validator.WithCustomClaims(customClaims),
+	)
 }

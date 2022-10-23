@@ -8,10 +8,10 @@ import (
 	"go.uber.org/zap"
 )
 
-// GenerateId sets the id field on an object using reflection
-func GenerateId(object interface{}) {
+// GenerateID sets the id field on an object using reflection
+func GenerateID(object interface{}) {
 	v := reflect.ValueOf(object).Elem()
-	id := v.FieldByName("Id")
+	id := v.FieldByName("ID")
 	id.SetString(gonanoid.MustID(8))
 }
 

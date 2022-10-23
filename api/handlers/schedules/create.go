@@ -2,6 +2,7 @@ package schedules
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"time"
 
@@ -38,7 +39,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate the schedule and remove unnecessary fields
-	valid := false
+	var valid bool
 	switch schedule.Type {
 	case database.ScheduleTypeFill:
 		valid = schedule.Color != nil
@@ -50,7 +51,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		schedule.Animation = nil
 
 		// Check that the preset exists
-		if _, err := db.GetPreset(*schedule.Preset); err == database.ErrNotFound {
+		if _, err := db.GetPreset(*schedule.Preset); errors.Is(err, database.ErrNotFound) {
 			handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("preset not found"))
 			return
 		} else if err != nil {
@@ -64,7 +65,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		schedule.Preset = nil
 
 		// Check that the animation exists
-		if _, err := db.GetAnimation(*schedule.Animation); err == database.ErrNotFound {
+		if _, err := db.GetAnimation(*schedule.Animation); errors.Is(err, database.ErrNotFound) {
 			handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("animation not found"))
 			return
 		} else if err != nil {
@@ -89,7 +90,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Save to database
-	database.GenerateId(&schedule)
+	database.GenerateID(&schedule)
 	schedule.Enabled = true
 	if err := db.AddSchedule(schedule); err != nil {
 		handlers.Respond(w, handlers.AsFatal())

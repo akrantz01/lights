@@ -1,6 +1,7 @@
 package schedules
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/auth0/go-jwt-middleware/v2/validator"
@@ -56,7 +57,7 @@ func read(w http.ResponseWriter, r *http.Request) {
 	l := logging.GetLogger(r.Context(), "schedules:read").With(zap.String("id", id))
 
 	schedule, err := db.GetSchedule(id)
-	if err == database.ErrNotFound {
+	if errors.Is(err, database.ErrNotFound) {
 		handlers.Respond(w, handlers.WithData(404), handlers.WithError("not found"))
 	} else if err != nil {
 		handlers.Respond(w, handlers.AsFatal())

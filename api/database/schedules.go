@@ -51,7 +51,7 @@ func (d *Database) AddSchedule(schedule Schedule) error {
 		return err
 	}
 
-	key := buildKey(schedulePrefix, schedule.Id)
+	key := buildKey(schedulePrefix, schedule.ID)
 	return d.db.Update(func(txn *badger.Txn) error {
 		return txn.Set(key, encoded)
 	})

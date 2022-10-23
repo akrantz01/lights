@@ -3,6 +3,7 @@ package ws
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -48,15 +49,15 @@ func (c *Client) register() {
 func (c *Client) reader(actions chan rpc.Callable, db *database.Database, stripLength uint16, v *validator.Validator) {
 	defer func() {
 		c.hub.unregister <- c
-		c.conn.Close()
+		_ = c.conn.Close()
 		c.logger.Debug("unregistered client")
 	}()
 
 	// Set max message size and handle pongs
 	c.conn.SetReadLimit(maxMessageSize)
-	c.conn.SetReadDeadline(time.Now().Add(pongWait))
+	_ = c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error {
-		c.conn.SetReadDeadline(time.Now().Add(pongWait))
+		_ = c.conn.SetReadDeadline(time.Now().Add(pongWait))
 		return nil
 	})
 
@@ -67,7 +68,8 @@ func (c *Client) reader(actions chan rpc.Callable, db *database.Database, stripL
 		// Read message from connection
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
-			if closeError, ok := err.(*websocket.CloseError); !ok {
+			var closeError *websocket.CloseError
+			if ok := errors.As(err, &closeError); !ok {
 				c.logger.Error("failed to read message", zap.Error(err))
 			} else if closeError.Code == websocket.CloseNoStatusReceived || closeError.Code == websocket.CloseGoingAway {
 				c.logger.Info("websocket connection closed")
@@ -91,8 +93,8 @@ func (c *Client) reader(actions chan rpc.Callable, db *database.Database, stripL
 		}
 
 		// Re-parse the message and do stuff
+		//nolint:exhaustive
 		switch msg.Type {
-
 		// Attempt to log the user in
 		case MessageLogin:
 			var login Login
@@ -179,12 +181,12 @@ func (c *Client) reader(actions chan rpc.Callable, db *database.Database, stripL
 			}
 
 			// Fetch the preset
-			preset, err := db.GetPreset(applyPreset.Id)
-			if err == database.ErrNotFound {
-				c.send <- NewNotFoundError(fmt.Sprintf("preset '%s'", applyPreset.Id))
+			preset, err := db.GetPreset(applyPreset.ID)
+			if errors.Is(err, database.ErrNotFound) {
+				c.send <- NewNotFoundError(fmt.Sprintf("preset '%s'", applyPreset.ID))
 				continue
 			} else if err != nil {
-				c.logger.Error("failed to find preset", zap.Error(err), zap.String("id", applyPreset.Id))
+				c.logger.Error("failed to find preset", zap.Error(err), zap.String("id", applyPreset.ID))
 				continue
 			}
 
@@ -202,17 +204,17 @@ func (c *Client) reader(actions chan rpc.Callable, db *database.Database, stripL
 			}
 
 			// Ensure the animation exists
-			animation, err := db.GetAnimation(startAnimation.Id)
-			if err == database.ErrNotFound {
-				c.send <- NewNotFoundError(fmt.Sprintf("animation '%s'", startAnimation.Id))
+			animation, err := db.GetAnimation(startAnimation.ID)
+			if errors.Is(err, database.ErrNotFound) {
+				c.send <- NewNotFoundError(fmt.Sprintf("animation '%s'", startAnimation.ID))
 				continue
 			} else if err != nil {
-				c.logger.Error("failed to find animation", zap.Error(err), zap.String("id", startAnimation.Id))
+				c.logger.Error("failed to find animation", zap.Error(err), zap.String("id", startAnimation.ID))
 				continue
 			}
 
-			actions <- rpc.NewStartAnimation(animation.Id)
-			c.hub.broadcast <- NewAnimationStarted(animation.Id)
+			actions <- rpc.NewStartAnimation(animation.ID)
+			c.hub.broadcast <- NewAnimationStarted(animation.ID)
 
 		// Stop the currently running animation
 		case MessageStopAnimation:
@@ -222,7 +224,6 @@ func (c *Client) reader(actions chan rpc.Callable, db *database.Database, stripL
 		// Handle any unknown messages
 		default:
 			c.logger.Warn("unknown message type", zap.String("type", string(msg.Type)))
-			break
 		}
 	}
 }
@@ -240,9 +241,9 @@ func (c *Client) writer() {
 		select {
 		// Send the messages to be broadcast
 		case message, ok := <-c.send:
-			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			_ = c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
-				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				_ = c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				c.logger.Debug("channel closed, terminating connection")
 				return
 			}
@@ -254,7 +255,7 @@ func (c *Client) writer() {
 
 		// Send pings at regular intervals
 		case <-ticker.C:
-			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			_ = c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				c.logger.Error("failed to send ping message", zap.Error(err))
 				return

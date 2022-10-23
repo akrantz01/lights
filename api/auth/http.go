@@ -9,8 +9,8 @@ import (
 )
 
 // Middleware creates an HTTP middleware for validating JWT tokens
-func Middleware(validator *validator.Validator, permission Permission) func(next http.Handler) http.Handler {
-	middleware := jwtmiddleware.New(validator.ValidateToken)
+func Middleware(v *validator.Validator, permission Permission) func(next http.Handler) http.Handler {
+	middleware := jwtmiddleware.New(v.ValidateToken)
 	return chi.Chain(middleware.CheckJWT, permissionsValidator(permission)).Handler
 }
 

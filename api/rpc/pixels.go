@@ -33,9 +33,5 @@ func (sa SetPixels) Execute(ctx context.Context, db *database.Database, controll
 	}
 
 	// Change the display mode to individual pixels
-	if err := db.SetPixelMode(database.PixelModeIndividual); err != nil {
-		return err
-	}
-
-	return nil
+	return db.SetPixelMode(database.PixelModeIndividual)
 }

@@ -4,7 +4,7 @@ type Permission string
 
 const (
 	PermissionEdit          Permission = "lights-edit"
-	PermissionControlLights            = "lights-control"
+	PermissionControlLights Permission = "lights-control"
 )
 
 var knownPermissions = []Permission{PermissionEdit, PermissionControlLights}

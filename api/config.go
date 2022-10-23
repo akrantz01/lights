@@ -23,7 +23,7 @@ type Config struct {
 
 	StripLength uint16
 
-	IssuerUrl *url.URL
+	IssuerURL *url.URL
 }
 
 // ReadConfig extracts all the configuration options from the environment variables
@@ -50,7 +50,7 @@ func ReadConfig() (*Config, error) {
 		return nil, err
 	}
 
-	issuerUrl, err := url.Parse(getEnvOrDefault("LIGHTS_JWT_ISSUER", "https://some-domain.us.auth0.com"))
+	issuerURL, err := url.Parse(getEnvOrDefault("LIGHTS_JWT_ISSUER", "https://some-domain.us.auth0.com"))
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func ReadConfig() (*Config, error) {
 		LogLevel:       getEnvOrDefault("LIGHTS_LOG_LEVEL", "info"),
 		Development:    development,
 		StripLength:    uint16(stripDensity * stripLength),
-		IssuerUrl:      issuerUrl,
+		IssuerURL:      issuerURL,
 	}, nil
 }
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net/http"
 	"os"
@@ -38,7 +39,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to initialize logging: %v\n", err)
 	}
-	defer logger.Sync()
+	defer func() { _ = logger.Sync() }()
 
 	// Connect to the database
 	db, err := database.Open(config.DatabasePath, config.StripLength)
@@ -73,7 +74,7 @@ func main() {
 	emitter := events.New()
 
 	// Setup JWT validation
-	validator, err := auth.NewValidator(config.IssuerUrl)
+	validator, err := auth.NewValidator(config.IssuerURL)
 	if err != nil {
 		logger.Fatal("failed to initialize JWT validator", zap.Error(err))
 	}
@@ -113,11 +114,11 @@ func main() {
 		<-sig
 
 		// Create a 30s shutdown timeout
-		shutdownCtx, _ := context.WithTimeout(serverCtx, 30*time.Second)
+		shutdownCtx, shutdownStopCtx := context.WithTimeout(serverCtx, 30*time.Second)
 
 		go func() {
 			<-shutdownCtx.Done()
-			if shutdownCtx.Err() == context.DeadlineExceeded {
+			if errors.Is(shutdownCtx.Err(), context.DeadlineExceeded) {
 				logger.Fatal("graceful shutdown timed out... forcing exit")
 			}
 		}()
@@ -127,7 +128,9 @@ func main() {
 		if err != nil {
 			logger.Fatal("failed to shutdown server", zap.Error(err))
 		}
+
 		serverStopCtx()
+		shutdownStopCtx()
 	}()
 
 	// Start the server

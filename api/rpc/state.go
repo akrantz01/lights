@@ -37,9 +37,5 @@ func (c ChangeState) Execute(ctx context.Context, db *database.Database, control
 	controller.Brightness(ctx, lastBrightness)
 
 	// Save the current state
-	if err := db.SetState(c.On); err != nil {
-		return err
-	}
-
-	return nil
+	return db.SetState(c.On)
 }

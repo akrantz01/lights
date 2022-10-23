@@ -14,7 +14,7 @@ import (
 )
 
 // Handler initiates the websocket connection and starts the client
-func Handler(hub *Hub, validator *validator.Validator) func(w http.ResponseWriter, r *http.Request) {
+func Handler(hub *Hub, v *validator.Validator) func(w http.ResponseWriter, r *http.Request) {
 	upgrader := websocket.Upgrader{
 		ReadBufferSize:    1024,
 		WriteBufferSize:   1024,
@@ -42,7 +42,7 @@ func Handler(hub *Hub, validator *validator.Validator) func(w http.ResponseWrite
 		client.register()
 
 		// Start reader and writer routines
-		go client.reader(actions, db, length, validator)
+		go client.reader(actions, db, length, v)
 		go client.writer()
 
 		// Send configuration information

@@ -1,7 +1,8 @@
 package animations
 
 import (
-	"io/ioutil"
+	"errors"
+	"io"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -24,7 +25,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 
 	// Get the animation
 	animation, err := db.GetAnimation(id)
-	if err == database.ErrNotFound {
+	if errors.Is(err, database.ErrNotFound) {
 		handlers.Respond(w, handlers.WithStatus(404), handlers.WithError("not found"))
 		return
 	} else if err != nil {
@@ -48,7 +49,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 		defer file.Close()
 
 		// Read the file
-		wasm, err := ioutil.ReadAll(file)
+		wasm, err := io.ReadAll(file)
 		if err != nil {
 			handlers.Respond(w, handlers.AsFatal())
 			l.Error("failed to read file", zap.Error(err))
@@ -62,7 +63,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 			handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("invalid WASM payload"))
 			return
 		}
-	} else if err != nil && err != http.ErrMissingFile {
+	} else if err != nil && !errors.Is(err, http.ErrMissingFile) {
 		handlers.Respond(w, handlers.AsFatal())
 		l.Error("failed to open form file", zap.Error(err))
 		return
@@ -75,6 +76,6 @@ func update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	emitter.PublishAnimationUpdateEvent(animation.Id, fields)
+	emitter.PublishAnimationUpdateEvent(animation.ID, fields)
 	handlers.Respond(w)
 }

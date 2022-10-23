@@ -2,6 +2,7 @@ package schedules
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"time"
 
@@ -37,7 +38,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 
 	// Ensure the schedule exists
 	schedule, err := db.GetSchedule(id)
-	if err == database.ErrNotFound {
+	if errors.Is(err, database.ErrNotFound) {
 		handlers.Respond(w, handlers.WithStatus(404), handlers.WithError("not found"))
 		return
 	} else if err != nil {
@@ -60,23 +61,23 @@ func update(w http.ResponseWriter, r *http.Request) {
 		if len(*updatedFields.Name) == 0 {
 			handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("name length must be greater than 0"))
 			return
-		} else {
-			schedule.Name = *updatedFields.Name
-			fields["name"] = *updatedFields.Name
 		}
+
+		schedule.Name = *updatedFields.Name
+		fields["name"] = *updatedFields.Name
 	}
 	if updatedFields.Enabled != nil {
 		schedule.Enabled = *updatedFields.Enabled
 		fields["enabled"] = *updatedFields.Enabled
 	}
 	if updatedFields.At != nil {
-		if _, err := time.Parse("15:04", *updatedFields.At); err == nil {
-			schedule.At = *updatedFields.At
-			fields["at"] = *updatedFields.At
-		} else {
+		if _, err := time.Parse("15:04", *updatedFields.At); err != nil {
 			handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("time format must match 'hh:mm'"))
 			return
 		}
+
+		schedule.At = *updatedFields.At
+		fields["at"] = *updatedFields.At
 	}
 	if updatedFields.Repeats != nil {
 		schedule.Repeats = *updatedFields.Repeats
@@ -119,7 +120,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 			fields["preset"] = updatedFields.Preset
 
 			// Check the preset exists
-			if _, err := db.GetPreset(*schedule.Preset); err == database.ErrNotFound {
+			if _, err := db.GetPreset(*schedule.Preset); errors.Is(err, database.ErrNotFound) {
 				handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("preset not found"))
 				return
 			} else if err != nil {
@@ -137,7 +138,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 			fields["animation"] = updatedFields.Animation
 
 			// Check that the animation exists
-			if _, err := db.GetAnimation(*schedule.Animation); err == database.ErrNotFound {
+			if _, err := db.GetAnimation(*schedule.Animation); errors.Is(err, database.ErrNotFound) {
 				handlers.Respond(w, handlers.WithStatus(400), handlers.WithError("animation not found"))
 				return
 			} else if err != nil {
@@ -153,8 +154,8 @@ func update(w http.ResponseWriter, r *http.Request) {
 
 	// Update the schedule job if the enabled status, repeated days, or run at changes
 	if schedule.Enabled && (updatedFields.At != nil || updatedFields.Repeats != nil) {
-		s.Remove(schedule.Id)
-		if err := s.Add(schedule.Id, schedule.At, schedule.Repeats); err != nil {
+		s.Remove(schedule.ID)
+		if err := s.Add(schedule.ID, schedule.At, schedule.Repeats); err != nil {
 			handlers.Respond(w, handlers.AsFatal())
 			l.Error("failed to update job", zap.Error(err))
 			return
