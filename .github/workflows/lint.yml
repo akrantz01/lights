@@ -44,7 +44,7 @@ jobs:
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-            target/
+            controller/target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('controller/Cargo.lock') }}-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-cargo-${{ hashFiles('controller/Cargo.lock') }}-
@@ -97,7 +97,7 @@ jobs:
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-            target/
+            sample-animations/${{ matrix.animation }}/target/
           key: ${{ runner.os }}-cargo-${{ matrix.animation }}-${{ hashFiles('sample-animations/${{ matrix.animation }}/Cargo.lock') }}-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-cargo-${{ matrix.animation }}-${{ hashFiles('sample-animations/${{ matrix.animation }}/Cargo.lock') }}-
