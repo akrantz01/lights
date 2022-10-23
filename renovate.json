@@ -1,6 +1,34 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
-  ]
+    "config:base",
+    "group:reactMonorepo",
+    ":prNotPending",
+    ":prHourlyLimitNone"
+  ],
+  "packageRules": [
+    {
+      "matchSourceUrlPrefixes": [
+        "https://github.com/hyperium/tonic"
+      ],
+      "matchUpdateTypes": [
+        "digest",
+        "patch",
+        "minor",
+        "major"
+      ],
+      "groupName": "tonic monorepo"
+    },
+    {
+      "matchPackageNames": ["^@?tailwindcss"],
+      "matchUpdateTypes": [
+        "digest",
+        "patch",
+        "minor",
+        "major"
+      ],
+      "groupName": "tailwindcss monorepo"
+    }
+  ],
+  "rebaseWhen": "auto"
 }
