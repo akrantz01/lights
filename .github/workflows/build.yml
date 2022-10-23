@@ -1,0 +1,70 @@
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-api:
+    name: Build API
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch:
+          - arm64
+          - amd64
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '^1.17.5'
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-lights-api-${{ matrix.arch }}-${{ hashFiles('**/go.sum') }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-lights-api-${{ matrix.arch }}-${{ hashFiles('**/go.sum') }}
+            ${{ runner.os }}-lights-api-${{ matrix.arch }}
+            ${{ runner.os }}-lights-api
+      - run: GOARCH=${{ matrix.arch }} go build -o ./lights-api.linux-${{ matrix.arch }}
+        working-directory: api
+      - uses: actions/upload-artifact@v2
+        with:
+          name: lights-api.linux-${{ matrix.arch }}
+          path: ${{ github.workspace }}/api/lights-api.linux-${{ matrix.arch }}
+
+  build-animation:
+    name: Build Animation
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        animation:
+          - rainbow
+          - simple
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          target: wasm32-unknown-unknown
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            sample-animations/${{ matrix.animation }}/target/
+          key: ${{ runner.os }}-cargo-${{ matrix.animation }}-${{ hashFiles('sample-animations/${{ matrix.animation }}/Cargo.lock') }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-${{ matrix.animation }}-${{ hashFiles('sample-animations/${{ matrix.animation }}/Cargo.lock') }}-
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --manifest-path sample-animations/${{ matrix.animation }}/Cargo.toml
+      - uses: actions/upload-artifact@v3
+        with:
+          name: animation-${{ matrix.animation }}.wasm
+          path: ${{ github.workspace }}/sample-animations/${{ matrix.animation }}/target/wasm32-unknown-unknown/release/${{ matrix.animation }}.wasm
