@@ -45,9 +45,8 @@ jobs:
           - simple
     steps:
       - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          profile: minimal
           toolchain: stable
           target: wasm32-unknown-unknown
       - uses: actions/cache@v3
@@ -61,10 +60,8 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ matrix.animation }}-${{ hashFiles('sample-animations/${{ matrix.animation }}/Cargo.lock') }}-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-cargo-${{ matrix.animation }}-${{ hashFiles('sample-animations/${{ matrix.animation }}/Cargo.lock') }}-
-      - uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --manifest-path sample-animations/${{ matrix.animation }}/Cargo.toml
+      - run: cargo build --release
+        working-directory: sample-animations/${{ matrix.animation }}
       - uses: actions/upload-artifact@v3
         with:
           name: animation-${{ matrix.animation }}.wasm
