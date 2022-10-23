@@ -3,7 +3,7 @@
   "extends": [
     "config:base",
     "group:reactMonorepo",
-    ":prNotPending",
+    ":prImmediately",
     ":prHourlyLimitNone"
   ],
   "packageRules": [
