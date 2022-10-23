@@ -62,3 +62,41 @@ jobs:
         working-directory: frontend
       - run: yarn lint
         working-directory: frontend
+
+
+  animations:
+    name: Lint Animation
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        animation:
+          - rainbow
+          - simple
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          components: rustfmt, clippy
+          target: wasm32-unknown-unknown
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('sample-animations/${{ matrix.animation }}/Cargo.lock') }}-${{ github.run_id }}
+          restore-key: |
+            ${{ runner.os }}-cargo-${{ hashFiles('sample-animations/${{ matrix.animation }}/Cargo.lock') }}-
+      - uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --check --manifest-path sample-animations/${{ matrix.animation }}/Cargo.toml
+      - uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: clippy - animations - ${{ matrix.animation }}
+          args: --manifest-path sample-animations/${{ matrix.animation }}/Cargo.toml
