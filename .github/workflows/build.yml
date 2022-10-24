@@ -6,6 +6,7 @@ jobs:
     name: Build API
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         arch:
           - arm64
@@ -29,6 +30,7 @@ jobs:
     name: Build Controller
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         arch:
           - aarch64
@@ -78,6 +80,7 @@ jobs:
     name: Build Animation
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         animation:
           - rainbow
