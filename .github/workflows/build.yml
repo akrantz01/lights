@@ -68,8 +68,7 @@ jobs:
             ${{ runner.os }}-cargo-controller-${{ matrix.arch }}-${{ hashFiles('controller/Cargo.lock') }}-${{ matrix.compiler }}-
             ${{ runner.os }}-cargo-controller-${{ matrix.arch }}-${{ hashFiles('controller/Cargo.lock') }}-
       # TODO: use latest version instead of main
-      - run: cargo install cross --git https://github.com/cross-rs/cross
-        if: steps.cache-rust.outputs.cache-hit != 'true'
+      - run: cargo install cross --git https://github.com/cross-rs/cross || true
       - run: cross build --release --target ${{ matrix.arch }}-unknown-linux-gnu --no-default-features --feature ${{ matrix.compiler }}
         working-directory: controller
       - uses: actions/upload-artifact@v3
