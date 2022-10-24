@@ -33,6 +33,10 @@ jobs:
         arch:
           - aarch64
           - x86_64
+        compiler:
+          - any
+          - cranelift
+          - llvm
     steps:
       - uses: actions/checkout@v3
       - uses: dtolnay/rust-toolchain@stable
@@ -57,16 +61,17 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             controller/target/
-          key: ${{ runner.os }}-cargo-controller-${{ matrix.arch }}-${{ hashFiles('controller/Cargo.lock') }}-${{ github.run_id }}
+          key: ${{ runner.os }}-cargo-controller-${{ matrix.arch }}-${{ hashFiles('controller/Cargo.lock') }}-${{ matrix.compiler }}-${{ github.run_id }}
           restore-keys: |
+            ${{ runner.os }}-cargo-controller-${{ matrix.arch }}-${{ hashFiles('controller/Cargo.lock') }}-${{ matrix.compiler }}-
             ${{ runner.os }}-cargo-controller-${{ matrix.arch }}-${{ hashFiles('controller/Cargo.lock') }}-
       # TODO: use latest version instead of main
       - run: cargo install cross --git https://github.com/cross-rs/cross
-      - run: cross build --release --target ${{ matrix.arch }}-unknown-linux-gnu
+      - run: cross build --release --target ${{ matrix.arch }}-unknown-linux-gnu --no-default-features --feature ${{ matrix.compiler }}
         working-directory: controller
       - uses: actions/upload-artifact@v3
         with:
-          name: lights-controller.linux-${{ matrix.arch }}
+          name: lights-controller.${{ matrix.compiler }}.linux-${{ matrix.arch }}
           path: ${{ github.workspace }}/controller/target/${{ matrix.arch }}-unknown-linux-gnu/release/controller
 
   build-animation:
