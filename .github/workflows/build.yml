@@ -1,8 +1,5 @@
 on:
-  push:
-    branches:
-      - main
-      - building-in-ci
+  - push
 
 jobs:
   build-api:
