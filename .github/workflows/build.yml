@@ -57,9 +57,9 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             controller/target/
-          key: ${{ runner.os }}-cargo-controller-${{ hashFiles('controller/Cargo.lock') }}-${{ github.run_id }}
+          key: ${{ runner.os }}-cargo-controller-${{ matrix.arch }}-${{ hashFiles('controller/Cargo.lock') }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-cargo-controller-${{ hashFiles('controller/Cargo.lock') }}-
+            ${{ runner.os }}-cargo-controller-${{ matrix.arch }}-${{ hashFiles('controller/Cargo.lock') }}-
       # TODO: use latest version instead of main
       - run: cargo install cross --git https://github.com/cross-rs/cross
       - run: cross build --release --target ${{ matrix.arch }}-unknown-linux-gnu
