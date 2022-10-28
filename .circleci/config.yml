@@ -23,7 +23,7 @@ commands:
     steps:
       - restore_cache:
           keys:
-            - cargo-{{ arch }}-{{ checksum "controller/Cargo.lock" }}
+            - cargo-<< parameters.crate >>-{{ arch }}-{{ checksum "controller/Cargo.lock" }}
       - run:
           name: Cargo Build
           command: cargo build --release
