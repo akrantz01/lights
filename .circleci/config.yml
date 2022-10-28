@@ -97,15 +97,21 @@ jobs:
     steps:
       - checkout
       - rust/install
-      - run:
-          name: Install LLVM 12
-          command: |
-            wget https://apt.llvm.org/llvm.sh
-            sudo bash ./llvm.sh 12
-            sudo apt-get install -y libclang-12-dev
-            echo 'export LLVM_CONFIG_PATH=/usr/lib/llvm-12/bin/llvm-config' >> "$BASH_ENV"
-            echo 'export LLVM_SYS_120_PREFIX=/usr/lib/llvm-12' >> "$BASH_ENV"
-            source "$BASH_ENV"
+      - when:
+          condition:
+            or:
+              - equal: [ llvm, << parameters.feature >> ]
+              - equal: [ any, << parameters.feature >> ]
+          steps:
+            - run:
+                name: Install LLVM 12
+                command: |
+                  wget https://apt.llvm.org/llvm.sh
+                  sudo bash ./llvm.sh 12
+                  sudo apt-get install -y libclang-12-dev
+                  echo 'export LLVM_CONFIG_PATH=/usr/lib/llvm-12/bin/llvm-config' >> "$BASH_ENV"
+                  echo 'export LLVM_SYS_120_PREFIX=/usr/lib/llvm-12' >> "$BASH_ENV"
+                  source "$BASH_ENV"
       - rust-build:
           crate: controller
           working_directory: ~/project/controller
