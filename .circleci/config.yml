@@ -90,7 +90,7 @@ jobs:
       arch:
         description: the architecture being built for
         type: string
-      feature:
+      compiler:
         description: the WASM compiler to use
         type: string
     executor: << parameters.os >>-<< parameters.arch >>
@@ -100,8 +100,8 @@ jobs:
       - when:
           condition:
             or:
-              - equal: [ llvm, << parameters.feature >> ]
-              - equal: [ any, << parameters.feature >> ]
+              - equal: [ llvm, << parameters.compiler >> ]
+              - equal: [ any, << parameters.compiler >> ]
           steps:
             - run:
                 name: Install LLVM 12
@@ -117,10 +117,10 @@ jobs:
           working_directory: ~/project/controller
           no_default_features: true
           with_features: true
-          features: << parameters.feature >>
+          features: << parameters.compiler >>
       - store_artifacts:
           path: ~/project/controller/target/release/controller
-          destination: lights-controller.<< parameters.os >>-<< parameters.arch >>
+          destination: lights-controller.<< parameters.compiler >>.<< parameters.os >>-<< parameters.arch >>
 
   build-animation:
     parameters:
@@ -158,7 +158,7 @@ workflows:
               arch:
                 - amd64
                 - arm64
-              feature:
+              compiler:
                 - any
                 - cranelift
                 - llvm
