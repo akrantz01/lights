@@ -32,16 +32,16 @@ commands:
     steps:
       - restore_cache:
           keys:
-            - cargo-<< parameters.crate >>-{{ arch }}-{{ checksum "controller/Cargo.lock" }}
+            - cargo-<< parameters.crate >>-<<# parameters.with_features >><< parameters.features >><</ parameters.with_features >>-{{ arch }}-{{ checksum "controller/Cargo.lock" }}
       - run:
           name: Cargo Build
           command: >-
             cargo build --release
-            <<#parameters.no_default_features>>--no-default-features<</parameters.no_default_features>>
-            <<#parameters.with_features>>--features <<parameters.features>><</parameters.with_features>>
+            <<# parameters.no_default_features >>--no-default-features<</ parameters.no_default_features >>
+            <<# parameters.with_features >>--features << parameters.features >><</ parameters.with_features >>
           working_directory: << parameters.working_directory >>
       - save_cache:
-          key: cargo-<< parameters.crate >>-{{ arch }}-{{ checksum "controller/Cargo.lock" }}
+          key: cargo-<< parameters.crate >>-<<# parameters.with_features >><< parameters.features >><</ parameters.with_features >>-{{ arch }}-{{ checksum "controller/Cargo.lock" }}
           paths:
             - ~/.cargo
             - << parameters.working_directory >>/target
