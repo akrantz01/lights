@@ -58,13 +58,13 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - go-mod-{{ arch }}-{{ checksum "api/go.sum" }}
+            - go-mod-api-{{ arch }}-{{ checksum "api/go.sum" }}
       - run:
           name: go mod download
           command: go mod download
           working_directory: ~/project/api
       - save_cache:
-          key: go-mod-{{ arch }}-{{ checksum "api/go.sum" }}
+          key: go-mod-api-{{ arch }}-{{ checksum "api/go.sum" }}
           paths:
             - /go/pkg/mod
       - run:
