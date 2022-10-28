@@ -74,6 +74,9 @@ jobs:
             GOOS: << parameters.os >>
             GOARCH: << parameters.arch >>
           working_directory: ~/project/api
+      - store_artifacts:
+          path: ~/project/api/lights-api.<< parameters.os >>-<< parameters.arch >>
+          destination: lights-api.<< parameters.os >>-<< parameters.arch >>
 
   build-controller:
     parameters:
