@@ -110,6 +110,9 @@ jobs:
     steps:
       - checkout
       - rust/install
+      - run:
+          name: Install wasm32-unknown-unknown
+          run: rustup target add wasm32-unknown-unknown
       - rust-build:
           crate: << parameters.animation >>
           working_directory: ~/project/sample-animations/<< parameters.animation >>
