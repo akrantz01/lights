@@ -23,6 +23,26 @@ commands:
           name: Install LLVM 12
           command: sudo bash ./llvm.sh 12
 
+  rust-build:
+    parameters:
+      crate:
+        type: string
+      working_directory:
+        type: string
+    steps:
+      - restore_cache:
+          keys:
+            - cargo-{{ arch }}-{{ checksum "controller/Cargo.lock" }}
+      - run:
+          name: Cargo Build
+          command: cargo build --release
+          working_directory: << parameters.working_directory >>
+      - save_cache:
+          key: cargo-<< parameters.crate >>-{{ arch }}-{{ checksum "controller/Cargo.lock" }}
+          paths:
+            - ~/.cargo
+            - << parameters.working_directory >>/target
+
 jobs:
   build-api:
     parameters:
@@ -69,10 +89,8 @@ jobs:
       - checkout
       - rust/install
       - install-llvm
-      - rust/build:
-          release: true
-          with_cache: true
-          cache_version: v1
+      - rust-build:
+          crate: controller
           working_directory: ~/project/controller
       - store_artifacts:
           path: ~/project/controller/target/release/controller
@@ -89,10 +107,8 @@ jobs:
     steps:
       - checkout
       - rust/install
-      - rust/build:
-          release: true
-          with_cache: true
-          cache_version: v1
+      - rust-build:
+          crate: << parameters.animation >>
           working_directory: ~/project/sample-animations/<< parameters.animation >>
       - store_artifacts:
           path: ~/project/sample-animations/<< parameters.animation >>/target/wasm32-unknown-unknown/release/<< parameters.animation >>.wasm
