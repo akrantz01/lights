@@ -14,15 +14,6 @@ executors:
     resource_class: arm.large
 
 commands:
-  install-llvm:
-    steps:
-      - run:
-          name: Download LLVM installer
-          command: wget https://apt.llvm.org/llvm.sh
-      - run:
-          name: Install LLVM 12
-          command: sudo bash ./llvm.sh 12
-
   rust-build:
     parameters:
       crate:
@@ -91,7 +82,14 @@ jobs:
     steps:
       - checkout
       - rust/install
-      - install-llvm
+      - run:
+          name: Install LLVM 12
+          command: |
+            wget https://apt.llvm.org/llvm.sh
+            sudo bash ./llvm.sh 12
+            echo 'export LLVM_CONFIG_PATH=/usr/bin/llvm-config-12' >> "$BASH_ENV"
+            echo 'export LLVM_SYS_120_PREFIX=/usr/bin/llvm-config-12' >> "$BASH_ENV"
+            source "$BASH_ENV"
       - rust-build:
           crate: controller
           working_directory: ~/project/controller
