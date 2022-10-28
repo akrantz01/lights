@@ -72,7 +72,7 @@ jobs:
             - /go/pkg/mod
       - run:
           name: Build API
-          command: go build -o ./lights-api.<< parameters.os >>-<< parameters.arch >>
+          command: go build -o ./lights-api.<< parameters.os >>-<< parameters.arch >> -buildmode pie
           environment:
             GOOS: << parameters.os >>
             GOARCH: << parameters.arch >>
