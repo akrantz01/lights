@@ -20,13 +20,25 @@ commands:
         type: string
       working_directory:
         type: string
+      with_features:
+        type: boolean
+        default: false
+      features:
+        type: string
+        default: ''
+      no_default_features:
+        type: boolean
+        default: false
     steps:
       - restore_cache:
           keys:
             - cargo-<< parameters.crate >>-{{ arch }}-{{ checksum "controller/Cargo.lock" }}
       - run:
           name: Cargo Build
-          command: cargo build --release
+          command: >-
+            cargo build --release
+            <<#parameters.no_default_features>>--no-default-features<</parameters.no_default_features>>
+            <<#parameters.with_features>>--features <<parameters.features>><</parameters.with_features>>
           working_directory: << parameters.working_directory >>
       - save_cache:
           key: cargo-<< parameters.crate >>-{{ arch }}-{{ checksum "controller/Cargo.lock" }}
@@ -78,6 +90,9 @@ jobs:
       arch:
         description: the architecture being built for
         type: string
+      feature:
+        description: the WASM compiler to use
+        type: string
     executor: << parameters.os >>-<< parameters.arch >>
     steps:
       - checkout
@@ -94,6 +109,9 @@ jobs:
       - rust-build:
           crate: controller
           working_directory: ~/project/controller
+          no_default_features: true
+          with_features: true
+          features: << parameters.feature >>
       - store_artifacts:
           path: ~/project/controller/target/release/controller
           destination: lights-controller.<< parameters.os >>-<< parameters.arch >>
@@ -134,6 +152,10 @@ workflows:
               arch:
                 - amd64
                 - arm64
+              feature:
+                - any
+                - cranelift
+                - llvm
       - build-animation:
           matrix:
             parameters:
