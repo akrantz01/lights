@@ -170,9 +170,9 @@ jobs:
       kind:
         description: the kind of package to build (deb, rpm)
         type: string
-    machine:
-      image: ubuntu-2004:current
-    resource_class: medium
+    docker:
+      - image: cimg/ruby:3.1.2
+    resource_class: small
     steps:
       - checkout
       - attach_workspace:
@@ -182,9 +182,9 @@ jobs:
           command: ls -la ~/build
 
   package-animations:
-    machine:
-      image: ubuntu-2004:current
-    resource_class: medium
+    docker:
+      - image: cimg/base:current-22.04
+    resource_class: small
     steps:
       - attach_workspace:
           at: ~/build
