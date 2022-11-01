@@ -181,6 +181,17 @@ jobs:
           name: Testing
           command: ls -la /build
 
+  package-animations:
+    machine:
+      image: ubuntu-2004:current
+    resource_class: medium
+    steps:
+      - attach_workspace:
+          at: /build
+      - run:
+          name: Testing
+          command: ls -la /build
+
 default-parameters:
   arch: &arch-params
     - amd64
@@ -219,3 +230,6 @@ workflows:
           requires:
             - build-api-<< matrix.arch >>
             - build-controller-<< matrix.arch >>-<< matrix.compiler >>
+      - package-animations:
+          requires:
+            - build-animation
