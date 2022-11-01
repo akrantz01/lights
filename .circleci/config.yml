@@ -159,10 +159,13 @@ jobs:
           path: ~/project/sample-animations/<< parameters.animation >>/target/wasm32-unknown-unknown/release/<< parameters.animation >>.wasm
           destination: animation-<< parameters.animation >>.wasm
 
-  package:
+  package-os:
     parameters:
       arch:
         description: the architecture to package for
+        type: string
+      compiler:
+        description: the WASM compiler to use
         type: string
       kind:
         description: the kind of package to build (deb, rpm)
@@ -178,41 +181,41 @@ jobs:
           name: Testing
           command: ls -la /build
 
+default-parameters:
+  arch: &arch-params
+    - amd64
+    - arm64
+  compiler: &compiler-params
+    - any
+    - cranelift
+    - llvm
+
 workflows:
   build:
     jobs:
       - build-api:
           matrix:
             parameters:
-              arch:
-                - amd64
-                - arm64
+              arch: *arch-params
       - build-controller:
           matrix:
             parameters:
-              arch:
-                - amd64
-                - arm64
-              compiler:
-                - any
-                - cranelift
-                - llvm
+              arch: *arch-params
+              compiler: *compiler-params
       - build-animation:
           matrix:
             parameters:
               animation:
                 - rainbow
                 - simple
-      - package:
+      - package-os:
           matrix:
             parameters:
-              arch:
-                - amd64
-                - arm64
+              arch: *arch-params
+              compiler: *compiler-params
               kind:
                 - deb
                 - rpm
           requires:
-            - build-api
-            - build-controller
-            - build-animation
+            - build-api-<< matrix.arch >>
+            - build-controller-<< matrix.arch >>-<< matrix.compiler >>
