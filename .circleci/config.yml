@@ -189,8 +189,11 @@ jobs:
       - attach_workspace:
           at: ~/build
       - run:
-          name: Testing
-          command: ls -la ~/build
+          name: Compress into zip
+          command: zip -r ~/animations.zip ~/build
+      - store_artifacts:
+          path: ~/animations.zip
+          destination: animations.zip
 
 default-parameters:
   arch: &arch-params
