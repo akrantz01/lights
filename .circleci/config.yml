@@ -72,13 +72,13 @@ jobs:
             - /go/pkg/mod
       - run:
           name: Build API
-          command: go build -o /build/lights-api.<< parameters.os >>-<< parameters.arch >> -buildmode pie
+          command: go build -o ~/build/lights-api.<< parameters.os >>-<< parameters.arch >> -buildmode pie
           environment:
             GOOS: << parameters.os >>
             GOARCH: << parameters.arch >>
           working_directory: ~/project/api
       - persist_to_workspace:
-          root: /build
+          root: ~/build
           paths:
             - lights-api.*
       - store_artifacts:
@@ -119,10 +119,10 @@ jobs:
       - run:
           name: Move files for packaging
           command: |
-            mkdir -p /build
-            mv ~/project/controller/target/release/controller /build/lights-controller.<< parameters.compiler >>.<< parameters.os >>-<< parameters.arch >>
+            mkdir -p ~/build
+            mv ~/project/controller/target/release/controller ~/build/lights-controller.<< parameters.compiler >>.<< parameters.os >>-<< parameters.arch >>
       - persist_to_workspace:
-          root: /build
+          root: ~/build
           paths:
             - lights-controller.*
       - store_artifacts:
@@ -149,10 +149,10 @@ jobs:
       - run:
           name: Move files for packaging
           command: |
-            mkdir -p /build
-            mv ~/project/sample-animations/<< parameters.animation >>/target/wasm32-unknown-unknown/release/<< parameters.animation >>.wasm /build/animation-<< parameters.animation >>.wasm
+            mkdir -p ~/build
+            mv ~/project/sample-animations/<< parameters.animation >>/target/wasm32-unknown-unknown/release/<< parameters.animation >>.wasm ~/build/animation-<< parameters.animation >>.wasm
       - persist_to_workspace:
-          root: /build
+          root: ~/build
           paths:
             - animation-*
       - store_artifacts:
