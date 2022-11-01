@@ -190,7 +190,7 @@ jobs:
           at: ~/build
       - run:
           name: Compress into zip
-          command: zip -r ~/animations.zip ~/build
+          command: zip -rj ~/animations.zip ~/build
       - store_artifacts:
           path: ~/animations.zip
           destination: animations.zip
