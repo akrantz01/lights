@@ -72,11 +72,15 @@ jobs:
             - /go/pkg/mod
       - run:
           name: Build API
-          command: go build -o ./lights-api.<< parameters.os >>-<< parameters.arch >> -buildmode pie
+          command: go build -o /build/lights-api.<< parameters.os >>-<< parameters.arch >> -buildmode pie
           environment:
             GOOS: << parameters.os >>
             GOARCH: << parameters.arch >>
           working_directory: ~/project/api
+      - persist_to_workspace:
+          root: /build
+          paths:
+            - lights-api.*
       - store_artifacts:
           path: ~/project/api/lights-api.<< parameters.os >>-<< parameters.arch >>
           destination: lights-api.<< parameters.os >>-<< parameters.arch >>
@@ -112,6 +116,15 @@ jobs:
           no_default_features: true
           with_features: true
           features: << parameters.compiler >>
+      - run:
+          name: Move files for packaging
+          command: |
+            mkdir -p /build
+            mv ~/project/controller/target/release/controller /build/lights-controller.<< parameters.compiler >>.<< parameters.os >>-<< parameters.arch >>
+      - persist_to_workspace:
+          root: /build
+          paths:
+            - lights-controller.*
       - store_artifacts:
           path: ~/project/controller/target/release/controller
           destination: lights-controller.<< parameters.compiler >>.<< parameters.os >>-<< parameters.arch >>
@@ -133,9 +146,37 @@ jobs:
       - rust-build:
           crate: << parameters.animation >>
           working_directory: ~/project/sample-animations/<< parameters.animation >>
+      - run:
+          name: Move files for packaging
+          command: |
+            mkdir -p /build
+            mv ~/project/sample-animations/<< parameters.animation >>/target/wasm32-unknown-unknown/release/<< parameters.animation >>.wasm /build/animation-<< parameters.animation >>.wasm
+      - persist_to_workspace:
+          root: /build
+          paths:
+            - animation-*
       - store_artifacts:
           path: ~/project/sample-animations/<< parameters.animation >>/target/wasm32-unknown-unknown/release/<< parameters.animation >>.wasm
           destination: animation-<< parameters.animation >>.wasm
+
+  package:
+    parameters:
+      arch:
+        description: the architecture to package for
+        type: string
+      kind:
+        description: the kind of package to build (deb, rpm)
+        type: string
+    machine:
+      image: ubuntu-2004:current
+    resource_class: medium
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /build
+      - run:
+          name: Testing
+          command: ls -la /build
 
 workflows:
   build:
@@ -162,3 +203,16 @@ workflows:
               animation:
                 - rainbow
                 - simple
+      - package:
+          matrix:
+            parameters:
+              arch:
+                - amd64
+                - arm64
+              kind:
+                - deb
+                - rpm
+          requires:
+            - build-api
+            - build-controller
+            - build-animation
