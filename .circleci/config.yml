@@ -178,8 +178,11 @@ jobs:
       - attach_workspace:
           at: ~/build
       - run:
-          name: Testing
-          command: ls -la ~/build
+          name: Install fpm
+          command: |
+            gem install fpm
+            sudo apt-get install -y squashfs-tools rpm
+            fpm --version
 
   package-animations:
     docker:
