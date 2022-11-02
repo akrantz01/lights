@@ -159,6 +159,39 @@ jobs:
           path: ~/project/sample-animations/<< parameters.animation >>/target/wasm32-unknown-unknown/release/<< parameters.animation >>.wasm
           destination: animation-<< parameters.animation >>.wasm
 
+  build-service:
+    parameters:
+      service:
+        description: the service to generate
+        type: string
+    docker:
+      - image: cimg/ruby:3.1.2
+    resource_class: small
+    steps:
+      - run:
+          name: Install fpm
+          command: gem install fpm
+      - run:
+          name: Generate service files
+          command: >
+            fpm --force
+              --log info
+              --input-type pleaserun
+              --output-type dir
+              --name lights-<< parameters.service >>
+              --package lights-<< parameters.service >>
+              --pleaserun-chdir /var/lib/lights
+              /usr/bin/lights-<< parameters.service >>
+      - run:
+          name: Prepare for workspace persistence
+          command: |
+            mkdir -p ~/build
+            mv lights-<< parameters.service >> ~/build
+      - persist_to_workspace:
+          root: ~/build
+          paths:
+            - lights-<< parameters.service >>/*
+
   package-os:
     parameters:
       arch:
@@ -183,6 +216,9 @@ jobs:
             sudo apt-get update
             sudo apt-get install -y squashfs-tools rpm
             gem install fpm
+      - run:
+          name: Debugging
+          command: ls -la ~/build
 
   package-animations:
     docker:
@@ -225,6 +261,12 @@ workflows:
               animation:
                 - rainbow
                 - simple
+      - build-service:
+          matrix:
+            parameters:
+              service:
+                - api
+                - controller
       - package-os:
           matrix:
             parameters:
@@ -236,6 +278,7 @@ workflows:
           requires:
             - build-api-<< matrix.arch >>
             - build-controller-<< matrix.arch >>-<< matrix.compiler >>
+            - build-service
       - package-animations:
           requires:
             - build-animation
