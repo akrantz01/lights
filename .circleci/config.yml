@@ -45,6 +45,28 @@ commands:
           paths:
             - ~/.cargo
             - << parameters.working_directory >>/target
+  set-version:
+    description: Sets the VERSION environment variable
+    steps:
+      - run:
+          name: Set GIT_REV environment variable
+          command: echo 'export GIT_REV=$(echo << pipeline.git.revision >> | head -c 8)' >> "$BASH_ENV"
+      - when:
+          condition: << pipeline.git.tag >>
+          steps:
+            - run:
+                name: Set VERSION environment variable
+                command: echo 'VERSION="<< pipeline.git.tag >>"' >> "$BASH_ENV"
+      - when:
+          condition:
+            not: << pipeline.git.tag >>
+          steps:
+            - run:
+                name: Set VERSION environment variable
+                command: echo 'VERSION=dev' >> "$BASH_ENV"
+      - run:
+          name: Load updated environment
+          command: source "$BASH_ENV"
 
 jobs:
   build-api:
@@ -197,6 +219,10 @@ jobs:
       arch:
         description: the architecture to package for
         type: string
+      os:
+        description: the os being packaged for
+        type: string
+        default: linux
       compiler:
         description: the WASM compiler to use
         type: string
@@ -216,9 +242,41 @@ jobs:
             sudo apt-get update
             sudo apt-get install -y squashfs-tools rpm
             gem install fpm
+      - set-version
       - run:
-          name: Debugging
-          command: ls -la ~/build
+          name: Setup scripts
+          command: |
+            cat > ./install.sh \<< EOF
+            #!/bin/sh
+            sh /usr/share/pleaserun/lights-api/install.sh
+            sh /usr/share/pleaserun/lights-controller/install.sh
+            EOF
+            cat > ./cleanup.sh \<< EOF
+            #!/bin/sh
+            sh /usr/share/pleaserun/lights-api/cleanup.sh
+            sh /usr/share/pleaserun/lights-controller/cleanup.sh
+            EOF
+      - run:
+          name: Build package
+          command: >
+            fpm --force \
+              --log info \
+              --architecture << parameters.arch >> \
+              --input-type dir \
+              --output-type << parameters.kind >> \
+              --license MIT \
+              --url https://github.com/akrantz01/lights \
+              --maintainer "Alexander Krantz <alex@krantz.dev>" \
+              --description "Internet-controlled LEDs for my dorm" \
+              --name lights-<< parameters.compiler >> \
+              --version $VERSION \
+              --iteration $GIT_SHA \
+              --after-install ./install.sh \
+              --before-remove ./cleanup.sh \
+              ~/build/lights-controller.<< parameters.compiler >>.<< parameters.os >>-<< parameters.arch >>=/usr/bin/lights-controller \
+              ~/build/lights-api.<< parameters.os >>-<< parameters.arch >>=/usr/bin/lights-api \
+              ~/build/service-api/usr/share/pleaserun/lights-api/=/usr/share/pleaserun/lights-api \
+              ~/build/service-controller/usr/share/pleaserun/lights-controller/=/usr/share/pleaserun/lights-controller
 
   package-animations:
     docker:
