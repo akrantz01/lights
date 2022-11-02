@@ -246,12 +246,12 @@ jobs:
       - run:
           name: Setup scripts
           command: |
-            cat > ./install.sh \<< EOF
+            cat > ~/install.sh \<< EOF
             #!/bin/sh
             sh /usr/share/pleaserun/lights-api/install.sh
             sh /usr/share/pleaserun/lights-controller/install.sh
             EOF
-            cat > ./cleanup.sh \<< EOF
+            cat > ~/cleanup.sh \<< EOF
             #!/bin/sh
             sh /usr/share/pleaserun/lights-api/cleanup.sh
             sh /usr/share/pleaserun/lights-controller/cleanup.sh
@@ -271,8 +271,8 @@ jobs:
               --name lights-<< parameters.compiler >> \
               --version $VERSION \
               --iteration $GIT_SHA \
-              --after-install ./install.sh \
-              --before-remove ./cleanup.sh \
+              --after-install ~/install.sh \
+              --before-remove ~/cleanup.sh \
               ~/build/lights-controller.<< parameters.compiler >>.<< parameters.os >>-<< parameters.arch >>=/usr/bin/lights-controller \
               ~/build/lights-api.<< parameters.os >>-<< parameters.arch >>=/usr/bin/lights-api \
               ~/build/service-api/usr/share/pleaserun/lights-api/=/usr/share/pleaserun/lights-api \
