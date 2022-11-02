@@ -215,12 +215,13 @@ name = "controller"
 version = "0.1.2"
 dependencies = [
  "color-eyre",
- "dotenv",
  "eyre",
  "prost",
  "rs_ws281x",
+ "serde",
  "thiserror",
  "tokio",
+ "toml",
  "tonic",
  "tonic-build",
  "tonic-health",
@@ -388,12 +389,6 @@ dependencies = [
  "quote",
  "syn",
 ]
-
-[[package]]
-name = "dotenv"
-version = "0.15.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "77c90badedccf4105eca100756a0b1289e191f6fcbdadd3cee1d2f614f97da8f"
 
 [[package]]
 name = "either"
@@ -1680,6 +1675,15 @@ dependencies = [
  "log",
  "pin-project-lite",
  "tokio",
+]
+
+[[package]]
+name = "toml"
+version = "0.5.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8d82e1a7758622a465f8cee077614c73484dac5b836c02ff6a40d5d1010324d7"
+dependencies = [
+ "serde",
 ]
 
 [[package]]

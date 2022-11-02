@@ -1,0 +1,30 @@
+# The log level to report at
+log_level = "info"
+
+# The density and length of the strip
+strip_density = 30
+strip_length = 5
+
+# Whether to run in development mode
+development = false
+
+[controller]
+# The host and port where the controller is listening
+address = "127.0.0.1:30000"
+
+# Where to store/load registered animations from
+animations = "./animations"
+
+[web]
+# The host and port where the web interface is listening
+host = "0.0.0.0"
+port = "3000"
+
+# The path to the database for the web interface
+database = "./badger"
+
+# The timezone to process scheduled jobs in
+timezone = "UTC"
+
+# The issuer for the authentication JWT
+jwt_issuer = "https://some-domain.us.auth0.com"

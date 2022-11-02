@@ -273,11 +273,13 @@ jobs:
               --iteration $GIT_REV \
               --after-install ~/install.sh \
               --before-remove ~/cleanup.sh \
+              --config-files /etc/lights/config.toml \
               --package lights-<< parameters.compiler >>_<< parameters.arch >>.<< parameters.kind >> \
               ~/build/lights-controller.<< parameters.compiler >>.<< parameters.os >>-<< parameters.arch >>=/usr/bin/lights-controller \
               ~/build/lights-api.<< parameters.os >>-<< parameters.arch >>=/usr/bin/lights-api \
               ~/build/service-api/usr/share/pleaserun/lights-api/=/usr/share/pleaserun/lights-api \
-              ~/build/service-controller/usr/share/pleaserun/lights-controller/=/usr/share/pleaserun/lights-controller
+              ~/build/service-controller/usr/share/pleaserun/lights-controller/=/usr/share/pleaserun/lights-controller \
+              ~/project/config.example.toml=/etc/lights/config.toml
       - store_artifacts:
           path: ~/project/lights-<< parameters.compiler >>_<< parameters.arch >>.<< parameters.kind >>
           destination: lights-<< parameters.compiler >>_<< parameters.arch >>.<< parameters.kind >>

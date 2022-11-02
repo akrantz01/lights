@@ -15,7 +15,6 @@ cranelift = ["wasmer/cranelift"]
 tokio = { version = "1.17.0", features = ["fs", "macros", "parking_lot", "rt-multi-thread", "signal", "sync"] }
 
 color-eyre = { version = "0.6.2", default-features = false, features = ["track-caller"] }
-dotenv = "0.15.0"
 eyre = "0.6.8"
 thiserror = "1.0"
 
@@ -29,6 +28,9 @@ tracing-subscriber = { version = "0.3.16", features = ["fmt", "parking_lot", "tr
 rs_ws281x = "0.4.4"
 
 wasmer = { version = "2.3.0", default-features = false, features = ["dylib", "sys"] }
+
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.5.9"
 
 [build-dependencies]
 tonic-build = "0.6.2"
