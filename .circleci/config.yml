@@ -174,13 +174,13 @@ jobs:
       - run:
           name: Generate service files
           command: >
-            fpm --force
-              --log info
-              --input-type pleaserun
-              --output-type dir
-              --name lights-<< parameters.service >>
-              --package lights-<< parameters.service >>
-              --pleaserun-chdir /var/lib/lights
+            fpm --force \
+              --log info \
+              --input-type pleaserun \
+              --output-type dir \
+              --name lights-<< parameters.service >> \
+              --package lights-<< parameters.service >> \
+              --pleaserun-chdir /var/lib/lights \
               /usr/bin/lights-<< parameters.service >>
       - run:
           name: Prepare for workspace persistence
