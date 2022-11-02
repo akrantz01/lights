@@ -56,14 +56,14 @@ commands:
           steps:
             - run:
                 name: Set VERSION environment variable
-                command: echo 'VERSION="<< pipeline.git.tag >>"' >> "$BASH_ENV"
+                command: echo 'export VERSION="<< pipeline.git.tag >>"' >> "$BASH_ENV"
       - when:
           condition:
             not: << pipeline.git.tag >>
           steps:
             - run:
                 name: Set VERSION environment variable
-                command: echo 'VERSION=dev' >> "$BASH_ENV"
+                command: echo 'export VERSION=dev' >> "$BASH_ENV"
       - run:
           name: Load updated environment
           command: source "$BASH_ENV"
