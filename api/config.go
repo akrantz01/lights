@@ -125,14 +125,14 @@ type rawWebConfig struct {
 
 type rawWebAuthConfig struct {
 	Enable    bool         `toml:"enable"`
-	IssuerURL parseableUrl `toml:"jwt_issuer"`
+	IssuerURL parseableURL `toml:"jwt_issuer"`
 }
 
-type parseableUrl struct {
+type parseableURL struct {
 	*url.URL
 }
 
-func (u *parseableUrl) UnmarshalText(text []byte) error {
+func (u *parseableURL) UnmarshalText(text []byte) error {
 	var err error
 	u.URL, err = url.Parse(string(text))
 	return err
