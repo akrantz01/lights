@@ -279,7 +279,8 @@ jobs:
               ~/build/service-api/usr/share/pleaserun/lights-api/=/usr/share/pleaserun/lights-api \
               ~/build/service-controller/usr/share/pleaserun/lights-controller/=/usr/share/pleaserun/lights-controller
       - store_artifacts:
-          path: ~/lights-<< parameters.compiler >>_<< parameters.arch >>.<< parameters.kind >>
+          path: ~/project/lights-<< parameters.compiler >>_<< parameters.arch >>.<< parameters.kind >>
+          destination: lights-<< parameters.compiler >>_<< parameters.arch >>.<< parameters.kind >>
 
   package-animations:
     docker:
