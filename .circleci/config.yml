@@ -179,18 +179,18 @@ jobs:
               --input-type pleaserun \
               --output-type dir \
               --name lights-<< parameters.service >> \
-              --package lights-<< parameters.service >> \
+              --package service-<< parameters.service >> \
               --pleaserun-chdir /var/lib/lights \
               /usr/bin/lights-<< parameters.service >>
       - run:
           name: Prepare for workspace persistence
           command: |
             mkdir -p ~/build
-            mv lights-<< parameters.service >> ~/build
+            mv service-<< parameters.service >> ~/build
       - persist_to_workspace:
           root: ~/build
           paths:
-            - lights-<< parameters.service >>/*
+            - service-<< parameters.service >>/*
 
   package-os:
     parameters:
