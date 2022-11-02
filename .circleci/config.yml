@@ -270,7 +270,7 @@ jobs:
               --description "Internet-controlled LEDs for my dorm" \
               --name lights-<< parameters.compiler >> \
               --version $VERSION \
-              --iteration $GIT_SHA \
+              --iteration $GIT_REV \
               --after-install ~/install.sh \
               --before-remove ~/cleanup.sh \
               ~/build/lights-controller.<< parameters.compiler >>.<< parameters.os >>-<< parameters.arch >>=/usr/bin/lights-controller \
