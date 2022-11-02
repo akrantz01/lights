@@ -282,6 +282,27 @@ jobs:
           path: ~/project/lights-<< parameters.compiler >>_<< parameters.arch >>.<< parameters.kind >>
           destination: lights-<< parameters.compiler >>_<< parameters.arch >>.<< parameters.kind >>
 
+  package-zip:
+    parameters:
+      arch:
+        description: the architecture to package for
+        type: string
+      compiler:
+        description: the WASM compiler to use
+        type: string
+    docker:
+      - image: cimg/base:current-22.04
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: ~/build
+      - run:
+          name: Compress into zip
+          command: zip -rj ~/lights.zip ~/build
+      - store_artifacts:
+          path: ~/lights.zip
+          destination: lights-<< parameters.compiler >>-<< parameters.arch >>.zip
+
   package-animations:
     docker:
       - image: cimg/base:current-22.04
@@ -341,6 +362,14 @@ workflows:
             - build-api-<< matrix.arch >>
             - build-controller-<< matrix.arch >>-<< matrix.compiler >>
             - build-service
+      - package-zip:
+          matrix:
+            parameters:
+              arch: *arch-params
+              compiler: *compiler-params
+          requires:
+            - build-api-<< matrix.arch >>
+            - build-controller-<< matrix.arch >>-<< matrix.compiler >>
       - package-animations:
           requires:
             - build-animation
