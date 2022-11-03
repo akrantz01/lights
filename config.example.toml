@@ -26,5 +26,10 @@ database = "./badger"
 # The timezone to process scheduled jobs in
 timezone = "UTC"
 
+[web.auth]
+# Whether to enable authentication
+# THIS SHOULD ONLY TURNED OFF IN DEVELOPMENT
+enable = true
+
 # The issuer for the authentication JWT
 jwt_issuer = "https://some-domain.us.auth0.com"
