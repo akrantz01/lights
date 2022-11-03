@@ -14,7 +14,7 @@ require (
 	github.com/r3labs/sse/v2 v2.8.1
 	go.mongodb.org/mongo-driver v1.8.2
 	go.uber.org/zap v1.23.0
-	google.golang.org/grpc v1.44.0
+	google.golang.org/grpc v1.50.1
 	google.golang.org/protobuf v1.28.1
 )
 
@@ -27,7 +27,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
 	github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6 // indirect
-	github.com/golang/protobuf v1.5.0 // indirect
+	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.3 // indirect
 	github.com/google/flatbuffers v1.12.1 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
