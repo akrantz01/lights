@@ -281,6 +281,8 @@ jobs:
               --before-remove ~/cleanup.sh \
               --config-files /etc/lights/config.toml \
               --config-files /usr/share/pleaserun \
+              --config-files /usr/share/pleaserun/lights-api/cleanup.sh \
+              --config-files /usr/share/pleaserun/lights-controller/cleanup.sh \
               --package lights-<< parameters.compiler >>_<< parameters.arch >>.<< parameters.kind >> \
               ~/build/lights-controller.<< parameters.compiler >>.<< parameters.os >>-<< parameters.arch >>=/usr/bin/lights-controller \
               ~/build/lights-api.<< parameters.os >>-<< parameters.arch >>=/usr/bin/lights-api \
