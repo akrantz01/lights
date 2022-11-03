@@ -11,7 +11,7 @@ require (
 	github.com/go-co-op/gocron v1.17.1
 	github.com/gorilla/websocket v1.5.0
 	github.com/matoous/go-nanoid v1.5.0
-	github.com/r3labs/sse/v2 v2.7.4
+	github.com/r3labs/sse/v2 v2.8.1
 	go.mongodb.org/mongo-driver v1.8.2
 	go.uber.org/zap v1.20.0
 	google.golang.org/grpc v1.44.0
