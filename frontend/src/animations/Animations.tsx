@@ -1,4 +1,4 @@
-import { FilmIcon, PlayIcon, TrashIcon } from '@heroicons/react/outline';
+import { FilmIcon, PlayIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { RouteComponentProps } from '@reach/router';
 import classNames from 'classnames';
 import React, { useState } from 'react';

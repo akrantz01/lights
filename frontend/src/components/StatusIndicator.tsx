@@ -1,4 +1,4 @@
-import { StatusOfflineIcon, StatusOnlineIcon } from '@heroicons/react/outline';
+import { SignalIcon, SignalSlashIcon } from '@heroicons/react/24/outline';
 import classNames from 'classnames';
 import React from 'react';
 
@@ -32,7 +32,7 @@ const StatusIndicator = (): JSX.Element => {
               },
             )}
           />
-          {connected ? <StatusOnlineIcon className={iconClasses} /> : <StatusOfflineIcon className={iconClasses} />}
+          {connected ? <SignalIcon className={iconClasses} /> : <SignalSlashIcon className={iconClasses} />}
         </span>
       </span>
     </div>

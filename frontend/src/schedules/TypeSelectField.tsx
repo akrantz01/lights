@@ -1,4 +1,4 @@
-import { RefreshIcon } from '@heroicons/react/outline';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import { Link } from '@reach/router';
 import React, { useEffect, useState } from 'react';
 import { RGBColor } from 'react-color';
@@ -22,14 +22,14 @@ const AnimationDropdown = ({ value, onChange }: DropdownProps) => {
 
   useEffect(() => onChange(data.length === 0 ? '' : data[0].id), [data]);
 
-  if (isLoading) return <RefreshIcon className="w-5 h-5 animate-spin" />;
+  if (isLoading) return <ArrowPathIcon className="w-5 h-5 animate-spin" />;
   return <BaseDropdown options={options} value={value} onChange={onChange} />;
 };
 
 const AnimationLink = ({ value }: LinkProps) => {
   const { data, isLoading } = useGetAnimationQuery(value);
 
-  if (isLoading) return <RefreshIcon className="w-5 h-5 animate-spin" />;
+  if (isLoading) return <ArrowPathIcon className="w-5 h-5 animate-spin" />;
   return (
     <Link to={`/animations/${value}`} className="text-blue-600 hover:text-blue-800 hover:underline">
       {data?.name}
@@ -43,14 +43,14 @@ const PresetDropdown = ({ value, onChange }: DropdownProps) => {
 
   useEffect(() => onChange(data.length === 0 ? '' : data[0].id), [data]);
 
-  if (isLoading) return <RefreshIcon className="w-5 h-5 animate-spin" />;
+  if (isLoading) return <ArrowPathIcon className="w-5 h-5 animate-spin" />;
   return <BaseDropdown options={options} value={value} onChange={onChange} />;
 };
 
 const PresetLink = ({ value }: LinkProps) => {
   const { data, isLoading } = useGetPresetQuery(value);
 
-  if (isLoading) return <RefreshIcon className="w-5 h-5 animate-spin" />;
+  if (isLoading) return <ArrowPathIcon className="w-5 h-5 animate-spin" />;
   return (
     <Link to={`/presets/${value}`} className="text-blue-600 hover:text-blue-800 hover:underline">
       {data?.name}

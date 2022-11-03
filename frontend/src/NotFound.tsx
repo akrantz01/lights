@@ -1,4 +1,5 @@
-import { ArrowSmLeftIcon, QuestionMarkCircleIcon } from '@heroicons/react/outline';
+import { ArrowLeftIcon } from '@heroicons/react/20/solid';
+import { QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
 import { Link, RouteComponentProps } from '@reach/router';
 import React from 'react';
 
@@ -20,7 +21,7 @@ const NotFound = (props: RouteComponentProps): JSX.Element => {
             to="/"
             className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
-            <ArrowSmLeftIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
+            <ArrowLeftIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
             Back to the dashboard
           </Link>
         </div>

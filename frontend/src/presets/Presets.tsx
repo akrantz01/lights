@@ -1,5 +1,5 @@
-import { CollectionIcon } from '@heroicons/react/outline';
-import { ChevronRightIcon } from '@heroicons/react/solid';
+import { RectangleStackIcon } from '@heroicons/react/24/outline';
+import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { Link, RouteComponentProps } from '@reach/router';
 import React from 'react';
 
@@ -29,7 +29,7 @@ const Presets: React.FC<RouteComponentProps> = () => {
         refetch={refetch}
         items={presets}
         typeName="preset"
-        icon={CollectionIcon}
+        icon={RectangleStackIcon}
         canCreate={canCreate}
       >
         {(item) => (

@@ -1,4 +1,5 @@
-import { ArrowSmLeftIcon, ClockIcon, RefreshIcon, TrashIcon } from '@heroicons/react/outline';
+import { ArrowLeftIcon } from '@heroicons/react/20/solid';
+import { ArrowPathIcon, ClockIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { RouteComponentProps, useNavigate } from '@reach/router';
 import React, { useState } from 'react';
 
@@ -69,7 +70,7 @@ const ScheduleDetail = ({ name }: Props): JSX.Element => {
       onClick={() => navigate('/schedules')}
       style={data === undefined ? 'secondary' : 'primary'}
     >
-      <ArrowSmLeftIcon className="-ml-1 mr-1 h-5 w-5" />
+      <ArrowLeftIcon className="-ml-1 mr-1 h-5 w-5" />
       Back
     </Button>
   );
@@ -85,7 +86,7 @@ const ScheduleDetail = ({ name }: Props): JSX.Element => {
     return (
       <Card>
         <div className="mt-3 pt-12 pb-6 text-center">
-          <RefreshIcon className="mx-auto h-12 w-12 text-gray-400 animate-spin" />
+          <ArrowPathIcon className="mx-auto h-12 w-12 text-gray-400 animate-spin" />
         </div>
       </Card>
     );

@@ -1,4 +1,5 @@
-import { ArrowSmLeftIcon, CollectionIcon, PaperAirplaneIcon, RefreshIcon, TrashIcon } from '@heroicons/react/outline';
+import { ArrowLeftIcon } from '@heroicons/react/20/solid';
+import { ArrowPathIcon, PaperAirplaneIcon, RectangleStackIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { RouteComponentProps, useNavigate } from '@reach/router';
 import React, { useState } from 'react';
 
@@ -44,7 +45,7 @@ const PresetDetail = ({ name }: Props): JSX.Element => {
 
   const backButton = (
     <Button className="mt-3" onClick={() => navigate('/presets')} style={data === undefined ? 'secondary' : 'primary'}>
-      <ArrowSmLeftIcon className="-ml-1 mr-1 h-5 w-5" />
+      <ArrowLeftIcon className="-ml-1 mr-1 h-5 w-5" />
       Back
     </Button>
   );
@@ -60,7 +61,7 @@ const PresetDetail = ({ name }: Props): JSX.Element => {
     return (
       <Card>
         <div className="mt-3 pt-12 pb-6 text-center">
-          <RefreshIcon className="mx-auto h-12 w-12 text-gray-400 animate-spin" />
+          <ArrowPathIcon className="mx-auto h-12 w-12 text-gray-400 animate-spin" />
         </div>
       </Card>
     );
@@ -71,7 +72,7 @@ const PresetDetail = ({ name }: Props): JSX.Element => {
     return (
       <Card>
         <div className="mt-3 border-2 border-gray-300 border-dashed rounded-lg p-12 text-center">
-          <CollectionIcon className="mx-auto h-12 w-12 text-gray-400" />
+          <RectangleStackIcon className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">{name} not found</h3>
           <p className="mt-1 text-sm text-gray-500">The preset you are looking for couldn&apos;t be found.</p>
           {backButton}
