@@ -9,7 +9,8 @@
   "packageRules": [
     {
       "matchSourceUrlPrefixes": [
-        "https://github.com/hyperium/tonic"
+        "https://github.com/hyperium/tonic",
+        "https://github.com/tokio-rs/prost"
       ],
       "matchUpdateTypes": [
         "digest",
