@@ -1,0 +1,390 @@
+version: 2.1
+
+orbs:
+  rust: circleci/rust@1.6.0
+
+executors:
+  linux-amd64:
+    machine:
+      image: ubuntu-2004:current
+    resource_class: large
+  linux-arm64:
+    machine:
+      image: ubuntu-2004:current
+    resource_class: arm.large
+
+commands:
+  rust-build:
+    parameters:
+      crate:
+        type: string
+      working_directory:
+        type: string
+      with_features:
+        type: boolean
+        default: false
+      features:
+        type: string
+        default: ''
+      no_default_features:
+        type: boolean
+        default: false
+    steps:
+      - restore_cache:
+          keys:
+            - cargo-<< parameters.crate >>-<<# parameters.with_features >><< parameters.features >><</ parameters.with_features >>-{{ arch }}-{{ checksum "controller/Cargo.lock" }}
+      - run:
+          name: Cargo Build
+          command: >-
+            cargo build --release
+            <<# parameters.no_default_features >>--no-default-features<</ parameters.no_default_features >>
+            <<# parameters.with_features >>--features << parameters.features >><</ parameters.with_features >>
+          working_directory: << parameters.working_directory >>
+      - save_cache:
+          key: cargo-<< parameters.crate >>-<<# parameters.with_features >><< parameters.features >><</ parameters.with_features >>-{{ arch }}-{{ checksum "controller/Cargo.lock" }}
+          paths:
+            - ~/.cargo
+            - << parameters.working_directory >>/target
+  set-version:
+    description: Sets the VERSION environment variable
+    steps:
+      - run:
+          name: Set GIT_REV environment variable
+          command: echo 'export GIT_REV=$(echo << pipeline.git.revision >> | head -c 8)' >> "$BASH_ENV"
+      - when:
+          condition: << pipeline.git.tag >>
+          steps:
+            - run:
+                name: Set VERSION environment variable
+                command: |
+                  version="<< pipeline.git.tag >>"
+                  echo "export VERSION=${version:1}" >> "$BASH_ENV"
+      - when:
+          condition:
+            not: << pipeline.git.tag >>
+          steps:
+            - run:
+                name: Set VERSION environment variable
+                command: |
+                  latest=$(git describe --abbrev=0 --tags)
+                  patch=$(( ${latest:(( ${#latest} - 1 ))} + 1 ))
+                  majorminor=${latest:1:(( ${#latest} - 2 ))}
+                  echo "export VERSION=${majorminor}${patch}" >> "$BASH_ENV"
+      - run:
+          name: Load updated environment
+          command: source "$BASH_ENV"
+
+jobs:
+  build-api:
+    parameters:
+      os:
+        description: the os being built for
+        type: string
+        default: linux
+      arch:
+        description: the architecture being built for
+        type: string
+    executor: << parameters.os >>-<< parameters.arch >>
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - go-mod-api-{{ arch }}-{{ checksum "api/go.sum" }}
+      - run:
+          name: go mod download
+          command: go mod download
+          working_directory: ~/project/api
+      - save_cache:
+          key: go-mod-api-{{ arch }}-{{ checksum "api/go.sum" }}
+          paths:
+            - /go/pkg/mod
+      - run:
+          name: Build API
+          command: go build -o ~/build/lights-api.<< parameters.os >>-<< parameters.arch >> -buildmode pie
+          environment:
+            GOOS: << parameters.os >>
+            GOARCH: << parameters.arch >>
+          working_directory: ~/project/api
+      - persist_to_workspace:
+          root: ~/build
+          paths:
+            - lights-api.*
+      - store_artifacts:
+          path: ~/project/api/lights-api.<< parameters.os >>-<< parameters.arch >>
+          destination: lights-api.<< parameters.os >>-<< parameters.arch >>
+
+  build-controller:
+    parameters:
+      os:
+        description: the os being built for
+        type: string
+        default: linux
+      arch:
+        description: the architecture being built for
+        type: string
+      compiler:
+        description: the WASM compiler to use
+        type: string
+    executor: << parameters.os >>-<< parameters.arch >>
+    steps:
+      - checkout
+      - rust/install
+      - run:
+          name: Install LLVM 12
+          command: |
+            wget https://apt.llvm.org/llvm.sh
+            sudo bash ./llvm.sh 12
+            sudo apt-get install -y libclang-12-dev
+            echo 'export LLVM_CONFIG_PATH=/usr/lib/llvm-12/bin/llvm-config' >> "$BASH_ENV"
+            echo 'export LLVM_SYS_120_PREFIX=/usr/lib/llvm-12' >> "$BASH_ENV"
+            source "$BASH_ENV"
+      - rust-build:
+          crate: controller
+          working_directory: ~/project/controller
+          no_default_features: true
+          with_features: true
+          features: << parameters.compiler >>
+      - run:
+          name: Move files for packaging
+          command: |
+            mkdir -p ~/build
+            mv ~/project/controller/target/release/controller ~/build/lights-controller.<< parameters.compiler >>.<< parameters.os >>-<< parameters.arch >>
+      - persist_to_workspace:
+          root: ~/build
+          paths:
+            - lights-controller.*
+      - store_artifacts:
+          path: ~/project/controller/target/release/controller
+          destination: lights-controller.<< parameters.compiler >>.<< parameters.os >>-<< parameters.arch >>
+
+  build-animation:
+    parameters:
+      animation:
+        description: the animation to build
+        type: string
+    machine:
+      image: ubuntu-2004:current
+    resource_class: medium
+    steps:
+      - checkout
+      - rust/install
+      - run:
+          name: Install wasm32-unknown-unknown
+          command: rustup target add wasm32-unknown-unknown
+      - rust-build:
+          crate: << parameters.animation >>
+          working_directory: ~/project/sample-animations/<< parameters.animation >>
+      - run:
+          name: Move files for packaging
+          command: |
+            mkdir -p ~/build
+            mv ~/project/sample-animations/<< parameters.animation >>/target/wasm32-unknown-unknown/release/<< parameters.animation >>.wasm ~/build/animation-<< parameters.animation >>.wasm
+      - persist_to_workspace:
+          root: ~/build
+          paths:
+            - animation-*
+      - store_artifacts:
+          path: ~/project/sample-animations/<< parameters.animation >>/target/wasm32-unknown-unknown/release/<< parameters.animation >>.wasm
+          destination: animation-<< parameters.animation >>.wasm
+
+  build-service:
+    parameters:
+      service:
+        description: the service to generate
+        type: string
+    docker:
+      - image: cimg/ruby:3.1.2
+    resource_class: small
+    steps:
+      - run:
+          name: Install fpm
+          command: gem install fpm
+      - run:
+          name: Generate service files
+          command: >
+            fpm --force \
+              --log info \
+              --input-type pleaserun \
+              --output-type dir \
+              --name lights-<< parameters.service >> \
+              --package service-<< parameters.service >> \
+              --pleaserun-chdir /var/lib/lights \
+              /usr/bin/lights-<< parameters.service >>
+      - run:
+          name: Prepare for workspace persistence
+          command: |
+            mkdir -p ~/build
+            mv service-<< parameters.service >> ~/build
+      - persist_to_workspace:
+          root: ~/build
+          paths:
+            - service-<< parameters.service >>/*
+
+  package-os:
+    parameters:
+      arch:
+        description: the architecture to package for
+        type: string
+      os:
+        description: the os being packaged for
+        type: string
+        default: linux
+      compiler:
+        description: the WASM compiler to use
+        type: string
+      kind:
+        description: the kind of package to build (deb, rpm)
+        type: string
+    docker:
+      - image: cimg/ruby:3.1.2
+    resource_class: small
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/build
+      - run:
+          name: Install fpm
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y squashfs-tools rpm
+            gem install fpm
+      - set-version
+      - run:
+          name: Setup scripts
+          command: |
+            cat > ~/install.sh \<< EOF
+            #!/bin/sh
+            sh /usr/share/pleaserun/lights-api/install.sh
+            sh /usr/share/pleaserun/lights-controller/install.sh
+            EOF
+            cat > ~/cleanup.sh \<< EOF
+            #!/bin/sh
+            sh /usr/share/pleaserun/lights-api/cleanup.sh
+            sh /usr/share/pleaserun/lights-controller/cleanup.sh
+            EOF
+            touch ~/build/service-api/usr/share/pleaserun/lights-api/cleanup.sh
+            touch ~/build/service-controller/usr/share/pleaserun/lights-controller/cleanup.sh
+      - run:
+          name: Build package
+          command: >
+            fpm --force \
+              --log info \
+              --architecture << parameters.arch >> \
+              --input-type dir \
+              --output-type << parameters.kind >> \
+              --license MIT \
+              --url https://github.com/akrantz01/lights \
+              --maintainer "Alexander Krantz <alex@krantz.dev>" \
+              --description "Internet-controlled LEDs for my dorm" \
+              --name lights-<< parameters.compiler >> \
+              --version $VERSION \
+              --iteration $GIT_REV \
+              --after-install ~/install.sh \
+              --before-remove ~/cleanup.sh \
+              --config-files /etc/lights/config.toml \
+              --config-files /usr/share/pleaserun \
+              --package lights-<< parameters.compiler >>_<< parameters.arch >>.<< parameters.kind >> \
+              ~/build/lights-controller.<< parameters.compiler >>.<< parameters.os >>-<< parameters.arch >>=/usr/bin/lights-controller \
+              ~/build/lights-api.<< parameters.os >>-<< parameters.arch >>=/usr/bin/lights-api \
+              ~/build/service-api/usr/share/pleaserun/lights-api/=/usr/share/pleaserun/lights-api \
+              ~/build/service-controller/usr/share/pleaserun/lights-controller/=/usr/share/pleaserun/lights-controller \
+              ~/project/config.example.toml=/etc/lights/config.toml
+      - store_artifacts:
+          path: ~/project/lights-<< parameters.compiler >>_<< parameters.arch >>.<< parameters.kind >>
+          destination: lights-<< parameters.compiler >>_<< parameters.arch >>.<< parameters.kind >>
+
+  package-zip:
+    parameters:
+      arch:
+        description: the architecture to package for
+        type: string
+      compiler:
+        description: the WASM compiler to use
+        type: string
+    docker:
+      - image: cimg/base:current-22.04
+    resource_class: small
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/build
+      - run:
+          name: Copy example config
+          command: mv ~/project/config.example.toml ~/build/config.toml
+      - run:
+          name: Compress into zip
+          command: zip -rj ~/lights.zip ~/build
+      - store_artifacts:
+          path: ~/lights.zip
+          destination: lights-<< parameters.compiler >>-<< parameters.arch >>.zip
+
+  package-animations:
+    docker:
+      - image: cimg/base:current-22.04
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: ~/build
+      - run:
+          name: Compress into zip
+          command: zip -rj ~/animations.zip ~/build
+      - store_artifacts:
+          path: ~/animations.zip
+          destination: animations.zip
+
+default-parameters:
+  arch: &arch-params
+    - amd64
+    - arm64
+  compiler: &compiler-params
+    - any
+    - cranelift
+    - llvm
+
+workflows:
+  build:
+    jobs:
+      - build-api:
+          matrix:
+            parameters:
+              arch: *arch-params
+      - build-controller:
+          matrix:
+            parameters:
+              arch: *arch-params
+              compiler: *compiler-params
+      - build-animation:
+          matrix:
+            parameters:
+              animation:
+                - rainbow
+                - simple
+      - build-service:
+          matrix:
+            parameters:
+              service:
+                - api
+                - controller
+      - package-os:
+          matrix:
+            parameters:
+              arch: *arch-params
+              compiler: *compiler-params
+              kind:
+                - deb
+                - rpm
+          requires:
+            - build-api-<< matrix.arch >>
+            - build-controller-<< matrix.arch >>-<< matrix.compiler >>
+            - build-service
+      - package-zip:
+          matrix:
+            parameters:
+              arch: *arch-params
+              compiler: *compiler-params
+          requires:
+            - build-api-<< matrix.arch >>
+            - build-controller-<< matrix.arch >>-<< matrix.compiler >>
+      - package-animations:
+          requires:
+            - build-animation

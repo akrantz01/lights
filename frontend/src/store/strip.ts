@@ -8,7 +8,7 @@ interface StripState {
 
 const initialState: StripState = {
   brightness: 100,
-  length: 150, // default strip length in .env
+  length: 150, // default strip length in config
   on: true,
 };
 

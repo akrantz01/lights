@@ -2,7 +2,7 @@ use eyre::WrapErr;
 use tokio::{fs, signal};
 use tonic::transport::Server;
 use tonic_health::server::health_reporter;
-use tracing::{info, info_span};
+use tracing::{debug, info, info_span};
 use tracing_subscriber::fmt::format::FmtSpan;
 
 mod animations;
@@ -19,11 +19,15 @@ use pixels::Pixels;
 #[tokio::main]
 async fn main() -> eyre::Result<()> {
     color_eyre::install()?;
-    let config = Config::load().wrap_err("failed to load configuration")?;
+    let config = Config::load()
+        .await
+        .wrap_err("failed to load configuration")?;
     tracing_subscriber::fmt()
         .with_span_events(FmtSpan::CLOSE)
         .with_max_level(config.log_level)
         .init();
+
+    debug!(?config, "loaded configuration");
 
     // Ensure animations folder exists
     if !config.animations_path.exists() {

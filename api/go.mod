@@ -3,13 +3,13 @@ module github.com/akrantz01/lights/api
 go 1.17
 
 require (
+	github.com/BurntSushi/toml v1.2.1
 	github.com/auth0/go-jwt-middleware/v2 v2.0.0
 	github.com/dgraph-io/badger/v3 v3.2103.2
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/go-chi/cors v1.2.0
 	github.com/go-co-op/gocron v1.11.0
 	github.com/gorilla/websocket v1.4.2
-	github.com/joho/godotenv v1.4.0
 	github.com/matoous/go-nanoid v1.5.0
 	github.com/r3labs/sse/v2 v2.7.4
 	go.mongodb.org/mongo-driver v1.8.2

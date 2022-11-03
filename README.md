@@ -42,7 +42,7 @@ Some features I would like to add in the future:
 
 - [ ] animations editable in the web UI
 - [ ] a mobile app
-- [ ] cross-compile the controller in CI
+- [x] cross-compile the controller in CI
 
 
 ### Contributing

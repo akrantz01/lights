@@ -267,4 +267,5 @@ go.work
 /Godeps/
 
 ### Project files ###
+config.toml
 badger/
