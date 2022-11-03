@@ -263,7 +263,7 @@ jobs:
             sh /usr/share/pleaserun/lights-controller/cleanup.sh
             EOF
             touch ~/build/service-api/usr/share/pleaserun/lights-api/cleanup.sh
-            touch ~/build/service-api/usr/share/pleaserun/lights-controller/cleanup.sh
+            touch ~/build/service-controller/usr/share/pleaserun/lights-controller/cleanup.sh
       - run:
           name: Build package
           command: >
