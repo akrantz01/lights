@@ -1,6 +1,6 @@
 import { LocationProvider, Router } from '@reach/router';
 import React, { Suspense } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Toaster } from 'react-hot-toast';
 import { Provider } from 'react-redux';
 
@@ -28,7 +28,11 @@ const Schedules = React.lazy(() => import('./schedules/Schedules'));
 // Connect to the websocket API
 store.dispatch(connect());
 
-ReactDOM.render(
+const container = document.getElementById('root');
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const root = createRoot(container!);
+
+root.render(
   <React.StrictMode>
     <Provider store={store}>
       <AuthHandler />
@@ -59,7 +63,6 @@ ReactDOM.render(
       </LocationProvider>
     </Provider>
   </React.StrictMode>,
-  document.getElementById('root'),
 );
 
 // If you want your app to work offline and load faster, you can change
