@@ -6,6 +6,8 @@ import { BaseProps } from './props';
 type TimeBaseProps = Omit<BaseProps<string>, 'value'> & Partial<Pick<BaseProps<string>, 'value'>>;
 
 const BaseTimeInput = ({ id, name, value, onChange }: TimeBaseProps): JSX.Element => (
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   <FlatPicker
     value={value}
     options={{
