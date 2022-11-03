@@ -48,6 +48,9 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('controller/Cargo.lock') }}-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-cargo-${{ hashFiles('controller/Cargo.lock') }}-
+      - uses: arduino/setup-protoc@v1
+        with:
+          version: '3.x'
       - uses: actions-rs/cargo@v1
         with:
           command: fmt

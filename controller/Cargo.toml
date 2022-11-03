@@ -18,9 +18,9 @@ color-eyre = { version = "0.6.2", default-features = false, features = ["track-c
 eyre = "0.6.8"
 thiserror = "1.0"
 
-prost = "0.9.0"
-tonic = "0.6.2"
-tonic-health = "0.5.0"
+prost = "0.11.0"
+tonic = "0.8.2"
+tonic-health = "0.7.1"
 
 tracing = { version = "0.1.37", features = ["attributes"] }
 tracing-subscriber = { version = "0.3.16", features = ["fmt", "parking_lot", "tracing-log"] }
@@ -33,4 +33,4 @@ serde = { version = "1.0", features = ["derive"] }
 toml = "0.5.9"
 
 [build-dependencies]
-tonic-build = "0.6.2"
+tonic-build = "0.8.2"
