@@ -1,14 +1,14 @@
 import { RectangleStackIcon } from '@heroicons/react/24/outline';
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
-import { Link, RouteComponentProps } from '@reach/router';
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 import Button from '../components/Button';
 import Card from '../components/Card';
 import ListView from '../components/ListView';
 import { Scope, applyPreset, hasPermission, useDispatch, useListPresetsQuery, useSelector } from '../store';
 
-const Presets: React.FC<RouteComponentProps> = () => {
+const Presets = () => {
   const dispatch = useDispatch();
   const { data: presets, isLoading, isFetching, refetch } = useListPresetsQuery();
   const currentPreset = useSelector((state) => state.display.preset || '');

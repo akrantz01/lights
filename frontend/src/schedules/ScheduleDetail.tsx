@@ -1,7 +1,7 @@
 import { ArrowLeftIcon } from '@heroicons/react/20/solid';
 import { ArrowPathIcon, ClockIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { RouteComponentProps, useNavigate } from '@reach/router';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import Button from '../components/Button';
 import Card from '../components/Card';
@@ -45,7 +45,7 @@ const formatTime = (time: string): string => {
   return `${hours}:${minutes} ${pm ? 'PM' : 'AM'}`;
 };
 
-interface Props extends RouteComponentProps {
+interface Props {
   name?: string;
 }
 

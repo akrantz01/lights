@@ -1,14 +1,14 @@
 import { ClockIcon } from '@heroicons/react/24/outline';
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
-import { Link, RouteComponentProps } from '@reach/router';
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 import Card from '../components/Card';
 import { Toggle } from '../components/form';
 import ListView from '../components/ListView';
 import { Scope, hasPermission, useListSchedulesQuery, useSelector, useToggleScheduleMutation } from '../store';
 
-const Schedules: React.FC<RouteComponentProps> = () => {
+const Schedules = () => {
   const [toggleSchedule] = useToggleScheduleMutation();
   const { data: schedules, isLoading, isFetching, refetch } = useListSchedulesQuery();
 

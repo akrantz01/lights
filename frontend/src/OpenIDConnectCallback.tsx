@@ -1,12 +1,12 @@
-import { RouteComponentProps, useNavigate } from '@reach/router';
 import React, { useEffect } from 'react';
 import { toast } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 import SuspenseLoading from './components/SuspenseLoading';
 import { handleCallback } from './oauth';
 import { useDispatch } from './store';
 
-const OpenIDConnectCallback: React.FC<RouteComponentProps> = () => {
+const OpenIDConnectCallback = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -14,7 +14,7 @@ const OpenIDConnectCallback: React.FC<RouteComponentProps> = () => {
     (async () => {
       try {
         await handleCallback(dispatch);
-        await navigate('/');
+        navigate('/');
       } catch (e) {
         toast.error('Failed to login');
         console.error(e);

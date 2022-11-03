@@ -1,7 +1,7 @@
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
-import { Link, RouteComponentProps, useNavigate } from '@reach/router';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { Link, useNavigate } from 'react-router-dom';
 
 import Button from '../components/Button';
 import Card from '../components/Card';
@@ -9,7 +9,7 @@ import { Input, Pixels, Slider } from '../components/form';
 import { Scope, hasPermission, useCreatePresetMutation, useSelector } from '../store';
 import { Color } from '../types';
 
-const NewPreset: React.FC<RouteComponentProps> = () => {
+const NewPreset = () => {
   const navigate = useNavigate();
   const length = useSelector((state) => state.strip.length);
   const [createPreset, { isLoading, isUninitialized, isError }] = useCreatePresetMutation();
@@ -25,7 +25,7 @@ const NewPreset: React.FC<RouteComponentProps> = () => {
   useEffect(() => {
     if (!isUninitialized && !isLoading && !isError) {
       toast.success(`Created preset '${name}'`);
-      navigate('/presets').catch(console.error);
+      navigate('/presets');
     }
   }, [isLoading]);
 

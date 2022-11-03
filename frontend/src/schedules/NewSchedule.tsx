@@ -1,7 +1,7 @@
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
-import { Link, RouteComponentProps, useNavigate } from '@reach/router';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { Link, useNavigate } from 'react-router-dom';
 
 import Button from '../components/Button';
 import Card from '../components/Card';
@@ -16,7 +16,7 @@ import {
 } from '../store';
 import { Color, ScheduleRepeats, ScheduleType } from '../types';
 
-const NewSchedule: React.FC<RouteComponentProps> = (): JSX.Element => {
+const NewSchedule = (): JSX.Element => {
   const navigate = useNavigate();
   const [createSchedule, { isLoading, isUninitialized, isError }] = useCreateScheduleMutation();
 
@@ -46,7 +46,7 @@ const NewSchedule: React.FC<RouteComponentProps> = (): JSX.Element => {
   useEffect(() => {
     if (!isUninitialized && !isLoading && !isError) {
       toast.success(`Created schedule '${name}'`);
-      navigate('/schedules').catch(console.error);
+      navigate('/schedules');
     }
   }, [isLoading]);
 

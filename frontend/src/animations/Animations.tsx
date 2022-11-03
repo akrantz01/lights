@@ -1,5 +1,4 @@
 import { FilmIcon, PlayIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { RouteComponentProps } from '@reach/router';
 import classNames from 'classnames';
 import React, { useState } from 'react';
 
@@ -19,7 +18,7 @@ import {
 } from '../store';
 import { Type } from '../store/display';
 
-const Animations: React.FC<RouteComponentProps> = () => {
+const Animations = () => {
   const dispatch = useDispatch();
   const [deleteSelection, setDeleteSelection] = useState('');
 
