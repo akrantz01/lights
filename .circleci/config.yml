@@ -56,7 +56,9 @@ commands:
           steps:
             - run:
                 name: Set VERSION environment variable
-                command: echo 'export VERSION="<< pipeline.git.tag >>"' >> "$BASH_ENV"
+                command: |
+                  version="<< pipeline.git.tag >>"
+                  echo "export VERSION=${version:1}" >> "$BASH_ENV"
       - when:
           condition:
             not: << pipeline.git.tag >>
@@ -67,7 +69,7 @@ commands:
                   latest=$(git describe --abbrev=0 --tags)
                   patch=$(( ${latest:(( ${#latest} - 1 ))} + 1 ))
                   majorminor=${latest:1:(( ${#latest} - 2 ))}
-                  echo "export VERSION=v${majorminor}${patch}" >> "$BASH_ENV"
+                  echo "export VERSION=${majorminor}${patch}" >> "$BASH_ENV"
       - run:
           name: Load updated environment
           command: source "$BASH_ENV"
