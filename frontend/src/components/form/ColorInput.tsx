@@ -4,6 +4,9 @@ import { ChromePicker, RGBColor } from 'react-color';
 import { BaseProps } from './props';
 
 const BaseColorInput = ({ value, onChange }: BaseProps<RGBColor>): JSX.Element => (
+  // Types currently broken: https://github.com/casesandberg/react-color/issues/855
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   <ChromePicker disableAlpha color={value} onChange={(color) => onChange(color.rgb)} />
 );
 

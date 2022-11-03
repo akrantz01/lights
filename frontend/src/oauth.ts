@@ -144,7 +144,7 @@ export async function handleCallback(dispatch: Dispatch): Promise<void> {
   if (error) throw new Error(`${error}: ${errorDescription}`);
 
   const transaction = loadState();
-  if (!transaction) throw new Error('Invalid state');
+  if (!transaction) return;
 
   deleteState();
 

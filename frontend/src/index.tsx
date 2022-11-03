@@ -1,8 +1,8 @@
-import { LocationProvider, Router } from '@reach/router';
 import React, { Suspense } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Toaster } from 'react-hot-toast';
 import { Provider } from 'react-redux';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import AuthHandler from './components/AuthHandler';
 import Layout from './components/Layout';
@@ -28,38 +28,41 @@ const Schedules = React.lazy(() => import('./schedules/Schedules'));
 // Connect to the websocket API
 store.dispatch(connect());
 
-ReactDOM.render(
+const container = document.getElementById('root');
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const root = createRoot(container!);
+
+root.render(
   <React.StrictMode>
     <Provider store={store}>
       <AuthHandler />
-      <LocationProvider>
+      <BrowserRouter>
         <Toaster position="top-right" toastOptions={{ duration: 2500 }} />
         <Layout>
           <Suspense fallback={<SuspenseLoading />}>
-            <Router>
-              <Dashboard path="/" />
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
 
-              <Animations path="/animations" />
-              <NewAnimation path="/new/animation" />
+              <Route path="/animations" element={<Animations />} />
+              <Route path="/new/animation" element={<NewAnimation />} />
 
-              <Presets path="/presets" />
-              <PresetDetail path="/presets/:name" />
-              <NewPreset path="/new/preset" />
+              <Route path="/presets" element={<Presets />} />
+              <Route path="/presets/:name" element={<PresetDetail />} />
+              <Route path="/new/preset" element={<NewPreset />} />
 
-              <Schedules path="/schedules" />
-              <ScheduleDetail path="/schedules/:name" />
-              <NewSchedule path="/new/schedule" />
+              <Route path="/schedules" element={<Schedules />} />
+              <Route path="/schedules/:name" element={<ScheduleDetail />} />
+              <Route path="/new/schedule" element={<NewSchedule />} />
 
-              <OpenIDConnectCallback path="/oauth/callback" />
+              <Route path="/oauth/callback" element={<OpenIDConnectCallback />} />
 
-              <NotFound default />
-            </Router>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
           </Suspense>
         </Layout>
-      </LocationProvider>
+      </BrowserRouter>
     </Provider>
   </React.StrictMode>,
-  document.getElementById('root'),
 );
 
 // If you want your app to work offline and load faster, you can change

@@ -1,8 +1,8 @@
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { Bars3Icon, LightBulbIcon, UserIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { Link, LinkGetProps, useLocation } from '@reach/router';
 import classNames from 'classnames';
 import React, { Fragment, MouseEvent } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 
 import { buildAuthorizationUrl, logout as oauthLogout } from '../oauth';
 import { logout, useDispatch, useProfile } from '../store';
@@ -46,13 +46,11 @@ const Navigation = (): JSX.Element => {
     .reverse(); // We reverse the result because "/" matches all routes
   const title = pages.length === 0 ? 'Not found' : pages[0];
 
-  const isActive = ({ isCurrent }: LinkGetProps) => ({
-    'aria-current': isCurrent ? 'page' : undefined,
-    className: classNames(
-      isCurrent ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+  const getClasses = ({ isActive }: { isActive: boolean }) =>
+    classNames(
+      isActive ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
       'block px-3 py-2 rounded-md text-sm font-medium',
-    ),
-  });
+    );
 
   const authAction = async (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -98,9 +96,9 @@ const Navigation = (): JSX.Element => {
                               );
                             } else {
                               return (
-                                <Link key={item.name} to={item.href} getProps={isActive}>
+                                <NavLink key={item.name} to={item.href} className={getClasses}>
                                   {item.name}
-                                </Link>
+                                </NavLink>
                               );
                             }
                           })}
@@ -177,7 +175,7 @@ const Navigation = (): JSX.Element => {
                   {navigation
                     .filter((item) => !item.hidden)
                     .map((item) => (
-                      <Disclosure.Button key={item.name} as={Link} to={item.href} getProps={isActive}>
+                      <Disclosure.Button key={item.name} as={NavLink} to={item.href} className={getClasses}>
                         {item.name}
                       </Disclosure.Button>
                     ))}

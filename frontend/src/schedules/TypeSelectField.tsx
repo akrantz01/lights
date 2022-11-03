@@ -1,7 +1,7 @@
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
-import { Link } from '@reach/router';
 import React, { useEffect, useState } from 'react';
 import { RGBColor } from 'react-color';
+import { Link } from 'react-router-dom';
 
 import { BaseColorInput, BaseDropdown } from '../components/form';
 import { useGetAnimationQuery, useGetPresetQuery, useListAnimationsQuery, useListPresetsQuery } from '../store';

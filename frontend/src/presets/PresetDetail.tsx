@@ -1,7 +1,7 @@
 import { ArrowLeftIcon } from '@heroicons/react/20/solid';
 import { ArrowPathIcon, PaperAirplaneIcon, RectangleStackIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { RouteComponentProps, useNavigate } from '@reach/router';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import Button from '../components/Button';
 import Card from '../components/Card';
@@ -19,7 +19,7 @@ import {
   useUpdatePresetMutation,
 } from '../store';
 
-interface Props extends RouteComponentProps {
+interface Props {
   name?: string;
 }
 
@@ -50,10 +50,10 @@ const PresetDetail = ({ name }: Props): JSX.Element => {
     </Button>
   );
 
-  const onDeleteCallback = async () => {
+  const onDeleteCallback = () => {
     deletePreset(name);
     setAlertOpen(false);
-    await navigate('/presets');
+    navigate('/presets');
   };
 
   // Display loading spinner

@@ -1,4 +1,3 @@
-import { RouteComponentProps } from '@reach/router';
 import React, { useEffect, useState } from 'react';
 
 import Card from '../components/Card';
@@ -12,7 +11,7 @@ import OnOffToggle from './OnOffToggle';
 import Pixels from './Pixels';
 import Tabs from './Tabs';
 
-const Dashboard: React.FC<RouteComponentProps> = () => {
+const Dashboard = () => {
   const displayMode = useSelector((state) => state.display.type);
   const [editMode, setEditMode] = useState(displayMode);
 
