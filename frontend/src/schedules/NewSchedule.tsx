@@ -1,4 +1,4 @@
-import { RefreshIcon } from '@heroicons/react/outline';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import { Link, RouteComponentProps, useNavigate } from '@reach/router';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
@@ -146,7 +146,7 @@ const NewSchedule: React.FC<RouteComponentProps> = (): JSX.Element => {
             </Link>
             <Button style="primary" className="ml-2" onClick={onSubmit} disabled={!canCreate || isLoading}>
               {!isLoading && 'Create'}
-              {isLoading && <RefreshIcon className="w-5 h-5 animate-spin" />}
+              {isLoading && <ArrowPathIcon className="w-5 h-5 animate-spin" />}
             </Button>
           </div>
         </div>

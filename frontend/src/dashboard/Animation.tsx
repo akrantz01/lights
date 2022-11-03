@@ -1,4 +1,4 @@
-import { RefreshIcon } from '@heroicons/react/outline';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import { Link } from '@reach/router';
 import classNames from 'classnames';
 import React from 'react';
@@ -17,7 +17,7 @@ const Animation = ({ disabled }: Props): JSX.Element => {
   if (isLoading || data === undefined) {
     return (
       <div className="mt-3 pt-12 pb-6 text-center">
-        <RefreshIcon className="mx-auto h-12 w-12 text-gray-400 animate-spin" />
+        <ArrowPathIcon className="mx-auto h-12 w-12 text-gray-400 animate-spin" />
       </div>
     );
   }

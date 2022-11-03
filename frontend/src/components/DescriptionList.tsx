@@ -1,4 +1,4 @@
-import { PencilAltIcon, SaveIcon, XIcon } from '@heroicons/react/outline';
+import { ArrowDownOnSquareIcon, PencilSquareIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import React, { ComponentType, ReactNode, useEffect, useState } from 'react';
 
 import { Color } from '../types';
@@ -165,7 +165,7 @@ const DescriptionList = ({
                   className="mx-1 text-sm text-gray-400 hover:text-gray-600"
                   onClick={() => setUpdating(false)}
                 >
-                  <XIcon className="w-4 h-4" />
+                  <XMarkIcon className="w-4 h-4" />
                 </button>
               </>
             )}
@@ -176,8 +176,8 @@ const DescriptionList = ({
                 className="ml-1 text-sm text-indigo-400 hover:text-indigo-600"
                 onClick={toggleUpdating}
               >
-                {isUpdating && <SaveIcon className="w-4 h-4" />}
-                {!isUpdating && <PencilAltIcon className="w-4 h-4" />}
+                {isUpdating && <ArrowDownOnSquareIcon className="w-4 h-4" />}
+                {!isUpdating && <PencilSquareIcon className="w-4 h-4" />}
               </button>
             )}
           </h3>

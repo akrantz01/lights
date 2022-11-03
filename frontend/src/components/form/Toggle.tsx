@@ -1,5 +1,5 @@
 import { Switch } from '@headlessui/react';
-import { CheckIcon, XIcon } from '@heroicons/react/outline';
+import { CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import classNames from 'classnames';
 import React from 'react';
 
@@ -37,7 +37,7 @@ const Toggle = ({ enabled, onChange, large = false, disabled = false }: Props): 
         )}
         aria-hidden="true"
       >
-        <XIcon className="h-5 w-5 text-gray-400" />
+        <XMarkIcon className="h-5 w-5 text-gray-400" />
       </span>
       <span
         className={classNames(

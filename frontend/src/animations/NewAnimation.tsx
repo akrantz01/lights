@@ -1,4 +1,4 @@
-import { RefreshIcon } from '@heroicons/react/outline';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import { Link, RouteComponentProps, useNavigate } from '@reach/router';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
@@ -55,7 +55,7 @@ const NewAnimation: React.FC<RouteComponentProps> = (): JSX.Element => {
               onClick={() => createAnimation({ name, wasm: file as File })}
             >
               {!isLoading && 'Create'}
-              {isLoading && <RefreshIcon className="w-5 h-5 animate-spin" />}
+              {isLoading && <ArrowPathIcon className="w-5 h-5 animate-spin" />}
             </Button>
           </div>
         </div>

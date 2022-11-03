@@ -1,4 +1,4 @@
-import { PlusIcon, RefreshIcon } from '@heroicons/react/outline';
+import { ArrowPathIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { Link } from '@reach/router';
 import classNames from 'classnames';
 import React from 'react';
@@ -44,7 +44,7 @@ const ListView = <T,>({
     <div className="flex items-center justify-between">
       {canCreate ? createButton : '​' /* <- zero-width space for consistent formatting */}
       <Button onClick={refetch} style="secondary" disabled={isFetching}>
-        <RefreshIcon
+        <ArrowPathIcon
           className={classNames('-ml-1 mr-2 h-5 w-5', { 'animate-spin': isFetching || isLoading })}
           aria-hidden="true"
         />
@@ -57,7 +57,7 @@ const ListView = <T,>({
   if (isLoading || items === undefined) {
     return (
       <div className="mt-3 pt-12 pb-6 text-center">
-        <RefreshIcon className="mx-auto h-12 w-12 text-gray-400 animate-spin" />
+        <ArrowPathIcon className="mx-auto h-12 w-12 text-gray-400 animate-spin" />
       </div>
     );
   }

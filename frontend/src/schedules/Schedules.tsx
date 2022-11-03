@@ -1,5 +1,5 @@
-import { ClockIcon } from '@heroicons/react/outline';
-import { ChevronRightIcon } from '@heroicons/react/solid';
+import { ClockIcon } from '@heroicons/react/24/outline';
+import { ChevronRightIcon } from '@heroicons/react/24/solid';
 import { Link, RouteComponentProps } from '@reach/router';
 import React from 'react';
 
