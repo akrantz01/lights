@@ -1,6 +1,6 @@
 module github.com/akrantz01/lights/api
 
-go 1.17
+go 1.19
 
 require (
 	github.com/BurntSushi/toml v1.2.1
