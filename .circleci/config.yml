@@ -303,8 +303,12 @@ jobs:
       - image: cimg/base:current-22.04
     resource_class: small
     steps:
+      - checkout
       - attach_workspace:
           at: ~/build
+      - run:
+          name: Copy example config
+          command: mv ~/project/config.example.toml ~/build/config.toml
       - run:
           name: Compress into zip
           command: zip -rj ~/lights.zip ~/build
