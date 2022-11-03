@@ -73,6 +73,51 @@ commands:
       - run:
           name: Load updated environment
           command: source "$BASH_ENV"
+  fpm-package:
+    description: create a package in the specified format
+    parameters:
+      arch:
+        description: the architecture to package for
+        type: string
+      os:
+        description: the os being packaged for
+        type: string
+        default: linux
+      compiler:
+        description: the WASM compiler to use
+        type: string
+      kind:
+        description: the kind of package to build (deb, rpm)
+        type: string
+    steps:
+      - run:
+          name: Build package (<< parameters.kind >>)
+          command: >
+            fpm --force \
+              --log info \
+              --architecture << parameters.arch >> \
+              --input-type dir \
+              --output-type << parameters.kind >> \
+              --license MIT \
+              --url https://github.com/akrantz01/lights \
+              --maintainer "Alexander Krantz <alex@krantz.dev>" \
+              --description "Internet-controlled LEDs for my dorm" \
+              --name lights-<< parameters.compiler >> \
+              --version $VERSION \
+              --iteration $GIT_REV \
+              --after-install ~/install.sh \
+              --before-remove ~/cleanup.sh \
+              --config-files /etc/lights/config.toml \
+              --config-files /usr/share/pleaserun \
+              --package lights-<< parameters.compiler >>_<< parameters.arch >>.<< parameters.kind >> \
+              ~/build/lights-controller.<< parameters.compiler >>.<< parameters.os >>-<< parameters.arch >>=/usr/bin/lights-controller \
+              ~/build/lights-api.<< parameters.os >>-<< parameters.arch >>=/usr/bin/lights-api \
+              ~/build/service-api/usr/share/pleaserun/lights-api/=/usr/share/pleaserun/lights-api \
+              ~/build/service-controller/usr/share/pleaserun/lights-controller/=/usr/share/pleaserun/lights-controller \
+              ~/project/config.example.toml=/etc/lights/config.toml
+      - store_artifacts:
+          path: ~/project/lights-<< parameters.compiler >>_<< parameters.arch >>.<< parameters.kind >>
+          destination: lights-<< parameters.compiler >>_<< parameters.arch >>.<< parameters.kind >>
 
 jobs:
   build-api:
@@ -232,9 +277,6 @@ jobs:
       compiler:
         description: the WASM compiler to use
         type: string
-      kind:
-        description: the kind of package to build (deb, rpm)
-        type: string
     docker:
       - image: cimg/ruby:3.1.2
     resource_class: small
@@ -264,34 +306,16 @@ jobs:
             EOF
             touch ~/build/service-api/usr/share/pleaserun/lights-api/cleanup.sh
             touch ~/build/service-controller/usr/share/pleaserun/lights-controller/cleanup.sh
-      - run:
-          name: Build package
-          command: >
-            fpm --force \
-              --log info \
-              --architecture << parameters.arch >> \
-              --input-type dir \
-              --output-type << parameters.kind >> \
-              --license MIT \
-              --url https://github.com/akrantz01/lights \
-              --maintainer "Alexander Krantz <alex@krantz.dev>" \
-              --description "Internet-controlled LEDs for my dorm" \
-              --name lights-<< parameters.compiler >> \
-              --version $VERSION \
-              --iteration $GIT_REV \
-              --after-install ~/install.sh \
-              --before-remove ~/cleanup.sh \
-              --config-files /etc/lights/config.toml \
-              --config-files /usr/share/pleaserun \
-              --package lights-<< parameters.compiler >>_<< parameters.arch >>.<< parameters.kind >> \
-              ~/build/lights-controller.<< parameters.compiler >>.<< parameters.os >>-<< parameters.arch >>=/usr/bin/lights-controller \
-              ~/build/lights-api.<< parameters.os >>-<< parameters.arch >>=/usr/bin/lights-api \
-              ~/build/service-api/usr/share/pleaserun/lights-api/=/usr/share/pleaserun/lights-api \
-              ~/build/service-controller/usr/share/pleaserun/lights-controller/=/usr/share/pleaserun/lights-controller \
-              ~/project/config.example.toml=/etc/lights/config.toml
-      - store_artifacts:
-          path: ~/project/lights-<< parameters.compiler >>_<< parameters.arch >>.<< parameters.kind >>
-          destination: lights-<< parameters.compiler >>_<< parameters.arch >>.<< parameters.kind >>
+      - fpm-package:
+          arch: << parameters.arch >>
+          os: << parameters.os >>
+          compiler: << parameters.compiler >>
+          kind: deb
+      - fpm-package:
+          arch: << parameters.arch >>
+          os: << parameters.os >>
+          compiler: << parameters.compiler >>
+          kind: rpm
 
   package-zip:
     parameters:
@@ -370,9 +394,6 @@ workflows:
             parameters:
               arch: *arch-params
               compiler: *compiler-params
-              kind:
-                - deb
-                - rpm
           requires:
             - build-api-<< matrix.arch >>
             - build-controller-<< matrix.arch >>-<< matrix.compiler >>
