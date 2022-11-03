@@ -67,7 +67,7 @@ commands:
                   latest=$(git describe --abbrev=0 --tags)
                   patch=$(( ${latest:(( ${#latest} - 1 ))} + 1 ))
                   majorminor=${latest:1:(( ${#latest} - 2 ))}
-                  echo 'export VERSION=v$majorminor$patch' >> "$BASH_ENV"
+                  echo "export VERSION=v${majorminor}${patch}" >> "$BASH_ENV"
       - run:
           name: Load updated environment
           command: source "$BASH_ENV"
