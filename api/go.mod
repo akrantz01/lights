@@ -9,7 +9,7 @@ require (
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/go-chi/cors v1.2.0
 	github.com/go-co-op/gocron v1.17.1
-	github.com/gorilla/websocket v1.4.2
+	github.com/gorilla/websocket v1.5.0
 	github.com/matoous/go-nanoid v1.5.0
 	github.com/r3labs/sse/v2 v2.7.4
 	go.mongodb.org/mongo-driver v1.8.2
