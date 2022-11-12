@@ -8,7 +8,7 @@ require (
 	github.com/dgraph-io/badger/v3 v3.2103.4
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/go-chi/cors v1.2.1
-	github.com/go-co-op/gocron v1.17.1
+	github.com/go-co-op/gocron v1.18.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/matoous/go-nanoid v1.5.0
 	github.com/r3labs/sse/v2 v2.8.1
