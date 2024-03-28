@@ -12,7 +12,7 @@ llvm = ["wasmer/llvm"]
 cranelift = ["wasmer/cranelift"]
 
 [dependencies]
-tokio = { version = "1.21.2", features = ["fs", "macros", "parking_lot", "rt-multi-thread", "signal", "sync"] }
+tokio = { version = "1.37.0", features = ["fs", "macros", "parking_lot", "rt-multi-thread", "signal", "sync"] }
 
 color-eyre = { version = "0.6.2", default-features = false, features = ["track-caller"] }
 eyre = "0.6.8"
